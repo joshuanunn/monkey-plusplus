@@ -49,6 +49,9 @@ Token Lexer::next_token() {
         case(0): {
             tok = {TokenType::ENDOFFILE, ""};
         } break;
+        default: {
+            // TODO: handle undefined cases.
+        }
     }
 
     read_char();
