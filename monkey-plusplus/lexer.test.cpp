@@ -60,7 +60,7 @@ let result = add(five, ten);
             Token{TokenType::ENDOFFILE, ""},
     };
 
-    for (Token t: tests) {
+    for (const Token& t: tests) {
         auto tok = test_input.next_token();
 
         REQUIRE(tok == t);
