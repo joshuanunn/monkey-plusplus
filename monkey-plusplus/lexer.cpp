@@ -66,16 +66,16 @@ Token Lexer::next_token() {
                 read_char();
                 tok = {TokenType::EQ, std::string{ch1} + std::string{ch}};
             } else {
-                tok = {TokenType::ASSIGN, "="};
+                tok = {TokenType::ASSIGN, std::string{ch}};
             }
         }
             break;
         case ('+'): {
-            tok = {TokenType::PLUS, "+"};
+            tok = {TokenType::PLUS, std::string{ch}};
         }
             break;
         case ('-'): {
-            tok = {TokenType::MINUS, "-"};
+            tok = {TokenType::MINUS, std::string{ch}};
         }
             break;
         case ('!'): {
@@ -84,48 +84,48 @@ Token Lexer::next_token() {
                 read_char();
                 tok = {TokenType::NOT_EQ, std::string{ch1} + std::string{ch}};
             } else {
-                tok = {TokenType::BANG, "!"};
+                tok = {TokenType::BANG, std::string{ch}};
             }
         }
             break;
         case ('*'): {
-            tok = {TokenType::ASTERISK, "*"};
+            tok = {TokenType::ASTERISK, std::string{ch}};
         }
             break;
         case ('/'): {
-            tok = {TokenType::SLASH, "/"};
+            tok = {TokenType::SLASH, std::string{ch}};
         }
             break;
         case ('<'): {
-            tok = {TokenType::LT, "<"};
+            tok = {TokenType::LT, std::string{ch}};
         }
             break;
         case ('>'): {
-            tok = {TokenType::GT, ">"};
+            tok = {TokenType::GT, std::string{ch}};
         }
             break;
         case (';'): {
-            tok = {TokenType::SEMICOLON, ";"};
+            tok = {TokenType::SEMICOLON, std::string{ch}};
         }
             break;
         case (','): {
-            tok = {TokenType::COMMA, ","};
+            tok = {TokenType::COMMA, std::string{ch}};
         }
             break;
         case ('('): {
-            tok = {TokenType::LPAREN, "("};
+            tok = {TokenType::LPAREN, std::string{ch}};
         }
             break;
         case (')'): {
-            tok = {TokenType::RPAREN, ")"};
+            tok = {TokenType::RPAREN, std::string{ch}};
         }
             break;
         case ('{'): {
-            tok = {TokenType::LBRACE, "{"};
+            tok = {TokenType::LBRACE, std::string{ch}};
         }
             break;
         case ('}'): {
-            tok = {TokenType::RBRACE, "}"};
+            tok = {TokenType::RBRACE, std::string{ch}};
         }
             break;
         case (0): {
