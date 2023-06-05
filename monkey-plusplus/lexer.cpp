@@ -46,6 +46,14 @@ std::string Lexer::read_number() {
     return input.substr(starting_position, position - starting_position);
 }
 
+char Lexer::peek_char() {
+    if (read_position >= input.length()) {
+        return 0;
+    } else {
+        return input[read_position];
+    }
+}
+
 Token Lexer::next_token() {
     Token tok;
 
@@ -53,7 +61,13 @@ Token Lexer::next_token() {
 
     switch (ch) {
         case ('='): {
-            tok = {TokenType::ASSIGN, "="};
+            if (peek_char() == '=') {
+                char ch1 = ch;
+                read_char();
+                tok = {TokenType::EQ, std::string{ch1} + std::string{ch}};
+            } else {
+                tok = {TokenType::ASSIGN, "="};
+            }
         }
             break;
         case ('+'): {
@@ -65,7 +79,13 @@ Token Lexer::next_token() {
         }
             break;
         case ('!'): {
-            tok = {TokenType::BANG, "!"};
+            if (peek_char() == '=') {
+                char ch1 = ch;
+                read_char();
+                tok = {TokenType::NOT_EQ, std::string{ch1} + std::string{ch}};
+            } else {
+                tok = {TokenType::BANG, "!"};
+            }
         }
             break;
         case ('*'): {

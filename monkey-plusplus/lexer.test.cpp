@@ -23,7 +23,11 @@ if (5 < 10) {
     return true;
 } else {
     return false;
-})";
+}
+
+10 == 10;
+10 != 9;
+)";
 
     auto test_input = Lexer(input);
 
@@ -93,6 +97,14 @@ if (5 < 10) {
             Token{TokenType::FALSE, "false"},
             Token{TokenType::SEMICOLON, ";"},
             Token{TokenType::RBRACE, "}"},
+            Token{TokenType::INT, "10"},
+            Token{TokenType::EQ, "=="},
+            Token{TokenType::INT, "10"},
+            Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::INT, "10"},
+            Token{TokenType::NOT_EQ, "!="},
+            Token{TokenType::INT, "9"},
+            Token{TokenType::SEMICOLON, ";"},
             Token{TokenType::ENDOFFILE, ""},
     };
 

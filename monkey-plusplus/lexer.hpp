@@ -23,6 +23,8 @@ struct Lexer {
 
     void skip_whitespace();
 
+    char peek_char();
+
     Token next_token();
 };
 
