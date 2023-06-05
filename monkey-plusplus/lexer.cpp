@@ -56,8 +56,40 @@ Token Lexer::next_token() {
             tok = {TokenType::ASSIGN, "="};
         }
             break;
+        case ('+'): {
+            tok = {TokenType::PLUS, "+"};
+        }
+            break;
+        case ('-'): {
+            tok = {TokenType::MINUS, "-"};
+        }
+            break;
+        case ('!'): {
+            tok = {TokenType::BANG, "!"};
+        }
+            break;
+        case ('*'): {
+            tok = {TokenType::ASTERISK, "*"};
+        }
+            break;
+        case ('/'): {
+            tok = {TokenType::SLASH, "/"};
+        }
+            break;
+        case ('<'): {
+            tok = {TokenType::LT, "<"};
+        }
+            break;
+        case ('>'): {
+            tok = {TokenType::GT, ">"};
+        }
+            break;
         case (';'): {
             tok = {TokenType::SEMICOLON, ";"};
+        }
+            break;
+        case (','): {
+            tok = {TokenType::COMMA, ","};
         }
             break;
         case ('('): {
@@ -66,14 +98,6 @@ Token Lexer::next_token() {
             break;
         case (')'): {
             tok = {TokenType::RPAREN, ")"};
-        }
-            break;
-        case (','): {
-            tok = {TokenType::COMMA, ","};
-        }
-            break;
-        case ('+'): {
-            tok = {TokenType::PLUS, "+"};
         }
             break;
         case ('{'): {

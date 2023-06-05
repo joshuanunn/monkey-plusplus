@@ -16,6 +16,8 @@ let add = fn(x, y) {
 };
 
 let result = add(five, ten);
+!-/*5;
+5 < 10 > 5;
 )";
 
     auto test_input = Lexer(input);
@@ -56,6 +58,18 @@ let result = add(five, ten);
             Token{TokenType::COMMA, ","},
             Token{TokenType::IDENT, "ten"},
             Token{TokenType::RPAREN, ")"},
+            Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::BANG, "!"},
+            Token{TokenType::MINUS, "-"},
+            Token{TokenType::SLASH, "/"},
+            Token{TokenType::ASTERISK, "*"},
+            Token{TokenType::INT, "5"},
+            Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::INT, "5"},
+            Token{TokenType::LT, "<"},
+            Token{TokenType::INT, "10"},
+            Token{TokenType::GT, ">"},
+            Token{TokenType::INT, "5"},
             Token{TokenType::SEMICOLON, ";"},
             Token{TokenType::ENDOFFILE, ""},
     };
