@@ -34,7 +34,12 @@ enum class TokenType {
 
     // Keywords
     FUNCTION,
-    LET
+    LET,
+    TRUE,
+    FALSE,
+    IF,
+    ELSE,
+    RETURN
 };
 
 extern std::map<std::string, TokenType> keywords;

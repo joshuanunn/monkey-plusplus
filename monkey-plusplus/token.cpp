@@ -2,7 +2,12 @@
 
 std::map<std::string, TokenType> keywords = {
         {"fn",  TokenType::FUNCTION},
-        {"let", TokenType::LET}
+        {"let", TokenType::LET},
+        {"true", TokenType::TRUE},
+        {"false", TokenType::FALSE},
+        {"if", TokenType::IF},
+        {"else", TokenType::ELSE},
+        {"return", TokenType::RETURN}
 };
 
 TokenType lookup_ident(const std::string &ident) {

@@ -18,7 +18,12 @@ let add = fn(x, y) {
 let result = add(five, ten);
 !-/*5;
 5 < 10 > 5;
-)";
+
+if (5 < 10) {
+    return true;
+} else {
+    return false;
+})";
 
     auto test_input = Lexer(input);
 
@@ -71,6 +76,23 @@ let result = add(five, ten);
             Token{TokenType::GT, ">"},
             Token{TokenType::INT, "5"},
             Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::IF, "if"},
+            Token{TokenType::LPAREN, "("},
+            Token{TokenType::INT, "5"},
+            Token{TokenType::LT, "<"},
+            Token{TokenType::INT, "10"},
+            Token{TokenType::RPAREN, ")"},
+            Token{TokenType::LBRACE, "{"},
+            Token{TokenType::RETURN, "return"},
+            Token{TokenType::TRUE, "true"},
+            Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::RBRACE, "}"},
+            Token{TokenType::ELSE, "else"},
+            Token{TokenType::LBRACE, "{"},
+            Token{TokenType::RETURN, "return"},
+            Token{TokenType::FALSE, "false"},
+            Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::RBRACE, "}"},
             Token{TokenType::ENDOFFILE, ""},
     };
 
