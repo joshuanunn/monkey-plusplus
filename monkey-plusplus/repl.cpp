@@ -4,7 +4,7 @@
 #include "lexer.hpp"
 #include "token.hpp"
 
-int main () {
+void start_repl () {
     std::string line;
 
     while (true) {

@@ -5,4 +5,6 @@
 
 static const std::string PROMPT {">> "};
 
+void start_repl();
+
 #endif //MONKEY_PLUSPLUS_REPL_HPP
