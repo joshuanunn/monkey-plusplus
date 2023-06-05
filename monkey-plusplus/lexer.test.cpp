@@ -2,26 +2,62 @@
 
 // Let Catch2 define a main function
 #define CATCH_CONFIG_MAIN
-#include "catch.hpp"
+
+#include "../include/catch.hpp"
 
 #include "lexer.hpp"
-#include "token.hpp"
 
 TEST_CASE("Test Next Token") {
-    std::string input = "=+(){},;";
+    std::string input = R"(let five = 5;
+let ten = 10;
+
+let add = fn(x, y) {
+  x + y;
+};
+
+let result = add(five, ten);
+)";
 
     auto test_input = Lexer(input);
 
     Token tests[] = {
-        Token{TokenType::ASSIGN, "="},
-        Token{TokenType::PLUS, "+"},
-        Token{TokenType::LPAREN, "("},
-        Token{TokenType::RPAREN, ")"},
-        Token{TokenType::LBRACE, "{"},
-        Token{TokenType::RBRACE, "}"},
-        Token{TokenType::COMMA, ","},
-        Token{TokenType::SEMICOLON, ";"},
-        Token{TokenType::ENDOFFILE, ""},
+            Token{TokenType::LET, "let"},
+            Token{TokenType::IDENT, "five"},
+            Token{TokenType::ASSIGN, "="},
+            Token{TokenType::INT, "5"},
+            Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::LET, "let"},
+            Token{TokenType::IDENT, "ten"},
+            Token{TokenType::ASSIGN, "="},
+            Token{TokenType::INT, "10"},
+            Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::LET, "let"},
+            Token{TokenType::IDENT, "add"},
+            Token{TokenType::ASSIGN, "="},
+            Token{TokenType::FUNCTION, "fn"},
+            Token{TokenType::LPAREN, "("},
+            Token{TokenType::IDENT, "x"},
+            Token{TokenType::COMMA, ","},
+            Token{TokenType::IDENT, "y"},
+            Token{TokenType::RPAREN, ")"},
+            Token{TokenType::LBRACE, "{"},
+            Token{TokenType::IDENT, "x"},
+            Token{TokenType::PLUS, "+"},
+            Token{TokenType::IDENT, "y"},
+            Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::RBRACE, "}"},
+            Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::LET, "let"},
+            Token{TokenType::IDENT, "result"},
+            Token{TokenType::ASSIGN, "="},
+            Token{TokenType::IDENT, "add"},
+            Token{TokenType::LPAREN, "("},
+            Token{TokenType::IDENT, "five"},
+            Token{TokenType::COMMA, ","},
+            Token{TokenType::IDENT, "ten"},
+            Token{TokenType::RPAREN, ")"},
+            Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::ENDOFFILE, ""},
     };
 
     for (Token t: tests) {

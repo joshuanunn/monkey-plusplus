@@ -4,6 +4,9 @@
 #include <string>
 #include "token.hpp"
 
+bool is_letter(char ch);
+
+
 struct Lexer {
     std::string input;
     int position;
@@ -13,6 +16,12 @@ struct Lexer {
     Lexer(std::string input_in);
 
     void read_char();
+
+    std::string read_identifier();
+
+    std::string read_number();
+
+    void skip_whitespace();
 
     Token next_token();
 };

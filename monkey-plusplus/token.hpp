@@ -1,6 +1,7 @@
 #ifndef MONKEY_PLUSPLUS_TOKEN_HPP
 #define MONKEY_PLUSPLUS_TOKEN_HPP
 
+#include <map>
 #include <string>
 
 enum class TokenType {
@@ -29,14 +30,15 @@ enum class TokenType {
     LET
 };
 
+extern std::map<std::string, TokenType> keywords;
+
+TokenType lookup_ident(const std::string &ident);
+
 struct Token {
     TokenType type;
     std::string literal;
 
-    bool operator==(const Token& t) const {
-        return type == t.type && literal == t.literal;
-    }
+    bool operator==(const Token &) const;
 };
-
 
 #endif //MONKEY_PLUSPLUS_TOKEN_HPP
