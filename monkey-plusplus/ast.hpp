@@ -8,15 +8,15 @@
 
 struct Node {
     virtual ~Node() = default;
-    virtual std::string token_literal() = 0;
+    virtual std::string token_literal() const = 0;
 };
 
 struct Statement : Node {
-    std::string token_literal() override;
+    std::string token_literal() const override;
 };
 
 struct Expression : Node {
-    std::string token_literal() override;
+    std::string token_literal() const override;
 };
 
 struct Identifier : Expression {
@@ -25,7 +25,7 @@ struct Identifier : Expression {
     Token token;
     std::string value;
 
-    std::string token_literal() override;
+    std::string token_literal() const override;
 };
 
 struct LetStatement : Statement {
@@ -35,7 +35,7 @@ struct LetStatement : Statement {
     std::unique_ptr<Identifier> name;
     Expression value;
 
-    std::string token_literal() override;
+    std::string token_literal() const override;
 };
 
 struct Program {
@@ -43,7 +43,7 @@ struct Program {
 
     std::vector<std::unique_ptr<Node>> statements;
 
-    std::string token_literal();
+    std::string token_literal() const;
 };
 
 #endif //MONKEY_PLUSPLUS_AST_HPP

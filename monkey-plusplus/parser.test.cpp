@@ -7,7 +7,7 @@
 
 #include "parser.hpp"
 
-bool test_let_statement(Node &s, std::string name) {
+bool test_let_statement(const Node &s, const std::string &name) {
     if (s.token_literal() != "let") {
         std::cerr << "s->token_literal not 'let'. got=" << s.token_literal() << std::endl;
         return false;
@@ -39,8 +39,8 @@ let foobar = 838383;
     };
 
     for (int i = 0; i < tests.size(); i++) {
-        auto tt = tests.at(i);
-        auto &stmt = *program->statements.at(i);
+        const auto &tt = tests.at(i);
+        const auto &stmt = *program->statements.at(i);
         REQUIRE(test_let_statement(stmt, tt));
     }
 }

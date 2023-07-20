@@ -1,14 +1,14 @@
 #include "ast.hpp"
 
-std::string Statement::token_literal() {
+std::string Statement::token_literal() const {
     return "Statement";
 }
 
-std::string Expression::token_literal() {
+std::string Expression::token_literal() const {
     return "Expression";
 }
 
-std::string LetStatement::token_literal() {
+std::string LetStatement::token_literal() const {
     return token.literal;
 }
 
@@ -18,7 +18,7 @@ LetStatement::LetStatement(Identifier n, Expression v) {
     value = std::move(v);
 }
 
-std::string Identifier::token_literal() {
+std::string Identifier::token_literal() const {
     return token.literal;
 }
 
@@ -31,7 +31,7 @@ Program::Program() {
     statements = std::vector<std::unique_ptr<Node>>();
 }
 
-std::string Program::token_literal() {
+std::string Program::token_literal() const {
     if (!statements.empty()) {
         return statements.at(0)->token_literal();
     } else {
