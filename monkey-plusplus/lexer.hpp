@@ -11,9 +11,9 @@ struct Lexer {
     std::string input;
     int position;
     int read_position;
-    char ch;
+    char ch{};
 
-    Lexer(std::string input_in);
+    explicit Lexer(const std::string &input_in);
 
     void read_char();
 
