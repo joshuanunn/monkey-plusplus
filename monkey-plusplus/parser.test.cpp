@@ -13,11 +13,19 @@ bool test_let_statement(const Node &s, const std::string &name) {
         return false;
     }
 
-    // TODO: add test 2
+    // Can now cast Node to a derived LetStatement, as we are confident that it is one
+    auto let_stmt = dynamic_cast<const LetStatement*>(&s);
 
-    // TODO: add test 3
+    if (let_stmt->name->value != name) {
+        std::cerr << "let_stmt.name.value not '" << name << "'. got=" << let_stmt->name->value << std::endl;
+        return false;
+    }
 
-    // TODO: add test 4
+    if (let_stmt->name->token_literal() != name) {
+        std::cerr << "let_stmt.name.token_literal() not '" << name << "'. got=" << let_stmt->name->token_literal() << std::endl;
+        return false;
+    }
+
     return true;
 }
 

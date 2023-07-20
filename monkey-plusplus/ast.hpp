@@ -11,15 +11,15 @@ struct Node {
     virtual std::string token_literal() const = 0;
 };
 
-struct Statement : Node {
+struct Statement : public Node {
     std::string token_literal() const override;
 };
 
-struct Expression : Node {
+struct Expression : public Node {
     std::string token_literal() const override;
 };
 
-struct Identifier : Expression {
+struct Identifier : public Expression {
     Identifier(Token t, std::string v);
 
     Token token;
@@ -28,7 +28,7 @@ struct Identifier : Expression {
     std::string token_literal() const override;
 };
 
-struct LetStatement : Statement {
+struct LetStatement : public Statement {
     LetStatement(Identifier n, Expression v);
 
     Token token;
