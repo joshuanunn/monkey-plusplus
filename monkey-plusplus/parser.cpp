@@ -3,6 +3,7 @@
 
 Parser::Parser(std::unique_ptr<Lexer> lexer) {
     l = std::move(lexer);
+    e = std::vector<std::string>{};
 
     // Read two tokens, so cur_token and peek_token are both set
     next_token();
@@ -60,6 +61,10 @@ std::unique_ptr<Program> Parser::parse_program() {
     return program;
 }
 
+std::vector<std::string> Parser::errors() const {
+    return e;
+}
+
 bool Parser::cur_token_is(TokenType t) const {
     return cur_token.type == t;
 }
@@ -73,6 +78,12 @@ bool Parser::expect_peek(TokenType t) {
         next_token();
         return true;
     } else {
+        peek_error(t);
         return false;
     }
+}
+
+void Parser::peek_error(TokenType t) {
+    std::string msg = "expected next token to be "; // + t + " got " + peek_token.type + " instead";
+    e.push_back(msg);
 }

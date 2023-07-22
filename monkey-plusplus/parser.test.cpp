@@ -29,6 +29,20 @@ bool test_let_statement(const Node &s, const std::string &name) {
     return true;
 }
 
+bool test_parser_errors(const Parser &p) {
+    auto errors = p.errors();
+
+    if (errors.empty()) {
+        return true;
+    }
+
+    std::cerr << "parser has " << errors.size() << " errors" << std::endl;
+    for (auto &e: errors) {
+        std::cerr << "parser error: " << e << std::endl;
+    }
+    return false;
+}
+
 TEST_CASE("Test Let Statements") {
     std::string input = R"(
 let x = 5;
@@ -39,6 +53,8 @@ let foobar = 838383;
     auto p = Parser(std::move(l));
 
     auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
 
     std::vector<std::string> tests = {
         "x",
