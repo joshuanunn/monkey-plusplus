@@ -84,6 +84,6 @@ bool Parser::expect_peek(TokenType t) {
 }
 
 void Parser::peek_error(TokenType t) {
-    std::string msg = "expected next token to be "; // + t + " got " + peek_token.type + " instead";
+    std::string msg = "expected next token to be " + tokentype_literal(t) + ", got " + tokentype_literal(peek_token.type) + " instead";
     e.push_back(msg);
 }

@@ -44,6 +44,8 @@ enum class TokenType {
     RETURN
 };
 
+std::string tokentype_literal(TokenType);
+
 extern std::map<std::string, TokenType> keywords;
 
 TokenType lookup_ident(const std::string &ident);

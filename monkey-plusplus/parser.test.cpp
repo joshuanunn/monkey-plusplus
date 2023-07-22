@@ -45,9 +45,9 @@ bool test_parser_errors(const Parser &p) {
 
 TEST_CASE("Test Let Statements") {
     std::string input = R"(
-let x = 5;
-let y = 10;
-let foobar = 838383;
+let x 5;
+let = 10;
+let 838383;
 )";
     auto l = std::make_unique<Lexer>(Lexer(input));
     auto p = Parser(std::move(l));

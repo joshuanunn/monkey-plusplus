@@ -24,3 +24,44 @@ TokenType lookup_ident(const std::string &ident) {
 bool Token::operator==(const Token &t) const {
     return type == t.type && literal == t.literal;
 }
+
+std::map<TokenType, std::string> tokentype_literals = {
+        {TokenType::ILLEGAL, "ILLEGAL"},
+        {TokenType::ENDOFFILE, "EOF"},
+        {TokenType::IDENT, "IDENT"},
+        {TokenType::INT, "INT"},
+        {TokenType::ASSIGN, "="},
+        {TokenType::PLUS, "+"},
+        {TokenType::MINUS, "-"},
+        {TokenType::BANG, "!"},
+        {TokenType::ASTERISK, "*"},
+        {TokenType::SLASH, "/"},
+        {TokenType::LT, "<"},
+        {TokenType::GT, ">"},
+        {TokenType::EQ, "=="},
+        {TokenType::NOT_EQ, "!="},
+        {TokenType::SEMICOLON, ";"},
+        {TokenType::COMMA, ","},
+        {TokenType::LPAREN, "("},
+        {TokenType::RPAREN, ")"},
+        {TokenType::LBRACE, "{"},
+        {TokenType::RBRACE, "}"},
+        {TokenType::FUNCTION, "FUNCTION"},
+        {TokenType::LET, "LET"},
+        {TokenType::TRUE, "TRUE"},
+        {TokenType::FALSE, "FALSE"},
+        {TokenType::IF, "IF"},
+        {TokenType::ELSE, "ELSE"},
+        {TokenType::RETURN, "RETURN"},
+};
+
+std::string tokentype_literal(TokenType t) {
+
+    auto contains = tokentype_literals.find(t);
+
+    // If ident is not a defined keyword, then return warning
+    if (contains == tokentype_literals.end()) {
+        return "TOKEN_NOT_DEFINED";
+    }
+    return tokentype_literals[t];
+}
