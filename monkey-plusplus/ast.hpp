@@ -47,6 +47,15 @@ struct ReturnStatement : public Statement {
     std::string token_literal() const override;
 };
 
+struct ExpressionStatement : public Statement {
+    explicit ExpressionStatement(Expression v);
+
+    Token token;
+    Expression expression;
+
+    std::string token_literal() const override;
+};
+
 struct Program {
     Program();
 

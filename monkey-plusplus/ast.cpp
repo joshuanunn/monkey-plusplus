@@ -27,6 +27,15 @@ ReturnStatement::ReturnStatement(Expression v) {
     return_value = std::move(v);
 }
 
+std::string ExpressionStatement::token_literal() const {
+    return token.literal;
+}
+
+ExpressionStatement::ExpressionStatement(Expression v) {
+    token = Token{TokenType::ILLEGAL, "expression"}; // TODO: work out how best to define this token
+    expression = std::move(v);
+}
+
 std::string Identifier::token_literal() const {
     return token.literal;
 }
