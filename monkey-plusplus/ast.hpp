@@ -9,14 +9,17 @@
 struct Node {
     virtual ~Node() = default;
     virtual std::string token_literal() const = 0;
+    virtual std::string string() const = 0;
 };
 
 struct Statement : public Node {
     std::string token_literal() const override;
+    std::string string() const override;
 };
 
 struct Expression : public Node {
     std::string token_literal() const override;
+    std::string string() const override;
 };
 
 struct Identifier : public Expression {
@@ -26,16 +29,18 @@ struct Identifier : public Expression {
     std::string value;
 
     std::string token_literal() const override;
+    std::string string() const override;
 };
 
 struct LetStatement : public Statement {
-    LetStatement(Identifier n, Expression v);
+    LetStatement(Identifier n, std::unique_ptr<Expression> v);
 
     Token token;
     std::unique_ptr<Identifier> name;
-    Expression value;
+    std::unique_ptr<Expression> value;
 
     std::string token_literal() const override;
+    std::string string() const override;
 };
 
 struct ReturnStatement : public Statement {
@@ -45,6 +50,7 @@ struct ReturnStatement : public Statement {
     Expression return_value;
 
     std::string token_literal() const override;
+    std::string string() const override;
 };
 
 struct ExpressionStatement : public Statement {
@@ -54,6 +60,7 @@ struct ExpressionStatement : public Statement {
     Expression expression;
 
     std::string token_literal() const override;
+    std::string string() const override;
 };
 
 struct Program {
@@ -62,6 +69,7 @@ struct Program {
     std::vector<std::unique_ptr<Node>> statements;
 
     std::string token_literal() const;
+    std::string string() const;
 };
 
 #endif //MONKEY_PLUSPLUS_AST_HPP

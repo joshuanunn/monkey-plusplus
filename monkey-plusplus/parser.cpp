@@ -22,7 +22,7 @@ std::unique_ptr<LetStatement> Parser::parse_let_statement() {
     }
 
     auto stmt = std::make_unique<LetStatement>(LetStatement(
-        Identifier(cur_token, cur_token.literal), Expression{}));
+        Identifier(cur_token, cur_token.literal), std::make_unique<Expression>(Expression{})));
 
     if (!expect_peek(TokenType::ASSIGN)) {
         return nullptr;
