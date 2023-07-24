@@ -36,10 +36,26 @@ std::unique_ptr<LetStatement> Parser::parse_let_statement() {
     return stmt;
 }
 
+std::unique_ptr<ReturnStatement> Parser::parse_return_statement() {
+
+    auto stmt = std::make_unique<ReturnStatement>(ReturnStatement(Expression{}));
+
+    next_token();
+
+    // TODO: for now, skip expressions until we encounter a semi-colon
+    while(!cur_token_is(TokenType::SEMICOLON)) {
+        next_token();
+    }
+
+    return stmt;
+}
+
 std::unique_ptr<Statement> Parser::parse_statement() {
     switch (cur_token.type) {
         case (TokenType::LET):
             return parse_let_statement();
+        case (TokenType::RETURN):
+            return parse_return_statement();
         default:
             return nullptr;
     }

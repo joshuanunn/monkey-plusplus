@@ -18,6 +18,15 @@ LetStatement::LetStatement(Identifier n, Expression v) {
     value = std::move(v);
 }
 
+std::string ReturnStatement::token_literal() const {
+    return token.literal;
+}
+
+ReturnStatement::ReturnStatement(Expression v) {
+    token = Token{TokenType::RETURN, "return"};
+    return_value = std::move(v);
+}
+
 std::string Identifier::token_literal() const {
     return token.literal;
 }

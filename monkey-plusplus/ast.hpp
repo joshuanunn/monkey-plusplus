@@ -38,6 +38,15 @@ struct LetStatement : public Statement {
     std::string token_literal() const override;
 };
 
+struct ReturnStatement : public Statement {
+    explicit ReturnStatement(Expression v);
+
+    Token token;
+    Expression return_value;
+
+    std::string token_literal() const override;
+};
+
 struct Program {
     Program();
 

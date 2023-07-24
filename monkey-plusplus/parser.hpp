@@ -18,6 +18,8 @@ struct Parser {
 
     std::unique_ptr<LetStatement> parse_let_statement();
 
+    std::unique_ptr<ReturnStatement> parse_return_statement();
+
     std::unique_ptr<Statement> parse_statement();
 
     std::unique_ptr<Program> parse_program();

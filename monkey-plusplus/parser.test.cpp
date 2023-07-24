@@ -68,3 +68,33 @@ let foobar = 838383;
         REQUIRE(test_let_statement(stmt, tt));
     }
 }
+
+TEST_CASE("Test Return Statements") {
+    std::string input = R"(
+return 5;
+return 10;
+return 993322;
+)";
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 3) {
+        std::cerr << "program->statements does not contain 3 statements. got=" << program->statements.size() << std::endl;
+    }
+
+    REQUIRE(program->statements.size() == 3);
+
+    for (const auto &stmt: program->statements) {
+        const auto &return_stmt = *stmt;
+
+        if (return_stmt.token_literal() != "return") {
+            std::cerr << "return_stmt.token_literal not 'return'. got=" << return_stmt.token_literal() << std::endl;
+        }
+
+        REQUIRE(return_stmt.token_literal() == "return");
+    }
+}
