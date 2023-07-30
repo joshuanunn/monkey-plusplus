@@ -116,13 +116,14 @@ TEST_CASE("Test Identifier Expression") {
 
     auto stmt = program->statements.at(0);
 
-    //if (stmt.token_literal() != "expression") {
-    //    std::cerr << "program.statements.at(0) is not an ExpressionStatement. got=" << stmt.token_literal() << std::endl;
-    //}
-    //REQUIRE(stmt.token_literal() == "expression");
-
     // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
     auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (expression_stmt == nullptr) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt != nullptr);
 
     // Can now cast Expression to an Identifier, as we are confident that it is one
     auto ident = std::dynamic_pointer_cast<Identifier>(expression_stmt->expression);
