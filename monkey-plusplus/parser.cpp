@@ -95,7 +95,7 @@ std::shared_ptr<Expression> Parser::parse_expression(Precedence precedence) {
 }
 
 std::shared_ptr<Expression> parse_identifier(const Token &t) {
-    return std::make_unique<Identifier>(Identifier(t, t.literal));
+    return std::make_shared<Identifier>(Identifier(t, t.literal));
 }
 
 std::shared_ptr<Expression> parse_integer_literal(const Token &t) {
