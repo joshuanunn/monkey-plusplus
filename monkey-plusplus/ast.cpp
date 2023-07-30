@@ -33,9 +33,9 @@ std::string LetStatement::string() const {
     return out;
 }
 
-LetStatement::LetStatement(Identifier n, std::unique_ptr<Expression> v) {
+LetStatement::LetStatement(const Identifier &n, std::unique_ptr<Expression> v) {
     token = Token{TokenType::LET, "let"};
-    name = std::make_unique<Identifier>(std::move(n));
+    name = std::make_unique<Identifier>(n);
     value = std::move(v);
 }
 
@@ -48,13 +48,13 @@ std::string ReturnStatement::string() const {
 
     out.append(token_literal() + " ");
 
-    out.append(return_value.string());
+    out.append(return_value->string());
     out.append(";");
 
     return out;
 }
 
-ReturnStatement::ReturnStatement(Expression v) {
+ReturnStatement::ReturnStatement(std::unique_ptr<Expression> v) {
     token = Token{TokenType::RETURN, "return"};
     return_value = std::move(v);
 }
@@ -66,14 +66,13 @@ std::string ExpressionStatement::token_literal() const {
 std::string ExpressionStatement::string() const {
     std::string out;
 
-    out.append(expression.string());
+    out.append(expression->string());
 
     return out;
 }
 
-ExpressionStatement::ExpressionStatement(Expression v) {
-    token = Token{TokenType::ILLEGAL, "expression"}; // TODO: work out how best to define this token
-    expression = std::move(v);
+ExpressionStatement::ExpressionStatement(const Token &t) {
+    token = t;
 }
 
 std::string Identifier::token_literal() const {
@@ -84,13 +83,13 @@ std::string Identifier::string() const {
     return value;
 }
 
-Identifier::Identifier(Token t, std::string v) {
-    token = std::move(t);
-    value = std::move(v);
+Identifier::Identifier(const Token &t, const std::string &v) {
+    token = t;
+    value = v;
 }
 
 Program::Program() {
-    statements = std::vector<std::unique_ptr<Node>>();
+    statements = std::vector<std::shared_ptr<Node>>();
 }
 
 std::string Program::token_literal() const {

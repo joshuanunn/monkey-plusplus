@@ -98,3 +98,47 @@ return 993322;
         REQUIRE(return_stmt.token_literal() == "return");
     }
 }
+
+TEST_CASE("Test Identifier Expression") {
+    std::string input = R"(foobar;)";
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program has not enough statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    //if (stmt.token_literal() != "expression") {
+    //    std::cerr << "program.statements.at(0) is not an ExpressionStatement. got=" << stmt.token_literal() << std::endl;
+    //}
+    //REQUIRE(stmt.token_literal() == "expression");
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Can now cast Expression to an Identifier, as we are confident that it is one
+    auto ident = std::dynamic_pointer_cast<Identifier>(expression_stmt->expression);
+
+    if (ident->token.type != TokenType::IDENT) {
+        std::cerr << "ident->token.type not IDENT. got=" << tokentype_literal(ident->token.type) << std::endl;
+    }
+    REQUIRE(ident->token.type == TokenType::IDENT);
+
+    if (ident->value != "foobar") {
+        std::cerr << "ident->value not foobar. got=" << ident->value << std::endl;
+    }
+    REQUIRE(ident->value == "foobar");
+
+    if (ident->token_literal() != "foobar") {
+        std::cerr << "ident->token_literal() not foobar. got=" << ident->token_literal() << std::endl;
+    }
+    REQUIRE(ident->token_literal() == "foobar");
+}

@@ -23,7 +23,7 @@ struct Expression : public Node {
 };
 
 struct Identifier : public Expression {
-    Identifier(Token t, std::string v);
+    Identifier(const Token &t, const std::string &v);
 
     Token token;
     std::string value;
@@ -33,7 +33,7 @@ struct Identifier : public Expression {
 };
 
 struct LetStatement : public Statement {
-    LetStatement(Identifier n, std::unique_ptr<Expression> v);
+    LetStatement(const Identifier &n, std::unique_ptr<Expression> v);
 
     Token token;
     std::unique_ptr<Identifier> name;
@@ -44,20 +44,20 @@ struct LetStatement : public Statement {
 };
 
 struct ReturnStatement : public Statement {
-    explicit ReturnStatement(Expression v);
+    explicit ReturnStatement(std::unique_ptr<Expression> v);
 
     Token token;
-    Expression return_value;
+    std::unique_ptr<Expression> return_value;
 
     std::string token_literal() const override;
     std::string string() const override;
 };
 
 struct ExpressionStatement : public Statement {
-    explicit ExpressionStatement(Expression v);
+    explicit ExpressionStatement(const Token &t);
 
     Token token;
-    Expression expression;
+    std::shared_ptr<Expression> expression;
 
     std::string token_literal() const override;
     std::string string() const override;
@@ -66,7 +66,7 @@ struct ExpressionStatement : public Statement {
 struct Program {
     Program();
 
-    std::vector<std::unique_ptr<Node>> statements;
+    std::vector<std::shared_ptr<Node>> statements;
 
     std::string token_literal() const;
     std::string string() const;
