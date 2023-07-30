@@ -63,4 +63,6 @@ struct Parser {
 
 std::shared_ptr<Expression> parse_identifier(const Token &t);
 
+std::shared_ptr<Expression> parse_integer_literal(const Token &t);
+
 #endif //MONKEY_PLUSPLUS_PARSER_HPP

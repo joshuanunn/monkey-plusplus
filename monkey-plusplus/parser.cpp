@@ -10,6 +10,7 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     infix_parse_fns = std::map<TokenType, infix_parse_fn>{};
 
     register_prefix(TokenType::IDENT, parse_identifier);
+    register_prefix(TokenType::INT, parse_integer_literal);
 
     // Read two tokens, so cur_token and peek_token are both set
     next_token();
@@ -95,6 +96,23 @@ std::shared_ptr<Expression> Parser::parse_expression(Precedence precedence) {
 
 std::shared_ptr<Expression> parse_identifier(const Token &t) {
     return std::make_unique<Identifier>(Identifier(t, t.literal));
+}
+
+std::shared_ptr<Expression> parse_integer_literal(const Token &t) {
+    auto lit = std::make_shared<IntegerLiteral>(IntegerLiteral(t));
+
+    std::size_t pos{};
+    try {
+        lit->value = std::stoi(t.literal, &pos);
+    } catch (std::invalid_argument const &ex) {
+        std::cerr << "invalid argument parsing " << ex.what() << "as int." << std::endl;
+    } catch (std::out_of_range const &ex) {
+        std::cerr << "integer literal " << ex.what() << " to be parsed out of range." << std::endl;
+    }
+
+    // TODO: for parse failures, we need to add the relevant error message to the parser error vector and return nullptr
+
+    return lit;
 }
 
 std::unique_ptr<Program> Parser::parse_program() {

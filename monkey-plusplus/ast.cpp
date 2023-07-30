@@ -88,6 +88,19 @@ Identifier::Identifier(const Token &t, const std::string &v) {
     value = v;
 }
 
+std::string IntegerLiteral::token_literal() const {
+    return token.literal;
+}
+
+std::string IntegerLiteral::string() const {
+    return std::to_string(value);
+}
+
+IntegerLiteral::IntegerLiteral(const Token &t) {
+    token = t;
+    value = {};
+}
+
 Program::Program() {
     statements = std::vector<std::shared_ptr<Node>>();
 }
