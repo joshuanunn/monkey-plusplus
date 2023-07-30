@@ -7,8 +7,8 @@
 #include "lexer.hpp"
 #include "token.hpp"
 
-typedef std::function<std::shared_ptr<Expression>(const Token &t)> prefix_parse_fn;
-typedef std::function<std::shared_ptr<Expression>(const Token &t)> infix_parse_fn;
+typedef std::function<std::unique_ptr<Expression>(const Token &t)> prefix_parse_fn;
+typedef std::function<std::unique_ptr<Expression>(const Token &t)> infix_parse_fn;
 
 enum class Precedence {
     LOWEST,
@@ -42,7 +42,7 @@ struct Parser {
 
     std::shared_ptr<Statement> parse_statement();
 
-    std::shared_ptr<Expression> parse_expression(Precedence precedence);
+    std::unique_ptr<Expression> parse_expression(Precedence precedence);
 
     std::unique_ptr<Program> parse_program();
 
@@ -61,6 +61,6 @@ struct Parser {
     void register_infix(TokenType token_type, infix_parse_fn fn);
 };
 
-std::shared_ptr<Expression> parse_identifier(const Token &t);
+std::unique_ptr<Expression> parse_identifier(const Token &t);
 
 #endif //MONKEY_PLUSPLUS_PARSER_HPP

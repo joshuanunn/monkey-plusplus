@@ -80,7 +80,7 @@ std::shared_ptr<Statement> Parser::parse_statement() {
     }
 }
 
-std::shared_ptr<Expression> Parser::parse_expression(Precedence precedence) {
+std::unique_ptr<Expression> Parser::parse_expression(Precedence precedence) {
     auto contains = prefix_parse_fns.find(cur_token.type);
 
     if (contains == prefix_parse_fns.end()) {
@@ -93,8 +93,8 @@ std::shared_ptr<Expression> Parser::parse_expression(Precedence precedence) {
     return left_exp;
 }
 
-std::shared_ptr<Expression> parse_identifier(const Token &t) {
-    return std::make_shared<Identifier>(Identifier(t, t.literal));
+std::unique_ptr<Expression> parse_identifier(const Token &t) {
+    return std::make_unique<Identifier>(Identifier(t, t.literal));
 }
 
 std::unique_ptr<Program> Parser::parse_program() {
