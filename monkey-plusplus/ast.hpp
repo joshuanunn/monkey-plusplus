@@ -33,21 +33,21 @@ struct Identifier : public Expression {
 };
 
 struct LetStatement : public Statement {
-    LetStatement(const Identifier &n, std::unique_ptr<Expression> v);
+    LetStatement(const Identifier &n, std::shared_ptr<Expression> v);
 
     Token token;
     std::unique_ptr<Identifier> name;
-    std::unique_ptr<Expression> value;
+    std::shared_ptr<Expression> value;
 
     std::string token_literal() const override;
     std::string string() const override;
 };
 
 struct ReturnStatement : public Statement {
-    explicit ReturnStatement(std::unique_ptr<Expression> v);
+    explicit ReturnStatement(std::shared_ptr<Expression> v);
 
     Token token;
-    std::unique_ptr<Expression> return_value;
+    std::shared_ptr<Expression> return_value;
 
     std::string token_literal() const override;
     std::string string() const override;
