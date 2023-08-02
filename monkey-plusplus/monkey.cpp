@@ -2,7 +2,7 @@
 
 #include "repl.hpp"
 
-int main () {
+int main() {
     std::string line;
 
     std::cout << "Hello, this is the Monkey programming language!" << std::endl;

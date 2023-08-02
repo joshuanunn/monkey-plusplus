@@ -89,7 +89,7 @@ std::string IntegerLiteral::string() const {
     return std::to_string(value);
 }
 
-IntegerLiteral::IntegerLiteral(const Token &t) : token {t}, value{} {}
+IntegerLiteral::IntegerLiteral(const Token &t) : token{t}, value{} {}
 
 std::string PrefixExpression::token_literal() const {
     return token.literal;

@@ -8,17 +8,21 @@
 
 struct Node {
     virtual ~Node() = default;
+
     virtual std::string token_literal() const = 0;
+
     virtual std::string string() const = 0;
 };
 
 struct Statement : public Node {
     std::string token_literal() const override;
+
     std::string string() const override;
 };
 
 struct Expression : public Node {
     std::string token_literal() const override;
+
     std::string string() const override;
 };
 
@@ -29,6 +33,7 @@ struct Identifier : public Expression {
     std::string value;
 
     std::string token_literal() const override;
+
     std::string string() const override;
 };
 
@@ -39,6 +44,7 @@ struct IntegerLiteral : public Expression {
     int value;
 
     std::string token_literal() const override;
+
     std::string string() const override;
 };
 
@@ -50,6 +56,7 @@ struct PrefixExpression : public Expression {
     std::shared_ptr<Expression> right;
 
     std::string token_literal() const override;
+
     std::string string() const override;
 };
 
@@ -61,6 +68,7 @@ struct LetStatement : public Statement {
     std::shared_ptr<Expression> value;
 
     std::string token_literal() const override;
+
     std::string string() const override;
 };
 
@@ -71,6 +79,7 @@ struct ReturnStatement : public Statement {
     std::shared_ptr<Expression> return_value;
 
     std::string token_literal() const override;
+
     std::string string() const override;
 };
 
@@ -81,6 +90,7 @@ struct ExpressionStatement : public Statement {
     std::shared_ptr<Expression> expression;
 
     std::string token_literal() const override;
+
     std::string string() const override;
 };
 
@@ -88,6 +98,7 @@ struct Program {
     std::vector<std::shared_ptr<Node>> statements;
 
     std::string token_literal() const;
+
     std::string string() const;
 };
 

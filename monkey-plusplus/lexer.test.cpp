@@ -108,7 +108,7 @@ if (5 < 10) {
             Token{TokenType::ENDOFFILE, ""},
     };
 
-    for (const Token& t: tests) {
+    for (const Token &t: tests) {
         auto tok = test_input.next_token();
 
         REQUIRE(tok == t);

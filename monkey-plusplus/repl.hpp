@@ -3,7 +3,7 @@
 
 #include <string>
 
-static const std::string PROMPT {">> "};
+static const std::string PROMPT{">> "};
 
 void start_repl();
 

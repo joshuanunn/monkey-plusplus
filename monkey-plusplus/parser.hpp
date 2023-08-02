@@ -9,8 +9,8 @@
 
 struct Parser;
 
-typedef std::function<std::shared_ptr<Expression>(Parser*)> prefix_parse_fn;
-typedef std::function<std::shared_ptr<Expression>(Parser*)> infix_parse_fn;
+typedef std::function<std::shared_ptr<Expression>(Parser *)> prefix_parse_fn;
+typedef std::function<std::shared_ptr<Expression>(Parser *)> infix_parse_fn;
 
 enum class Precedence {
     LOWEST,

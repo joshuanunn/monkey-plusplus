@@ -14,7 +14,7 @@ bool test_let_statement(const Node &s, const std::string &name) {
     }
 
     // Can now cast Node to a derived LetStatement, as we are confident that it is one
-    auto let_stmt = dynamic_cast<const LetStatement*>(&s);
+    auto let_stmt = dynamic_cast<const LetStatement *>(&s);
 
     if (let_stmt->name->value != name) {
         std::cerr << "let_stmt.name.value not '" << name << "'. got=" << let_stmt->name->value << std::endl;
@@ -22,7 +22,8 @@ bool test_let_statement(const Node &s, const std::string &name) {
     }
 
     if (let_stmt->name->token_literal() != name) {
-        std::cerr << "let_stmt.name.token_literal() not '" << name << "'. got=" << let_stmt->name->token_literal() << std::endl;
+        std::cerr << "let_stmt.name.token_literal() not '" << name << "'. got=" << let_stmt->name->token_literal()
+                  << std::endl;
         return false;
     }
 
@@ -80,9 +81,9 @@ let foobar = 838383;
     REQUIRE(test_parser_errors(p));
 
     std::vector<std::string> tests = {
-        "x",
-        "y",
-        "foobar",
+            "x",
+            "y",
+            "foobar",
     };
 
     for (int i = 0; i < tests.size(); i++) {
@@ -106,7 +107,8 @@ return 993322;
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 3) {
-        std::cerr << "program->statements does not contain 3 statements. got=" << program->statements.size() << std::endl;
+        std::cerr << "program->statements does not contain 3 statements. got=" << program->statements.size()
+                  << std::endl;
     }
 
     REQUIRE(program->statements.size() == 3);
@@ -218,12 +220,12 @@ TEST_CASE("Test Integer Literal Expression") {
 
 TEST_CASE("Test Parsing Prefix Expressions") {
     std::vector<std::tuple<std::string, std::string, int>> prefix_tests = {
-       std::make_tuple("!5;", "!", 5),
-       std::make_tuple("-15;", "-", 15),
+            std::make_tuple("!5;", "!", 5),
+            std::make_tuple("-15;", "-", 15),
     };
 
     for (const auto &tt: prefix_tests) {
-        const auto[tt_input, tt_operator, tt_value] = tt;
+        const auto [tt_input, tt_operator, tt_value] = tt;
 
         auto l = std::make_unique<Lexer>(Lexer(tt_input));
         auto p = Parser(std::move(l));
@@ -233,7 +235,8 @@ TEST_CASE("Test Parsing Prefix Expressions") {
         REQUIRE(test_parser_errors(p));
 
         if (program->statements.size() != 1) {
-            std::cerr << "program.statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+            std::cerr << "program.statements does not contain 1 statements. got=" << program->statements.size()
+                      << std::endl;
         }
         REQUIRE(program->statements.size() == 1);
 

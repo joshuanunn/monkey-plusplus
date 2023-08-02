@@ -9,7 +9,7 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     register_prefix(TokenType::IDENT, std::mem_fn(&Parser::parse_identifier));
     register_prefix(TokenType::INT, std::mem_fn(&Parser::parse_integer_literal));
     register_prefix(TokenType::BANG, std::mem_fn(&Parser::parse_prefix_expression));
-    register_prefix(TokenType::MINUS,std::mem_fn(&Parser::parse_prefix_expression));
+    register_prefix(TokenType::MINUS, std::mem_fn(&Parser::parse_prefix_expression));
 
     // Read two tokens, so cur_token and peek_token are both set
     next_token();
@@ -27,14 +27,14 @@ std::unique_ptr<LetStatement> Parser::parse_let_statement() {
     }
 
     auto stmt = std::make_unique<LetStatement>(LetStatement{
-        Identifier(cur_token, cur_token.literal), std::make_unique<Expression>(Expression{})});
+            Identifier(cur_token, cur_token.literal), std::make_unique<Expression>(Expression{})});
 
     if (!expect_peek(TokenType::ASSIGN)) {
         return nullptr;
     }
 
     // TODO: for now, skip expressions until we encounter a semi-colon
-    while(!cur_token_is(TokenType::SEMICOLON)) {
+    while (!cur_token_is(TokenType::SEMICOLON)) {
         next_token();
     }
 
@@ -47,7 +47,7 @@ std::unique_ptr<ReturnStatement> Parser::parse_return_statement() {
     next_token();
 
     // TODO: for now, skip expressions until we encounter a semi-colon
-    while(!cur_token_is(TokenType::SEMICOLON)) {
+    while (!cur_token_is(TokenType::SEMICOLON)) {
         next_token();
     }
 
@@ -165,7 +165,9 @@ bool Parser::expect_peek(TokenType t) {
 }
 
 void Parser::peek_error(TokenType t) {
-    std::string msg = "expected next token to be " + tokentype_literal(t) + ", got " + tokentype_literal(peek_token.type) + " instead";
+    std::string msg =
+            "expected next token to be " + tokentype_literal(t) + ", got " + tokentype_literal(peek_token.type) +
+            " instead";
     e.push_back(msg);
 }
 
