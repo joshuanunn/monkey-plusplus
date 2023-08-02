@@ -11,7 +11,6 @@ std::map<std::string, TokenType> keywords = {
 };
 
 TokenType lookup_ident(const std::string &ident) {
-
     auto contains = keywords.find(ident);
 
     // If ident is not a defined keyword, then assumed to be a user identifier
@@ -56,7 +55,6 @@ std::map<TokenType, std::string> tokentype_literals = {
 };
 
 std::string tokentype_literal(TokenType t) {
-
     auto contains = tokentype_literals.find(t);
 
     // If ident is not a defined keyword, then return warning

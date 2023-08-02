@@ -85,8 +85,6 @@ struct ExpressionStatement : public Statement {
 };
 
 struct Program {
-    Program();
-
     std::vector<std::shared_ptr<Node>> statements;
 
     std::string token_literal() const;

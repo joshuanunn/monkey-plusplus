@@ -8,10 +8,7 @@ bool is_digit(char ch) {
     return '0' <= ch && ch <= '9';
 }
 
-Lexer::Lexer(const std::string &input_in) {
-    input = input_in;
-    position = 0;
-    read_position = 0;
+Lexer::Lexer(const std::string &input_in) : input{input_in}, position{}, read_position{} {
     read_char();
 }
 

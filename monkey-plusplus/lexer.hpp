@@ -6,13 +6,7 @@
 
 bool is_letter(char ch);
 
-
 struct Lexer {
-    std::string input;
-    int position;
-    int read_position;
-    char ch{};
-
     explicit Lexer(const std::string &input_in);
 
     void read_char();
@@ -26,6 +20,12 @@ struct Lexer {
     char peek_char();
 
     Token next_token();
+
+private:
+    std::string input;
+    int position;
+    int read_position;
+    char ch;
 };
 
 #endif //MONKEY_PLUSPLUS_LEXER_HPP

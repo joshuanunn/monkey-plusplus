@@ -4,11 +4,8 @@
 
 Parser::Parser(std::unique_ptr<Lexer> lexer) {
     l = std::move(lexer);
-    e = std::vector<std::string>{};
 
-    prefix_parse_fns = std::map<TokenType, prefix_parse_fn>{};
-    infix_parse_fns = std::map<TokenType, infix_parse_fn>{};
-
+    // Register prefix method pointers lookups for each token type
     register_prefix(TokenType::IDENT, std::mem_fn(&Parser::parse_identifier));
     register_prefix(TokenType::INT, std::mem_fn(&Parser::parse_integer_literal));
     register_prefix(TokenType::BANG, std::mem_fn(&Parser::parse_prefix_expression));
@@ -25,13 +22,12 @@ void Parser::next_token() {
 }
 
 std::unique_ptr<LetStatement> Parser::parse_let_statement() {
-
     if (!expect_peek(TokenType::IDENT)) {
         return nullptr;
     }
 
-    auto stmt = std::make_unique<LetStatement>(LetStatement(
-        Identifier(cur_token, cur_token.literal), std::make_unique<Expression>(Expression{})));
+    auto stmt = std::make_unique<LetStatement>(LetStatement{
+        Identifier(cur_token, cur_token.literal), std::make_unique<Expression>(Expression{})});
 
     if (!expect_peek(TokenType::ASSIGN)) {
         return nullptr;
@@ -46,8 +42,7 @@ std::unique_ptr<LetStatement> Parser::parse_let_statement() {
 }
 
 std::unique_ptr<ReturnStatement> Parser::parse_return_statement() {
-
-    auto stmt = std::make_unique<ReturnStatement>(ReturnStatement(std::make_unique<Expression>(Expression{})));
+    auto stmt = std::make_unique<ReturnStatement>(ReturnStatement{std::make_shared<Expression>(Expression{})});
 
     next_token();
 
@@ -60,8 +55,7 @@ std::unique_ptr<ReturnStatement> Parser::parse_return_statement() {
 }
 
 std::unique_ptr<ExpressionStatement> Parser::parse_expression_statement() {
-
-    auto stmt = std::make_unique<ExpressionStatement>(ExpressionStatement(cur_token));
+    auto stmt = std::make_unique<ExpressionStatement>(ExpressionStatement{cur_token});
 
     stmt->expression = std::move(parse_expression(Precedence::LOWEST));
 
@@ -84,42 +78,46 @@ std::unique_ptr<Statement> Parser::parse_statement() {
 }
 
 std::shared_ptr<Expression> Parser::parse_expression(Precedence precedence) {
+    // Retrieve method pointer for prefix parsing based on token type and log an error if not defined
     auto contains = prefix_parse_fns.find(cur_token.type);
-
     if (contains == prefix_parse_fns.end()) {
         no_prefix_parse_fn_error(cur_token.type);
         return nullptr;
     }
     auto prefix = prefix_parse_fns[cur_token.type];
 
+    // Generate an expression using the current token and prefix parsing method
     auto left_exp = prefix(this);
 
     return left_exp;
 }
 
-std::shared_ptr<Expression> Parser::parse_identifier() {
-    return std::make_shared<Identifier>(Identifier(cur_token, cur_token.literal));
+std::shared_ptr<Expression> Parser::parse_identifier() const {
+    return std::make_shared<Identifier>(Identifier{cur_token, cur_token.literal});
 }
 
 std::shared_ptr<Expression> Parser::parse_integer_literal() {
-    auto lit = std::make_shared<IntegerLiteral>(IntegerLiteral(cur_token));
+    auto lit = std::make_shared<IntegerLiteral>(IntegerLiteral{cur_token});
 
+    // Try and parse integer literal token, and log error and return nullptr on failure
     std::size_t pos{};
     try {
         lit->value = std::stoi(cur_token.literal, &pos);
     } catch (std::invalid_argument const &ex) {
-        std::cerr << "invalid argument parsing " << ex.what() << "as int." << std::endl;
+        std::string msg = "invalid argument parsing " + std::string(ex.what()) + " as int.";
+        e.push_back(msg);
+        return nullptr;
     } catch (std::out_of_range const &ex) {
-        std::cerr << "integer literal " << ex.what() << " to be parsed out of range." << std::endl;
+        std::string msg = "integer literal " + std::string(ex.what()) + " to be parsed out of range.";
+        e.push_back(msg);
+        return nullptr;
     }
-
-    // TODO: for parse failures, we need to add the relevant error message to the parser error vector and return nullptr
 
     return lit;
 }
 
 std::shared_ptr<Expression> Parser::parse_prefix_expression() {
-    auto expression = std::make_shared<PrefixExpression>(PrefixExpression(cur_token, cur_token.literal));
+    auto expression = std::make_shared<PrefixExpression>(PrefixExpression{cur_token, cur_token.literal});
 
     next_token();
 
@@ -129,7 +127,7 @@ std::shared_ptr<Expression> Parser::parse_prefix_expression() {
 }
 
 std::unique_ptr<Program> Parser::parse_program() {
-    auto program = std::make_unique<Program>(Program());
+    auto program = std::make_unique<Program>(Program{});
 
     while (cur_token.type != TokenType::ENDOFFILE) {
         auto stmt = parse_statement();

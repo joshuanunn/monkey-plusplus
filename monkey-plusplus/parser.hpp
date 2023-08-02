@@ -23,14 +23,8 @@ enum class Precedence {
 };
 
 struct Parser {
-    std::unique_ptr<Lexer> l;
-    std::vector<std::string> e;
-
     Token cur_token;
     Token peek_token;
-
-    std::map<TokenType, prefix_parse_fn> prefix_parse_fns;
-    std::map<TokenType, infix_parse_fn> infix_parse_fns;
 
     explicit Parser(std::unique_ptr<Lexer> lexer);
 
@@ -46,7 +40,7 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_expression(Precedence precedence);
 
-    std::shared_ptr<Expression> parse_identifier();
+    std::shared_ptr<Expression> parse_identifier() const;
 
     std::shared_ptr<Expression> parse_integer_literal();
 
@@ -69,6 +63,13 @@ struct Parser {
     void register_prefix(TokenType token_type, prefix_parse_fn fn);
 
     void register_infix(TokenType token_type, infix_parse_fn fn);
+
+private:
+    std::unique_ptr<Lexer> l;
+    std::vector<std::string> e;
+
+    std::map<TokenType, prefix_parse_fn> prefix_parse_fns;
+    std::map<TokenType, infix_parse_fn> infix_parse_fns;
 };
 
 #endif //MONKEY_PLUSPLUS_PARSER_HPP
