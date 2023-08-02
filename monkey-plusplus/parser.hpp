@@ -7,8 +7,10 @@
 #include "lexer.hpp"
 #include "token.hpp"
 
-typedef std::function<std::shared_ptr<Expression>(const Token &t)> prefix_parse_fn;
-typedef std::function<std::shared_ptr<Expression>(const Token &t)> infix_parse_fn;
+struct Parser;
+
+typedef std::function<std::shared_ptr<Expression>(Parser*)> prefix_parse_fn;
+typedef std::function<std::shared_ptr<Expression>(Parser*)> infix_parse_fn;
 
 enum class Precedence {
     LOWEST,
@@ -44,6 +46,12 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_expression(Precedence precedence);
 
+    std::shared_ptr<Expression> parse_identifier();
+
+    std::shared_ptr<Expression> parse_integer_literal();
+
+    std::shared_ptr<Expression> parse_prefix_expression();
+
     std::unique_ptr<Program> parse_program();
 
     std::vector<std::string> errors() const;
@@ -56,13 +64,11 @@ struct Parser {
 
     void peek_error(TokenType t);
 
+    void no_prefix_parse_fn_error(TokenType t);
+
     void register_prefix(TokenType token_type, prefix_parse_fn fn);
 
     void register_infix(TokenType token_type, infix_parse_fn fn);
 };
-
-std::shared_ptr<Expression> parse_identifier(const Token &t);
-
-std::shared_ptr<Expression> parse_integer_literal(const Token &t);
 
 #endif //MONKEY_PLUSPLUS_PARSER_HPP

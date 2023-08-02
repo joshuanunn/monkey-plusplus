@@ -9,8 +9,10 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     prefix_parse_fns = std::map<TokenType, prefix_parse_fn>{};
     infix_parse_fns = std::map<TokenType, infix_parse_fn>{};
 
-    register_prefix(TokenType::IDENT, parse_identifier);
-    register_prefix(TokenType::INT, parse_integer_literal);
+    register_prefix(TokenType::IDENT, std::mem_fn(&Parser::parse_identifier));
+    register_prefix(TokenType::INT, std::mem_fn(&Parser::parse_integer_literal));
+    register_prefix(TokenType::BANG, std::mem_fn(&Parser::parse_prefix_expression));
+    register_prefix(TokenType::MINUS,std::mem_fn(&Parser::parse_prefix_expression));
 
     // Read two tokens, so cur_token and peek_token are both set
     next_token();
@@ -85,25 +87,26 @@ std::shared_ptr<Expression> Parser::parse_expression(Precedence precedence) {
     auto contains = prefix_parse_fns.find(cur_token.type);
 
     if (contains == prefix_parse_fns.end()) {
+        no_prefix_parse_fn_error(cur_token.type);
         return nullptr;
     }
     auto prefix = prefix_parse_fns[cur_token.type];
 
-    auto left_exp = prefix(cur_token);
+    auto left_exp = prefix(this);
 
     return left_exp;
 }
 
-std::shared_ptr<Expression> parse_identifier(const Token &t) {
-    return std::make_shared<Identifier>(Identifier(t, t.literal));
+std::shared_ptr<Expression> Parser::parse_identifier() {
+    return std::make_shared<Identifier>(Identifier(cur_token, cur_token.literal));
 }
 
-std::shared_ptr<Expression> parse_integer_literal(const Token &t) {
-    auto lit = std::make_shared<IntegerLiteral>(IntegerLiteral(t));
+std::shared_ptr<Expression> Parser::parse_integer_literal() {
+    auto lit = std::make_shared<IntegerLiteral>(IntegerLiteral(cur_token));
 
     std::size_t pos{};
     try {
-        lit->value = std::stoi(t.literal, &pos);
+        lit->value = std::stoi(cur_token.literal, &pos);
     } catch (std::invalid_argument const &ex) {
         std::cerr << "invalid argument parsing " << ex.what() << "as int." << std::endl;
     } catch (std::out_of_range const &ex) {
@@ -115,13 +118,23 @@ std::shared_ptr<Expression> parse_integer_literal(const Token &t) {
     return lit;
 }
 
+std::shared_ptr<Expression> Parser::parse_prefix_expression() {
+    auto expression = std::make_shared<PrefixExpression>(PrefixExpression(cur_token, cur_token.literal));
+
+    next_token();
+
+    expression->right = parse_expression(Precedence::PREFIX);
+
+    return expression;
+}
+
 std::unique_ptr<Program> Parser::parse_program() {
     auto program = std::make_unique<Program>(Program());
 
     while (cur_token.type != TokenType::ENDOFFILE) {
         auto stmt = parse_statement();
 
-        if (stmt != nullptr) {
+        if (stmt) {
             program->statements.push_back(std::move(stmt));
         }
 
@@ -158,10 +171,15 @@ void Parser::peek_error(TokenType t) {
     e.push_back(msg);
 }
 
+void Parser::no_prefix_parse_fn_error(TokenType t) {
+    std::string msg = "no prefix parse function for " + tokentype_literal(t) + " found";
+    e.push_back(msg);
+}
+
 void Parser::register_prefix(TokenType token_type, prefix_parse_fn fn) {
-    prefix_parse_fns[token_type] = fn;
+    prefix_parse_fns[token_type] = std::move(fn);
 }
 
 void Parser::register_infix(TokenType token_type, infix_parse_fn fn) {
-    infix_parse_fns[token_type] = fn;
+    infix_parse_fns[token_type] = std::move(fn);
 }

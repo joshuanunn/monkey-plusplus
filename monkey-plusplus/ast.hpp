@@ -42,6 +42,17 @@ struct IntegerLiteral : public Expression {
     std::string string() const override;
 };
 
+struct PrefixExpression : public Expression {
+    PrefixExpression(const Token &t, const std::string &o);
+
+    Token token;
+    std::string op;
+    std::shared_ptr<Expression> right;
+
+    std::string token_literal() const override;
+    std::string string() const override;
+};
+
 struct LetStatement : public Statement {
     LetStatement(const Identifier &n, std::shared_ptr<Expression> v);
 

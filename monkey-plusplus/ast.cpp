@@ -101,6 +101,19 @@ IntegerLiteral::IntegerLiteral(const Token &t) {
     value = {};
 }
 
+std::string PrefixExpression::token_literal() const {
+    return token.literal;
+}
+
+std::string PrefixExpression::string() const {
+    return "(" + op + right->string() + ")";
+}
+
+PrefixExpression::PrefixExpression(const Token &t, const std::string &o) {
+    token = t;
+    op = o;
+}
+
 Program::Program() {
     statements = std::vector<std::shared_ptr<Node>>();
 }
