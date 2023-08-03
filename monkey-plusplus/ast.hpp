@@ -60,6 +60,19 @@ struct PrefixExpression : public Expression {
     std::string string() const override;
 };
 
+struct InfixExpression : public Expression {
+    InfixExpression(const Token &t, const std::string &o);
+
+    Token token;
+    std::shared_ptr<Expression> left;
+    std::string op;
+    std::shared_ptr<Expression> right;
+
+    std::string token_literal() const override;
+
+    std::string string() const override;
+};
+
 struct LetStatement : public Statement {
     LetStatement(const Identifier &n, std::shared_ptr<Expression> v);
 

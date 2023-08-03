@@ -266,3 +266,60 @@ TEST_CASE("Test Parsing Prefix Expressions") {
         REQUIRE(test_integer_literal(expr->right, tt_value));
     }
 }
+
+TEST_CASE("Test Parsing Infix Expressions") {
+    std::vector<std::tuple<std::string, int, std::string, int>> infix_tests = {
+            std::make_tuple("5 + 5;", 5, "+", 5),
+            std::make_tuple("5 - 5;", 5, "-", 5),
+            std::make_tuple("5 * 5;", 5, "*", 5),
+            std::make_tuple("5 / 5;", 5, "/", 5),
+            std::make_tuple("5 > 5;", 5, ">", 5),
+            std::make_tuple("5 < 5;", 5, "<", 5),
+            std::make_tuple("5 == 5;", 5, "==", 5),
+            std::make_tuple("5 != 5;", 5, "!=", 5),
+    };
+
+    for (const auto &tt: infix_tests) {
+        const auto [tt_input, tt_leftvalue, tt_operator, tt_rightvalue] = tt;
+
+        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto p = Parser(std::move(l));
+
+        auto program = p.parse_program();
+
+        REQUIRE(test_parser_errors(p));
+
+        if (program->statements.size() != 1) {
+            std::cerr << "program.statements does not contain 1 statements. got=" << program->statements.size()
+                      << std::endl;
+        }
+        REQUIRE(program->statements.size() == 1);
+
+        auto stmt = program->statements.at(0);
+
+        // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+        auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+        // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+        if (!expression_stmt) {
+            std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+        }
+        REQUIRE(expression_stmt);
+
+        // Can now cast Expression to a InfixExpression, as we are confident that it is one
+        auto expr = std::dynamic_pointer_cast<InfixExpression>(expression_stmt->expression);
+        if (!expr) {
+            std::cerr << "expr is set to a nullptr." << std::endl;
+        }
+        REQUIRE(expr);
+
+        REQUIRE(test_integer_literal(expr->left, tt_leftvalue));
+
+        if (expr->op != tt_operator) {
+            std::cerr << "exp->operator is not '" << tt_operator << "'. got=" << expr->op << std::endl;
+        }
+        REQUIRE(expr->op == tt_operator);
+
+        REQUIRE(test_integer_literal(expr->right, tt_rightvalue));
+    }
+}

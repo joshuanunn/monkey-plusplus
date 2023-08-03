@@ -2,6 +2,17 @@
 #include <memory>
 #include "parser.hpp"
 
+std::map<TokenType, Precedence> precedences = {
+        {TokenType::EQ, Precedence::EQUALS},
+        {TokenType::NOT_EQ, Precedence::EQUALS},
+        {TokenType::LT, Precedence::LESSGREATER},
+        {TokenType::GT, Precedence::LESSGREATER},
+        {TokenType::PLUS, Precedence::SUM},
+        {TokenType::MINUS, Precedence::SUM},
+        {TokenType::SLASH, Precedence::PRODUCT},
+        {TokenType::ASTERISK, Precedence::PRODUCT}
+};
+
 Parser::Parser(std::unique_ptr<Lexer> lexer) {
     l = std::move(lexer);
 
@@ -10,6 +21,16 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     register_prefix(TokenType::INT, std::mem_fn(&Parser::parse_integer_literal));
     register_prefix(TokenType::BANG, std::mem_fn(&Parser::parse_prefix_expression));
     register_prefix(TokenType::MINUS, std::mem_fn(&Parser::parse_prefix_expression));
+
+    // Register infix method pointers lookups for each token type
+    register_infix(TokenType::PLUS, std::mem_fn(&Parser::parse_infix_expression));
+    register_infix(TokenType::MINUS, std::mem_fn(&Parser::parse_infix_expression));
+    register_infix(TokenType::SLASH, std::mem_fn(&Parser::parse_infix_expression));
+    register_infix(TokenType::ASTERISK, std::mem_fn(&Parser::parse_infix_expression));
+    register_infix(TokenType::EQ, std::mem_fn(&Parser::parse_infix_expression));
+    register_infix(TokenType::NOT_EQ, std::mem_fn(&Parser::parse_infix_expression));
+    register_infix(TokenType::LT, std::mem_fn(&Parser::parse_infix_expression));
+    register_infix(TokenType::GT, std::mem_fn(&Parser::parse_infix_expression));
 
     // Read two tokens, so cur_token and peek_token are both set
     next_token();
@@ -79,8 +100,8 @@ std::unique_ptr<Statement> Parser::parse_statement() {
 
 std::shared_ptr<Expression> Parser::parse_expression(Precedence precedence) {
     // Retrieve method pointer for prefix parsing based on token type and log an error if not defined
-    auto contains = prefix_parse_fns.find(cur_token.type);
-    if (contains == prefix_parse_fns.end()) {
+    auto pcontains = prefix_parse_fns.find(cur_token.type);
+    if (pcontains == prefix_parse_fns.end()) {
         no_prefix_parse_fn_error(cur_token.type);
         return nullptr;
     }
@@ -88,6 +109,20 @@ std::shared_ptr<Expression> Parser::parse_expression(Precedence precedence) {
 
     // Generate an expression using the current token and prefix parsing method
     auto left_exp = prefix(this);
+
+    while (!peek_token_is(TokenType::SEMICOLON) && precedence < peek_precedence()) {
+        // Retrieve method pointer for infix parsing based on token type and log an error if not defined
+        auto icontains = infix_parse_fns.find(peek_token.type);
+        if (icontains == infix_parse_fns.end()) {
+            //no_infix_parse_fn_error(peek_token.type);
+            return left_exp;
+        }
+        auto infix = infix_parse_fns[peek_token.type];
+
+        next_token();
+
+        left_exp = infix(this, left_exp);
+    }
 
     return left_exp;
 }
@@ -122,6 +157,19 @@ std::shared_ptr<Expression> Parser::parse_prefix_expression() {
     next_token();
 
     expression->right = parse_expression(Precedence::PREFIX);
+
+    return expression;
+}
+
+std::shared_ptr<Expression> Parser::parse_infix_expression(std::shared_ptr<Expression> left) {
+    auto expression = std::make_shared<InfixExpression>(InfixExpression{cur_token, cur_token.literal});
+
+    expression->left = std::move(left);
+
+    auto precedence = cur_precedence();
+    next_token();
+
+    expression->right = parse_expression(precedence);
 
     return expression;
 }
@@ -169,6 +217,26 @@ void Parser::peek_error(TokenType t) {
             "expected next token to be " + tokentype_literal(t) + ", got " + tokentype_literal(peek_token.type) +
             " instead";
     e.push_back(msg);
+}
+
+Precedence Parser::peek_precedence() const {
+    auto precedence = precedences.find(peek_token.type);
+
+    // If peek token type does not have a defined precedence, then return LOWEST
+    if (precedence == precedences.end()) {
+        return Precedence::LOWEST;
+    }
+    return precedences[peek_token.type];
+}
+
+Precedence Parser::cur_precedence() const {
+    auto precedence = precedences.find(cur_token.type);
+
+    // If peek token type does not have a defined precedence, then return LOWEST
+    if (precedence == precedences.end()) {
+        return Precedence::LOWEST;
+    }
+    return precedences[cur_token.type];
 }
 
 void Parser::no_prefix_parse_fn_error(TokenType t) {

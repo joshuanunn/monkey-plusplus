@@ -10,7 +10,7 @@
 struct Parser;
 
 typedef std::function<std::shared_ptr<Expression>(Parser *)> prefix_parse_fn;
-typedef std::function<std::shared_ptr<Expression>(Parser *)> infix_parse_fn;
+typedef std::function<std::shared_ptr<Expression>(Parser *, std::shared_ptr<Expression>)> infix_parse_fn;
 
 enum class Precedence {
     LOWEST,
@@ -46,6 +46,8 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_prefix_expression();
 
+    std::shared_ptr<Expression> parse_infix_expression(std::shared_ptr<Expression> left);
+
     std::unique_ptr<Program> parse_program();
 
     std::vector<std::string> errors() const;
@@ -57,6 +59,10 @@ struct Parser {
     bool expect_peek(TokenType t);
 
     void peek_error(TokenType t);
+
+    Precedence peek_precedence() const;
+
+    Precedence cur_precedence() const;
 
     void no_prefix_parse_fn_error(TokenType t);
 

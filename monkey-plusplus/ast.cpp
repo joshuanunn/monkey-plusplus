@@ -101,6 +101,16 @@ std::string PrefixExpression::string() const {
 
 PrefixExpression::PrefixExpression(const Token &t, const std::string &o) : token{t}, op{o} {}
 
+std::string InfixExpression::token_literal() const {
+    return token.literal;
+}
+
+std::string InfixExpression::string() const {
+    return "(" + left->string() + " " + op + " " + right->string() + ")";
+}
+
+InfixExpression::InfixExpression(const Token &t, const std::string &o) : token{t}, op{o} {}
+
 std::string Program::token_literal() const {
     if (!statements.empty()) {
         return statements.at(0)->token_literal();
