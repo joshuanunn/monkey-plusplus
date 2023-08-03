@@ -323,3 +323,38 @@ TEST_CASE("Test Parsing Infix Expressions") {
         REQUIRE(test_integer_literal(expr->right, tt_rightvalue));
     }
 }
+
+TEST_CASE("Test Operator Precedence Parsing") {
+    std::vector<std::tuple<std::string, std::string>> tests = {
+            std::make_tuple("-a * b", "((-a) * b)"),
+            std::make_tuple("!-a", "(!(-a))"),
+            std::make_tuple("a + b + c", "((a + b) + c)"),
+            std::make_tuple("a + b - c", "((a + b) - c)"),
+            std::make_tuple("a * b * c", "((a * b) * c)"),
+            std::make_tuple("a * b / c", "((a * b) / c)"),
+            std::make_tuple("a + b / c", "(a + (b / c))"),
+            std::make_tuple("a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)"),
+            std::make_tuple("3 + 4; -5 * 5", "(3 + 4)((-5) * 5)"),
+            std::make_tuple("5 > 4 == 3 < 4", "((5 > 4) == (3 < 4))"),
+            std::make_tuple("5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))"),
+            std::make_tuple("3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto p = Parser(std::move(l));
+
+        auto program = p.parse_program();
+
+        REQUIRE(test_parser_errors(p));
+
+        auto actual = program->string();
+
+        if (actual != tt_expected) {
+            std::cerr << "expected=" << tt_expected << ", got=" << actual << std::endl;
+        }
+        REQUIRE(actual == tt_expected);
+    }
+}
