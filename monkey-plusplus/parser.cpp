@@ -21,6 +21,8 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     register_prefix(TokenType::INT, std::mem_fn(&Parser::parse_integer_literal));
     register_prefix(TokenType::BANG, std::mem_fn(&Parser::parse_prefix_expression));
     register_prefix(TokenType::MINUS, std::mem_fn(&Parser::parse_prefix_expression));
+    register_prefix(TokenType::TRUE, std::mem_fn(&Parser::parse_boolean));
+    register_prefix(TokenType::FALSE, std::mem_fn(&Parser::parse_boolean));
 
     // Register infix method pointers lookups for each token type
     register_infix(TokenType::PLUS, std::mem_fn(&Parser::parse_infix_expression));
@@ -149,6 +151,10 @@ std::shared_ptr<Expression> Parser::parse_integer_literal() {
     }
 
     return lit;
+}
+
+std::shared_ptr<Expression> Parser::parse_boolean() const {
+    return std::make_shared<Boolean>(Boolean{cur_token, cur_token_is(TokenType::TRUE)});
 }
 
 std::shared_ptr<Expression> Parser::parse_prefix_expression() {
