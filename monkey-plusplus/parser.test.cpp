@@ -482,6 +482,11 @@ TEST_CASE("Test Operator Precedence Parsing") {
             std::make_tuple("false", "false"),
             std::make_tuple("3 > 5 == false", "((3 > 5) == false)"),
             std::make_tuple("3 < 5 == true", "((3 < 5) == true)"),
+            std::make_tuple("1 + (2 + 3) + 4", "((1 + (2 + 3)) + 4)"),
+            std::make_tuple("(5 + 5) * 2", "((5 + 5) * 2)"),
+            std::make_tuple("2 / (5 + 5)", "(2 / (5 + 5))"),
+            std::make_tuple("-(5 + 5)", "(-(5 + 5))"),
+            std::make_tuple("!(true == true)", "(!(true == true))"),
     };
 
     for (const auto &tt: tests) {

@@ -23,6 +23,7 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     register_prefix(TokenType::MINUS, std::mem_fn(&Parser::parse_prefix_expression));
     register_prefix(TokenType::TRUE, std::mem_fn(&Parser::parse_boolean));
     register_prefix(TokenType::FALSE, std::mem_fn(&Parser::parse_boolean));
+    register_prefix(TokenType::LPAREN, std::mem_fn(&Parser::parse_grouped_expression));
 
     // Register infix method pointers lookups for each token type
     register_infix(TokenType::PLUS, std::mem_fn(&Parser::parse_infix_expression));
@@ -178,6 +179,18 @@ std::shared_ptr<Expression> Parser::parse_infix_expression(std::shared_ptr<Expre
     expression->right = parse_expression(precedence);
 
     return expression;
+}
+
+std::shared_ptr<Expression> Parser::parse_grouped_expression() {
+    next_token();
+
+    auto exp = parse_expression(Precedence::LOWEST);
+
+    if (!expect_peek(TokenType::RPAREN)) {
+        return nullptr;
+    }
+
+    return exp;
 }
 
 std::unique_ptr<Program> Parser::parse_program() {

@@ -50,6 +50,8 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_infix_expression(std::shared_ptr<Expression> left);
 
+    std::shared_ptr<Expression> parse_grouped_expression();
+
     std::unique_ptr<Program> parse_program();
 
     std::vector<std::string> errors() const;
