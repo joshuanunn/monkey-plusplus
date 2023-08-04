@@ -49,8 +49,13 @@ bool test_integer_literal(std::shared_ptr<Expression> il, int value) {
     auto integ = std::dynamic_pointer_cast<IntegerLiteral>(il);
 
     // Check that we have an Integer Literal by checking if the dynamic pointer cast fails (returns nullptr)
-    if (integ == nullptr) {
+    if (!integ) {
         std::cerr << "il is not an IntegerLiteral." << std::endl;
+        return false;
+    }
+
+    if (integ->token.type != TokenType::INT) {
+        std::cerr << "ident->token.type not INT. got=" << tokentype_literal(integ->token.type) << std::endl;
         return false;
     }
 
@@ -61,6 +66,66 @@ bool test_integer_literal(std::shared_ptr<Expression> il, int value) {
 
     if (integ->token_literal() != std::to_string(value)) {
         std::cerr << "integ->token_literal not " << value << ". got=" << integ->token_literal() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool test_identifier(std::shared_ptr<Expression> exp, std::string value) {
+    // Cast Expression to an Identifier, as this is what we are expecting
+    auto ident = std::dynamic_pointer_cast<Identifier>(exp);
+
+    if (!ident) {
+        std::cerr << "ident is nullptr, failed cast to Identifier" << std::endl;
+        return false;
+    }
+
+    if (ident->token.type != TokenType::IDENT) {
+        std::cerr << "ident->token.type not IDENT. got=" << tokentype_literal(ident->token.type) << std::endl;
+        return false;
+    }
+
+    if (ident->value != value) {
+        std::cerr << "ident->value not " << value << ". got=" << ident->value << std::endl;
+        return false;
+    }
+
+    if (ident->token_literal() != value) {
+        std::cerr << "ident->token_literal() not " << value << ". got=" << ident->token_literal() << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool test_literal_expression(std::shared_ptr<Expression> exp, int value) {
+    return test_integer_literal(exp, value);
+}
+
+bool test_literal_expression(std::shared_ptr<Expression> exp, std::string value) {
+    return test_identifier(exp, value);
+}
+
+template <class T>
+bool test_infix_expression(std::shared_ptr<Expression> exp, T left, std::string op, T right) {
+    // Cast Expression to a InfixExpression, as it should be one
+    auto op_exp = std::dynamic_pointer_cast<InfixExpression>(exp);
+    if (!op_exp) {
+        std::cerr << "op_exp is set to a nullptr." << std::endl;
+        return false;
+    }
+
+    if (!test_integer_literal(op_exp->left, left)) {
+        return false;
+    }
+
+    if (op_exp->op != op) {
+        std::cerr << "op_exp->op is not '" << op << "'. got=" << op_exp->op << std::endl;
+        return false;
+    }
+
+    if (!test_integer_literal(op_exp->right, right)) {
         return false;
     }
 
@@ -150,23 +215,8 @@ TEST_CASE("Test Identifier Expression") {
     }
     REQUIRE(expression_stmt != nullptr);
 
-    // Can now cast Expression to an Identifier, as we are confident that it is one
-    auto ident = std::dynamic_pointer_cast<Identifier>(expression_stmt->expression);
-
-    if (ident->token.type != TokenType::IDENT) {
-        std::cerr << "ident->token.type not IDENT. got=" << tokentype_literal(ident->token.type) << std::endl;
-    }
-    REQUIRE(ident->token.type == TokenType::IDENT);
-
-    if (ident->value != "foobar") {
-        std::cerr << "ident->value not foobar. got=" << ident->value << std::endl;
-    }
-    REQUIRE(ident->value == "foobar");
-
-    if (ident->token_literal() != "foobar") {
-        std::cerr << "ident->token_literal() not foobar. got=" << ident->token_literal() << std::endl;
-    }
-    REQUIRE(ident->token_literal() == "foobar");
+    // Check Identifier in Expression Statement is correct
+    REQUIRE(test_identifier(expression_stmt->expression, "foobar"));
 }
 
 TEST_CASE("Test Integer Literal Expression") {
@@ -195,27 +245,8 @@ TEST_CASE("Test Integer Literal Expression") {
     }
     REQUIRE(expression_stmt);
 
-    // Can now cast Expression to an Identifier, as we are confident that it is one
-    auto ident = std::dynamic_pointer_cast<IntegerLiteral>(expression_stmt->expression);
-    if (!ident) {
-        std::cerr << "ident is set to a nullptr." << std::endl;
-    }
-    REQUIRE(ident);
-
-    if (ident->token.type != TokenType::INT) {
-        std::cerr << "ident->token.type not IDENT. got=" << tokentype_literal(ident->token.type) << std::endl;
-    }
-    REQUIRE(ident->token.type == TokenType::INT);
-
-    if (ident->value != 5) {
-        std::cerr << "ident->value not 5. got=" << ident->value << std::endl;
-    }
-    REQUIRE(ident->value == 5);
-
-    if (ident->token_literal() != "5") {
-        std::cerr << "ident->token_literal() not 5. got=" << ident->token_literal() << std::endl;
-    }
-    REQUIRE(ident->token_literal() == "5");
+    // Check IntegerLiteral in Expression Statement is correct
+    REQUIRE(test_integer_literal(expression_stmt->expression, 5));
 }
 
 TEST_CASE("Test Parsing Prefix Expressions") {
@@ -306,21 +337,8 @@ TEST_CASE("Test Parsing Infix Expressions") {
         }
         REQUIRE(expression_stmt);
 
-        // Can now cast Expression to a InfixExpression, as we are confident that it is one
-        auto expr = std::dynamic_pointer_cast<InfixExpression>(expression_stmt->expression);
-        if (!expr) {
-            std::cerr << "expr is set to a nullptr." << std::endl;
-        }
-        REQUIRE(expr);
-
-        REQUIRE(test_integer_literal(expr->left, tt_leftvalue));
-
-        if (expr->op != tt_operator) {
-            std::cerr << "exp->operator is not '" << tt_operator << "'. got=" << expr->op << std::endl;
-        }
-        REQUIRE(expr->op == tt_operator);
-
-        REQUIRE(test_integer_literal(expr->right, tt_rightvalue));
+        // Check InfixExpression in Expression Statement is correct
+        REQUIRE(test_infix_expression(expression_stmt->expression, tt_leftvalue, tt_operator, tt_rightvalue));
     }
 }
 
