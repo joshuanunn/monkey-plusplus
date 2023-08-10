@@ -36,6 +36,8 @@ struct Parser {
 
     std::unique_ptr<ExpressionStatement> parse_expression_statement();
 
+    std::unique_ptr<BlockStatement> parse_block_statement();
+
     std::unique_ptr<Statement> parse_statement();
 
     std::shared_ptr<Expression> parse_expression(Precedence precedence);
@@ -51,6 +53,8 @@ struct Parser {
     std::shared_ptr<Expression> parse_infix_expression(std::shared_ptr<Expression> left);
 
     std::shared_ptr<Expression> parse_grouped_expression();
+
+    std::shared_ptr<Expression> parse_if_expression();
 
     std::unique_ptr<Program> parse_program();
 

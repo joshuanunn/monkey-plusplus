@@ -121,6 +121,39 @@ std::string InfixExpression::string() const {
 
 InfixExpression::InfixExpression(const Token &t, const std::string &o) : token{t}, op{o} {}
 
+std::string BlockStatement::token_literal() const {
+    return token.literal;
+}
+
+std::string BlockStatement::string() const {
+    std::string msg;
+
+    for (const auto &stmt: statements) {
+        msg += stmt->string();
+    }
+
+    return msg;
+}
+
+BlockStatement::BlockStatement(const Token &t) : token(t) {}
+
+std::string IfExpression::token_literal() const {
+    return token.literal;
+}
+
+std::string IfExpression::string() const {
+    std::string msg = "if" + condition->string() + " " + consequence->string();
+
+    if (alternative) {
+        msg += "else ";
+        msg += alternative->string();
+    }
+
+    return msg;
+}
+
+IfExpression::IfExpression(const Token &t) : token(t) {}
+
 std::string Program::token_literal() const {
     if (!statements.empty()) {
         return statements.at(0)->token_literal();

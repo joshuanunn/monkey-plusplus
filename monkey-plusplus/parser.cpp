@@ -24,6 +24,7 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     register_prefix(TokenType::TRUE, std::mem_fn(&Parser::parse_boolean));
     register_prefix(TokenType::FALSE, std::mem_fn(&Parser::parse_boolean));
     register_prefix(TokenType::LPAREN, std::mem_fn(&Parser::parse_grouped_expression));
+    register_prefix(TokenType::IF, std::mem_fn(&Parser::parse_if_expression));
 
     // Register infix method pointers lookups for each token type
     register_infix(TokenType::PLUS, std::mem_fn(&Parser::parse_infix_expression));
@@ -88,6 +89,24 @@ std::unique_ptr<ExpressionStatement> Parser::parse_expression_statement() {
     }
 
     return stmt;
+}
+
+std::unique_ptr<BlockStatement> Parser::parse_block_statement() {
+    auto block = std::make_unique<BlockStatement>(BlockStatement{cur_token});
+
+    next_token();
+
+    while(!cur_token_is(TokenType::RBRACE) && !cur_token_is(TokenType::ENDOFFILE)) {
+        auto stmt = parse_statement();
+
+        if (stmt) {
+            block->statements.push_back(std::move(stmt));
+        }
+
+        next_token();
+    }
+
+    return block;
 }
 
 std::unique_ptr<Statement> Parser::parse_statement() {
@@ -191,6 +210,39 @@ std::shared_ptr<Expression> Parser::parse_grouped_expression() {
     }
 
     return exp;
+}
+
+std::shared_ptr<Expression> Parser::parse_if_expression() {
+    auto expression = std::make_shared<IfExpression>(IfExpression{cur_token});
+
+    if (!expect_peek(TokenType::LPAREN)) {
+        return nullptr;
+    }
+
+    next_token();
+    expression->condition = parse_expression(Precedence::LOWEST);
+
+    if (!expect_peek(TokenType::RPAREN)) {
+        return nullptr;
+    }
+
+    if (!expect_peek(TokenType::LBRACE)) {
+        return nullptr;
+    }
+
+    expression->consequence = parse_block_statement();
+
+    if (peek_token_is(TokenType::ELSE)) {
+        next_token();
+
+        if (!expect_peek(TokenType::LBRACE)) {
+            return nullptr;
+        }
+
+        expression->alternative = parse_block_statement();
+    }
+
+    return expression;
 }
 
 std::unique_ptr<Program> Parser::parse_program() {

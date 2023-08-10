@@ -132,6 +132,10 @@ bool test_literal_expression(std::shared_ptr<Expression> exp, int value) {
     return test_integer_literal(exp, value);
 }
 
+bool test_literal_expression(std::shared_ptr<Expression> exp, const char *value) {
+    return test_identifier(exp, value);
+}
+
 bool test_literal_expression(std::shared_ptr<Expression> exp, std::string value) {
     return test_identifier(exp, value);
 }
@@ -543,4 +547,157 @@ TEST_CASE("Test Boolean Expression") {
         // Check IntegerLiteral in Expression Statement is correct
         REQUIRE(test_literal_expression(expression_stmt->expression, tt_expected_boolean));
     }
+}
+
+TEST_CASE("Test If Expression") {
+    std::string input = "if (x < y) { x }";
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to an IfExpression, as this is what we are expecting
+    auto exp = std::dynamic_pointer_cast<IfExpression>(expression_stmt->expression);
+
+    // Check that we have an IfExpression by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!exp) {
+        std::cerr << "exp is not an IfExpression." << std::endl;
+    }
+    REQUIRE(exp);
+
+    REQUIRE(test_infix_expression(exp->condition, "x", "<", "y"));
+
+    // Check that consequence is a BlockStatement by checking for nullptr
+    if (!exp->consequence) {
+        std::cerr << "consequence is not a BlockStatement." << std::endl;
+    }
+    REQUIRE(exp->consequence);
+
+    if (exp->consequence->statements.size() != 1) {
+        std::cerr << "consequence is not 1 statements. got=" << exp->consequence->statements.size() << std::endl;
+    }
+    REQUIRE(exp->consequence->statements.size() == 1);
+
+    stmt = exp->consequence->statements.at(0);
+
+    // Cast Node to an ExpressionStatement, as this is what we are expecting
+    auto consequence = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!consequence) {
+        std::cerr << "exp->consequence->statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(consequence);
+
+    REQUIRE(test_identifier(consequence->expression, "x"));
+
+    if (exp->alternative) {
+        std::cerr << "exp->alternative->statements was not nullptr." << std::endl;
+    }
+    REQUIRE(!(exp->alternative));
+}
+
+TEST_CASE("Test If Else Expression") {
+    std::string input = "if (x < y) { x } else { y }";
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to an IfExpression, as this is what we are expecting
+    auto exp = std::dynamic_pointer_cast<IfExpression>(expression_stmt->expression);
+
+    // Check that we have an IfExpression by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!exp) {
+        std::cerr << "exp is not an IfExpression." << std::endl;
+    }
+    REQUIRE(exp);
+
+    REQUIRE(test_infix_expression(exp->condition, "x", "<", "y"));
+
+    // Check that consequence is a BlockStatement by checking for nullptr
+    if (!exp->consequence) {
+        std::cerr << "consequence is not a BlockStatement." << std::endl;
+    }
+    REQUIRE(exp->consequence);
+
+    if (exp->consequence->statements.size() != 1) {
+        std::cerr << "consequence is not 1 statements. got=" << exp->consequence->statements.size() << std::endl;
+    }
+    REQUIRE(exp->consequence->statements.size() == 1);
+
+    stmt = exp->consequence->statements.at(0);
+
+    // Cast Node to an ExpressionStatement, as this is what we are expecting
+    auto consequence = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!consequence) {
+        std::cerr << "exp->consequence->statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(consequence);
+
+    REQUIRE(test_identifier(consequence->expression, "x"));
+
+    // Check that alternative is a BlockStatement by checking for nullptr
+    if (!exp->alternative) {
+        std::cerr << "alternative is not a BlockStatement." << std::endl;
+    }
+    REQUIRE(exp->alternative);
+
+    if (exp->alternative->statements.size() != 1) {
+        std::cerr << "alternative is not 1 statements. got=" << exp->alternative->statements.size() << std::endl;
+    }
+    REQUIRE(exp->alternative->statements.size() == 1);
+
+    stmt = exp->alternative->statements.at(0);
+
+    // Cast Node to an ExpressionStatement, as this is what we are expecting
+    auto alternative = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!alternative) {
+        std::cerr << "exp->alternative->statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(alternative);
+
+    REQUIRE(test_identifier(alternative->expression, "y"));
 }

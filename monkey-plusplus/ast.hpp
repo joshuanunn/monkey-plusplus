@@ -84,6 +84,30 @@ struct InfixExpression : public Expression {
     std::string string() const override;
 };
 
+struct BlockStatement : public Statement {
+    BlockStatement(const Token &t);
+
+    Token token;
+    std::vector<std::shared_ptr<Node>> statements;
+
+    std::string token_literal() const;
+
+    std::string string() const;
+};
+
+struct IfExpression : public Expression {
+    explicit IfExpression(const Token &t);
+
+    Token token;
+    std::shared_ptr<Expression> condition;
+    std::unique_ptr<BlockStatement> consequence;
+    std::unique_ptr<BlockStatement> alternative;
+
+    std::string token_literal() const override;
+
+    std::string string() const override;
+};
+
 struct LetStatement : public Statement {
     LetStatement(const Identifier &n, std::shared_ptr<Expression> v);
 
