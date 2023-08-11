@@ -133,7 +133,7 @@ struct CallExpression : public Expression {
 };
 
 struct LetStatement : public Statement {
-    LetStatement(const Identifier &n, std::shared_ptr<Expression> v);
+    explicit LetStatement(const Token &t);
 
     Token token;
     std::unique_ptr<Identifier> name;
@@ -145,7 +145,7 @@ struct LetStatement : public Statement {
 };
 
 struct ReturnStatement : public Statement {
-    explicit ReturnStatement(std::shared_ptr<Expression> v);
+    explicit ReturnStatement(const Token &t);
 
     Token token;
     std::shared_ptr<Expression> return_value;

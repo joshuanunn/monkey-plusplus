@@ -32,11 +32,7 @@ std::string LetStatement::string() const {
     return out;
 }
 
-LetStatement::LetStatement(const Identifier &n, std::shared_ptr<Expression> v) {
-    token = Token{TokenType::LET, "let"};
-    name = std::make_unique<Identifier>(n);
-    value = std::move(v);
-}
+LetStatement::LetStatement(const Token &t) : token(t) {}
 
 std::string ReturnStatement::token_literal() const {
     return token.literal;
@@ -52,10 +48,7 @@ std::string ReturnStatement::string() const {
     return out;
 }
 
-ReturnStatement::ReturnStatement(std::shared_ptr<Expression> v) {
-    token = Token{TokenType::RETURN, "return"};
-    return_value = std::move(v);
-}
+ReturnStatement::ReturnStatement(const Token &t) : token(t) {}
 
 std::string ExpressionStatement::token_literal() const {
     return token.literal;

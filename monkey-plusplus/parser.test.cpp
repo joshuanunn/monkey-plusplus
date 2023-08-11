@@ -7,7 +7,8 @@
 
 #include "parser.hpp"
 
-bool test_let_statement(const Node &s, const std::string &name) {
+template <class T>
+bool test_let_statement(const Node &s, const std::string &name, T value) {
     if (s.token_literal() != "let") {
         std::cerr << "s->token_literal not 'let'. got=" << s.token_literal() << std::endl;
         return false;
@@ -24,6 +25,27 @@ bool test_let_statement(const Node &s, const std::string &name) {
     if (let_stmt->name->token_literal() != name) {
         std::cerr << "let_stmt.name.token_literal() not '" << name << "'. got=" << let_stmt->name->token_literal()
                   << std::endl;
+        return false;
+    }
+
+    if (!test_literal_expression(let_stmt->value, value)) {
+        return false;
+    }
+
+    return true;
+}
+
+template <class T>
+bool test_return_statement(const Node &s, T value) {
+    if (s.token_literal() != "return") {
+        std::cerr << "s->token_literal not 'return'. got=" << s.token_literal() << std::endl;
+        return false;
+    }
+
+    // Can now cast Node to a derived ReturnStatement, as we are confident that it is one
+    auto return_stmt = dynamic_cast<const ReturnStatement *>(&s);
+
+    if (!test_literal_expression(return_stmt->return_value, value)) {
         return false;
     }
 
@@ -172,34 +194,8 @@ bool test_infix_expression(std::shared_ptr<Expression> exp, T left, std::string 
 TEST_CASE("Test Let Statements") {
     std::string input = R"(
 let x = 5;
-let y = 10;
-let foobar = 838383;
-)";
-    auto l = std::make_unique<Lexer>(Lexer(input));
-    auto p = Parser(std::move(l));
-
-    auto program = p.parse_program();
-
-    REQUIRE(test_parser_errors(p));
-
-    std::vector<std::string> tests = {
-            "x",
-            "y",
-            "foobar",
-    };
-
-    for (int i = 0; i < tests.size(); i++) {
-        const auto &tt = tests.at(i);
-        const auto &stmt = *program->statements.at(i);
-        REQUIRE(test_let_statement(stmt, tt));
-    }
-}
-
-TEST_CASE("Test Return Statements") {
-    std::string input = R"(
-return 5;
-return 10;
-return 993322;
+let y = true;
+let foobar = y;
 )";
     auto l = std::make_unique<Lexer>(Lexer(input));
     auto p = Parser(std::move(l));
@@ -212,18 +208,35 @@ return 993322;
         std::cerr << "program->statements does not contain 3 statements. got=" << program->statements.size()
                   << std::endl;
     }
-
     REQUIRE(program->statements.size() == 3);
 
-    for (const auto &stmt: program->statements) {
-        const auto &return_stmt = *stmt;
+    REQUIRE(test_let_statement(*program->statements.at(0), "x", 5));
+    REQUIRE(test_let_statement(*program->statements.at(1), "y", true));
+    REQUIRE(test_let_statement(*program->statements.at(2), "foobar", "y"));
+}
 
-        if (return_stmt.token_literal() != "return") {
-            std::cerr << "return_stmt.token_literal not 'return'. got=" << return_stmt.token_literal() << std::endl;
-        }
+TEST_CASE("Test Return Statements") {
+    std::string input = R"(
+return 5;
+return true;
+return foobar;
+)";
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
 
-        REQUIRE(return_stmt.token_literal() == "return");
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 3) {
+        std::cerr << "program->statements does not contain 3 statements. got=" << program->statements.size()
+                  << std::endl;
     }
+    REQUIRE(program->statements.size() == 3);
+
+    REQUIRE(test_return_statement(*program->statements.at(0), 5));
+    REQUIRE(test_return_statement(*program->statements.at(1), true));
+    REQUIRE(test_return_statement(*program->statements.at(2), "foobar"));
 }
 
 TEST_CASE("Test Identifier Expression") {

@@ -50,19 +50,23 @@ void Parser::next_token() {
 }
 
 std::unique_ptr<LetStatement> Parser::parse_let_statement() {
+    auto stmt = std::make_unique<LetStatement>(LetStatement{cur_token});
+
     if (!expect_peek(TokenType::IDENT)) {
         return nullptr;
     }
 
-    auto stmt = std::make_unique<LetStatement>(LetStatement{
-            Identifier(cur_token, cur_token.literal), std::make_unique<Expression>(Expression{})});
+    stmt->name = std::make_unique<Identifier>(Identifier{cur_token, cur_token.literal});
 
     if (!expect_peek(TokenType::ASSIGN)) {
         return nullptr;
     }
 
-    // TODO: for now, skip expressions until we encounter a semi-colon
-    while (!cur_token_is(TokenType::SEMICOLON)) {
+    next_token();
+
+    stmt->value = parse_expression(Precedence::LOWEST);
+
+    if (peek_token_is(TokenType::SEMICOLON)) {
         next_token();
     }
 
@@ -70,12 +74,13 @@ std::unique_ptr<LetStatement> Parser::parse_let_statement() {
 }
 
 std::unique_ptr<ReturnStatement> Parser::parse_return_statement() {
-    auto stmt = std::make_unique<ReturnStatement>(ReturnStatement{std::make_shared<Expression>(Expression{})});
+    auto stmt = std::make_unique<ReturnStatement>(ReturnStatement{cur_token});
 
     next_token();
 
-    // TODO: for now, skip expressions until we encounter a semi-colon
-    while (!cur_token_is(TokenType::SEMICOLON)) {
+    stmt->return_value = parse_expression(Precedence::LOWEST);
+
+    if (peek_token_is(TokenType::SEMICOLON)) {
         next_token();
     }
 
