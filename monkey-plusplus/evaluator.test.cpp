@@ -15,7 +15,7 @@ std::shared_ptr<Object> test_eval (const std::string &input) {
     auto p = Parser(std::move(l));
     auto program = p.parse_program();
 
-    return Eval(std::move(program));
+    return eval(std::move(program));
 }
 
 bool test_integer_object(std::shared_ptr<Object> obj, int expected) {

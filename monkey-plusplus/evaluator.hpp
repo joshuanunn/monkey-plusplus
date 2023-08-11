@@ -4,7 +4,7 @@
 #include "ast.hpp"
 #include "object.hpp"
 
-std::shared_ptr<Object> Eval(const std::shared_ptr<Node> &node);
+std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node);
 
 std::shared_ptr<Object> eval_statements(const std::vector<std::shared_ptr<Node>> &stmts);
 
