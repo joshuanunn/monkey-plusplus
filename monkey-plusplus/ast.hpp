@@ -166,7 +166,7 @@ struct ExpressionStatement : public Statement {
     std::string string() const override;
 };
 
-struct Program {
+struct Program : public Node {
     std::vector<std::shared_ptr<Node>> statements;
 
     std::string token_literal() const;
