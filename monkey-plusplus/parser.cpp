@@ -10,7 +10,8 @@ std::map<TokenType, Precedence> precedences = {
         {TokenType::PLUS, Precedence::SUM},
         {TokenType::MINUS, Precedence::SUM},
         {TokenType::SLASH, Precedence::PRODUCT},
-        {TokenType::ASTERISK, Precedence::PRODUCT}
+        {TokenType::ASTERISK, Precedence::PRODUCT},
+        {TokenType::LPAREN, Precedence::CALL}
 };
 
 Parser::Parser(std::unique_ptr<Lexer> lexer) {
@@ -36,6 +37,7 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     register_infix(TokenType::NOT_EQ, std::mem_fn(&Parser::parse_infix_expression));
     register_infix(TokenType::LT, std::mem_fn(&Parser::parse_infix_expression));
     register_infix(TokenType::GT, std::mem_fn(&Parser::parse_infix_expression));
+    register_infix(TokenType::LPAREN, std::mem_fn(&Parser::parse_call_expression));
 
     // Read two tokens, so cur_token and peek_token are both set
     next_token();
@@ -244,6 +246,38 @@ std::shared_ptr<Expression> Parser::parse_infix_expression(std::shared_ptr<Expre
     expression->right = parse_expression(precedence);
 
     return expression;
+}
+
+std::vector<std::shared_ptr<Expression>> Parser::parse_call_arguments() {
+    std::vector<std::shared_ptr<Expression>> args;
+
+    if (peek_token_is(TokenType::RPAREN)) {
+        next_token();
+        return args;
+    }
+
+    next_token();
+    args.push_back(parse_expression(Precedence::LOWEST));
+
+    while (peek_token_is(TokenType::COMMA)) {
+        next_token();
+        next_token();
+        args.push_back(parse_expression(Precedence::LOWEST));
+    }
+
+    if (!expect_peek(TokenType::RPAREN)) {
+        return std::vector<std::shared_ptr<Expression>>{};
+    }
+
+    return args;
+}
+
+std::shared_ptr<Expression> Parser::parse_call_expression(std::shared_ptr<Expression> function) {
+    auto exp = std::make_shared<CallExpression>(CallExpression{cur_token, function});
+
+    exp->arguments = parse_call_arguments();
+
+    return exp;
 }
 
 std::shared_ptr<Expression> Parser::parse_grouped_expression() {

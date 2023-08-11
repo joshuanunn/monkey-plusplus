@@ -56,6 +56,10 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_infix_expression(std::shared_ptr<Expression> left);
 
+    std::vector<std::shared_ptr<Expression>> parse_call_arguments();
+
+    std::shared_ptr<Expression> parse_call_expression(std::shared_ptr<Expression> function);
+
     std::shared_ptr<Expression> parse_grouped_expression();
 
     std::shared_ptr<Expression> parse_if_expression();

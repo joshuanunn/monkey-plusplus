@@ -491,6 +491,9 @@ TEST_CASE("Test Operator Precedence Parsing") {
             std::make_tuple("2 / (5 + 5)", "(2 / (5 + 5))"),
             std::make_tuple("-(5 + 5)", "(-(5 + 5))"),
             std::make_tuple("!(true == true)", "(!(true == true))"),
+            std::make_tuple("a + add(b * c) + d", "((a + add((b * c))) + d)"),
+            std::make_tuple("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"),
+            std::make_tuple("add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))"),
     };
 
     for (const auto &tt: tests) {
@@ -808,6 +811,106 @@ TEST_CASE("Test Function Parameter Parsing") {
 
         for (int i = 0; i < tt_expected.size(); i++) {
             REQUIRE(test_literal_expression(function->parameters.at(i), tt_expected.at(i)));
+        }
+    }
+}
+
+TEST_CASE("Test Call Expression Parsing") {
+    std::string input = "add(1, 2 * 3, 4 + 5);";
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to a CallExpression, as this is what we are expecting
+    auto exp = std::dynamic_pointer_cast<CallExpression>(expression_stmt->expression);
+
+    // Check that we have a FunctionLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!exp) {
+        std::cerr << "stmt->expression is not a CallExpression." << std::endl;
+    }
+    REQUIRE(exp);
+
+    REQUIRE(test_identifier(exp->function, "add"));
+
+    if (exp->arguments.size() != 3) {
+        std::cerr << "wrong length of arguments. want 2, got=" << exp->arguments.size() << std::endl;
+    }
+    REQUIRE(exp->arguments.size() == 3);
+
+    REQUIRE(test_literal_expression(exp->arguments.at(0), 1));
+    REQUIRE(test_infix_expression(exp->arguments.at(1), 2, "*", 3));
+    REQUIRE(test_infix_expression(exp->arguments.at(2), 4, "+", 5));
+}
+
+TEST_CASE("Test Call Expression Parameter Parsing") {
+    std::vector<std::tuple<std::string, std::string, std::vector<std::string>>> tests = {
+            std::make_tuple("add();", "add", std::vector<std::string>{}),
+            std::make_tuple("add(1);", "add", std::vector<std::string>{"1"}),
+            std::make_tuple("add(1, 2 * 3, 4 + 5);", "add", std::vector<std::string>{"1", "(2 * 3)", "(4 + 5)"}),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected_ident, tt_expected_args] = tt;
+
+        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto p = Parser(std::move(l));
+
+        auto program = p.parse_program();
+
+        REQUIRE(test_parser_errors(p));
+
+        auto stmt = program->statements.at(0);
+
+        // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+        auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+        // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+        if (!expression_stmt) {
+            std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+        }
+        REQUIRE(expression_stmt);
+
+        // Cast Expression to a CallExpression, as this is what we are expecting
+        auto exp = std::dynamic_pointer_cast<CallExpression>(expression_stmt->expression);
+
+        // Check that we have a CallExpression by checking if the dynamic pointer cast fails (returns nullptr)
+        if (!exp) {
+            std::cerr << "stmt->expression is not a CallExpression." << std::endl;
+        }
+        REQUIRE(exp);
+
+        REQUIRE(test_identifier(exp->function, tt_expected_ident));
+
+        if (exp->arguments.size() != tt_expected_args.size()) {
+            std::cerr << "wrong length of arguments. want " << tt_expected_args.size() << ", got=" << exp->arguments.size() << std::endl;
+        }
+        REQUIRE(exp->arguments.size() == tt_expected_args.size());
+
+        for (int i = 0; i < tt_expected_args.size(); i++) {
+            if (exp->arguments.at(i)->string() != tt_expected_args.at(i)) {
+                std::cerr << "argument " << i << " wrong. want =" << tt_expected_args.at(i) << ", got=" << exp->arguments.at(i)->string() << std::endl;
+            }
+            REQUIRE(exp->arguments.at(i)->string() == tt_expected_args.at(i));
         }
     }
 }

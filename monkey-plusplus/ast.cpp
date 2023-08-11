@@ -179,6 +179,30 @@ std::string FunctionLiteral::string() const {
 
 FunctionLiteral::FunctionLiteral(const Token &t) : token(t) {}
 
+std::string CallExpression::token_literal() const {
+    return token.literal;
+}
+
+std::string CallExpression::string() const {
+    std::string msg = function->string() + "(";
+
+    int counter = 0;
+
+    for (const auto &a: arguments) {
+        if (counter != 0) {
+            msg += ", ";
+        }
+        msg += a->string();
+        counter++;
+    }
+
+    msg += ")";
+
+    return msg;
+}
+
+CallExpression::CallExpression(const Token &t, std::shared_ptr<Expression> f) : token(t), function(f) {}
+
 std::string Program::token_literal() const {
     if (!statements.empty()) {
         return statements.at(0)->token_literal();

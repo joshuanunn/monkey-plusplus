@@ -120,6 +120,18 @@ struct FunctionLiteral : public Expression {
     std::string string() const override;
 };
 
+struct CallExpression : public Expression {
+    explicit CallExpression(const Token &t, std::shared_ptr<Expression> f);
+
+    Token token;
+    std::shared_ptr<Expression> function;
+    std::vector<std::shared_ptr<Expression>> arguments;
+
+    std::string token_literal() const override;
+
+    std::string string() const override;
+};
+
 struct LetStatement : public Statement {
     LetStatement(const Identifier &n, std::shared_ptr<Expression> v);
 
