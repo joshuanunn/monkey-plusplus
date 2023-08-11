@@ -28,4 +28,4 @@ test-parser : parsertest
 	./parsertest
 
 clean :
-	rm -rf *.o asttest lexertest parsertest monkey
+	rm -rf *.o asttest evaluatortest lexertest parsertest monkey
