@@ -9,6 +9,8 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node) {
     // Expressions
     } else if (auto il = std::dynamic_pointer_cast<IntegerLiteral>(node)) {
         return std::make_shared<Integer>(Integer{il->value});
+    } else if (auto bl = std::dynamic_pointer_cast<BooleanLiteral>(node)) {
+        return std::make_shared<Boolean>(Boolean{bl->value});
     }
 
     return nullptr;
