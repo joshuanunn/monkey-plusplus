@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "repl.hpp"
+#include "evaluator.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 
@@ -21,7 +22,10 @@ void start_repl() {
             continue;
         }
 
-        std::cout << program->string() << std::endl;
+        auto evaluated = eval(std::move(program));
+        if (evaluated) {
+            std::cout << evaluated->inspect() << std::endl;
+        }
     }
 }
 

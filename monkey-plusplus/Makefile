@@ -1,6 +1,6 @@
 CXXFLAGS = --std=c++17 -I../include
 
-monkey : lexer.o token.o ast.o parser.o repl.o monkey.o
+monkey : lexer.o token.o ast.o parser.o object.o evaluator.o repl.o monkey.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 asttest : ast.o token.o ast.test.o
