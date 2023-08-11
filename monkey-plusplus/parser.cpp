@@ -227,7 +227,7 @@ std::shared_ptr<Expression> Parser::parse_function_literal() {
 }
 
 std::shared_ptr<Expression> Parser::parse_boolean() const {
-    return std::make_shared<Boolean>(Boolean{cur_token, cur_token_is(TokenType::TRUE)});
+    return std::make_shared<BooleanLiteral>(BooleanLiteral{cur_token, cur_token_is(TokenType::TRUE)});
 }
 
 std::shared_ptr<Expression> Parser::parse_prefix_expression() {

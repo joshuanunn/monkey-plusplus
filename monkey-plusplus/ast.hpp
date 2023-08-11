@@ -48,8 +48,8 @@ struct IntegerLiteral : public Expression {
     std::string string() const override;
 };
 
-struct Boolean : public Expression {
-    Boolean(const Token &t, bool v);
+struct BooleanLiteral : public Expression {
+    BooleanLiteral(const Token &t, bool v);
 
     Token token;
     bool value;

@@ -123,7 +123,7 @@ bool test_identifier(std::shared_ptr<Expression> exp, std::string value) {
 
 bool test_boolean_expression(std::shared_ptr<Expression> exp, bool value) {
     // Cast Expression to a Boolean, as this is what we are expecting
-    auto bo = std::dynamic_pointer_cast<Boolean>(exp);
+    auto bo = std::dynamic_pointer_cast<BooleanLiteral>(exp);
 
     // Check that we have an Boolean by checking if the dynamic pointer cast fails (returns nullptr)
     if (!bo) {

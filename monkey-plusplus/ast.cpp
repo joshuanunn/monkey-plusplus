@@ -84,15 +84,15 @@ std::string IntegerLiteral::string() const {
 
 IntegerLiteral::IntegerLiteral(const Token &t) : token{t}, value{} {}
 
-std::string Boolean::token_literal() const {
+std::string BooleanLiteral::token_literal() const {
     return token.literal;
 }
 
-std::string Boolean::string() const {
+std::string BooleanLiteral::string() const {
     return token.literal;
 }
 
-Boolean::Boolean(const Token &t, bool v) : token{t}, value{v} {}
+BooleanLiteral::BooleanLiteral(const Token &t, bool v) : token{t}, value{v} {}
 
 std::string PrefixExpression::token_literal() const {
     return token.literal;
