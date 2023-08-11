@@ -108,6 +108,18 @@ struct IfExpression : public Expression {
     std::string string() const override;
 };
 
+struct FunctionLiteral : public Expression {
+    explicit FunctionLiteral(const Token &t);
+
+    Token token;
+    std::vector<std::shared_ptr<Identifier>> parameters;
+    std::unique_ptr<BlockStatement> body;
+
+    std::string token_literal() const override;
+
+    std::string string() const override;
+};
+
 struct LetStatement : public Statement {
     LetStatement(const Identifier &n, std::shared_ptr<Expression> v);
 

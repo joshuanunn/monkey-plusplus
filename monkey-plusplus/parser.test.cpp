@@ -701,3 +701,113 @@ TEST_CASE("Test If Else Expression") {
 
     REQUIRE(test_identifier(alternative->expression, "y"));
 }
+
+TEST_CASE("Test Function Literal Parsing") {
+    std::string input = "fn(x, y) { x + y; }";
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to a FunctionLiteral, as this is what we are expecting
+    auto function = std::dynamic_pointer_cast<FunctionLiteral>(expression_stmt->expression);
+
+    // Check that we have a FunctionLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!function) {
+        std::cerr << "function is not a FunctionLiteral." << std::endl;
+    }
+    REQUIRE(function);
+
+    if (function->parameters.size() != 2) {
+        std::cerr << "function literal parameters wrong. want 2, got=" << function->parameters.size() << std::endl;
+    }
+    REQUIRE(function->parameters.size() == 2);
+
+    REQUIRE(test_literal_expression(function->parameters.at(0), "x"));
+    REQUIRE(test_literal_expression(function->parameters.at(1), "y"));
+
+    if (function->body->statements.size() != 1) {
+        std::cerr << "function->body->statements has not 1 statements. got=" << function->body->statements.size() << std::endl;
+    }
+    REQUIRE(function->body->statements.size() == 1);
+
+    stmt = function->body->statements.at(0);
+
+    // Cast Node to an ExpressionStatement, as this is what we are expecting
+    auto body_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!body_stmt) {
+        std::cerr << "function body stmt is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(body_stmt);
+
+    REQUIRE(test_infix_expression(body_stmt->expression, "x", "+", "y"));
+}
+
+TEST_CASE("Test Function Parameter Parsing") {
+    std::vector<std::tuple<std::string, std::vector<std::string>>> tests = {
+            std::make_tuple("fn() {};", std::vector<std::string>{}),
+            std::make_tuple("fn(x) {};", std::vector<std::string>{"x"}),
+            std::make_tuple("fn(x, y, z) {};", std::vector<std::string>{"x", "y", "z"}),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto p = Parser(std::move(l));
+
+        auto program = p.parse_program();
+
+        REQUIRE(test_parser_errors(p));
+
+        auto stmt = program->statements.at(0);
+
+        // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+        auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+        // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+        if (!expression_stmt) {
+            std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+        }
+        REQUIRE(expression_stmt);
+
+        // Cast Expression to a FunctionLiteral, as this is what we are expecting
+        auto function = std::dynamic_pointer_cast<FunctionLiteral>(expression_stmt->expression);
+
+        // Check that we have a FunctionLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+        if (!function) {
+            std::cerr << "function is not a FunctionLiteral." << std::endl;
+        }
+        REQUIRE(function);
+
+        if (function->parameters.size() != tt_expected.size()) {
+            std::cerr << "length parameters wrong. want " << tt_expected.size() << ", got=" << function->parameters.size() << std::endl;
+        }
+        REQUIRE(function->parameters.size() == tt_expected.size());
+
+        for (int i = 0; i < tt_expected.size(); i++) {
+            REQUIRE(test_literal_expression(function->parameters.at(i), tt_expected.at(i)));
+        }
+    }
+}

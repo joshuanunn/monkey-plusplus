@@ -25,6 +25,7 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     register_prefix(TokenType::FALSE, std::mem_fn(&Parser::parse_boolean));
     register_prefix(TokenType::LPAREN, std::mem_fn(&Parser::parse_grouped_expression));
     register_prefix(TokenType::IF, std::mem_fn(&Parser::parse_if_expression));
+    register_prefix(TokenType::FUNCTION, std::mem_fn(&Parser::parse_function_literal));
 
     // Register infix method pointers lookups for each token type
     register_infix(TokenType::PLUS, std::mem_fn(&Parser::parse_infix_expression));
@@ -169,6 +170,51 @@ std::shared_ptr<Expression> Parser::parse_integer_literal() {
         e.push_back(msg);
         return nullptr;
     }
+
+    return lit;
+}
+
+std::vector<std::shared_ptr<Identifier>> Parser::parse_function_parameters() {
+    std::vector<std::shared_ptr<Identifier>> identifiers;
+
+    if (peek_token_is(TokenType::RPAREN)) {
+        next_token();
+        return identifiers;
+    }
+
+    next_token();
+
+    auto ident = std::make_shared<Identifier>(Identifier{cur_token, cur_token.literal});
+    identifiers.push_back(ident);
+
+    while (peek_token_is(TokenType::COMMA)) {
+        next_token();
+        next_token();
+        ident = std::make_shared<Identifier>(Identifier{cur_token, cur_token.literal});
+        identifiers.push_back(ident);
+    }
+
+    if (!expect_peek(TokenType::RPAREN)) {
+        return std::vector<std::shared_ptr<Identifier>>{};
+    }
+
+    return identifiers;
+}
+
+std::shared_ptr<Expression> Parser::parse_function_literal() {
+    auto lit = std::make_shared<FunctionLiteral>(FunctionLiteral{cur_token});
+
+    if (!expect_peek(TokenType::LPAREN)) {
+        return nullptr;
+    }
+
+    lit->parameters = parse_function_parameters();
+
+    if (!expect_peek(TokenType::LBRACE)) {
+        return nullptr;
+    }
+
+    lit->body = parse_block_statement();
 
     return lit;
 }

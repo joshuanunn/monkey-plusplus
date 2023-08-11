@@ -154,6 +154,31 @@ std::string IfExpression::string() const {
 
 IfExpression::IfExpression(const Token &t) : token(t) {}
 
+std::string FunctionLiteral::token_literal() const {
+    return token.literal;
+}
+
+std::string FunctionLiteral::string() const {
+    std::string msg = token.literal + "(";
+
+    int counter = 0;
+
+    for (const auto &p: parameters) {
+        if (counter != 0) {
+            msg += ", ";
+        }
+        msg += p->string();
+        counter++;
+    }
+
+    msg += ") ";
+    msg += body->string();
+
+    return msg;
+}
+
+FunctionLiteral::FunctionLiteral(const Token &t) : token(t) {}
+
 std::string Program::token_literal() const {
     if (!statements.empty()) {
         return statements.at(0)->token_literal();

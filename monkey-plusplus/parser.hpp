@@ -46,6 +46,10 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_integer_literal();
 
+    std::vector<std::shared_ptr<Identifier>> parse_function_parameters();
+
+    std::shared_ptr<Expression> parse_function_literal();
+
     std::shared_ptr<Expression> parse_boolean() const;
 
     std::shared_ptr<Expression> parse_prefix_expression();
