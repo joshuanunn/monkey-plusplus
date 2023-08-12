@@ -84,6 +84,10 @@ std::shared_ptr<Object> eval_minus_prefix_operator_expression(const std::shared_
 std::shared_ptr<Object> eval_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right) {
     if (left->type() == ObjectType::INTEGER_OBJ && right->type() == ObjectType::INTEGER_OBJ) {
         return eval_integer_infix_expression(op, left, right);
+    } else if (op == "==") {
+        return native_bool_to_boolean_object(left == right);
+    } else if (op == "!=") {
+        return native_bool_to_boolean_object(left != right);
     } else {
         return GLOBAL_NULL;
     }
