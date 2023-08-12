@@ -81,3 +81,21 @@ TEST_CASE("Test Eval Boolean Expression") {
         REQUIRE(test_boolean_object(evaluated, tt_expected));
     }
 }
+
+TEST_CASE("Test Bang Operator") {
+    std::vector<std::tuple<std::string, bool>> tests = {
+            std::make_tuple("!true", false),
+            std::make_tuple("!false", true),
+            std::make_tuple("!5", false),
+            std::make_tuple("!!true", true),
+            std::make_tuple("!!false", false),
+            std::make_tuple("!!5", true),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto evaluated = test_eval(tt_input);
+        REQUIRE(test_boolean_object(evaluated, tt_expected));
+    }
+}
