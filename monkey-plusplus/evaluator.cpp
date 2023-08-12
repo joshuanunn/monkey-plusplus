@@ -15,6 +15,10 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node) {
     } else if (auto pe = std::dynamic_pointer_cast<PrefixExpression>(node)) {
         auto right = eval(pe->right);
         return eval_prefix_expression(pe->op, right);
+    } else if (auto ie = std::dynamic_pointer_cast<InfixExpression>(node)) {
+        auto left = eval(ie->left);
+        auto right = eval(ie->right);
+        return eval_infix_expression(ie->op, left, right);
     } else if (auto il = std::dynamic_pointer_cast<IntegerLiteral>(node)) {
         return std::make_shared<Integer>(Integer{il->value});
     } else if (auto bl = std::dynamic_pointer_cast<BooleanLiteral>(node)) {
@@ -75,4 +79,34 @@ std::shared_ptr<Object> eval_minus_prefix_operator_expression(const std::shared_
     }
 
     return std::make_shared<Integer>(Integer{-(original->value)});
+}
+
+std::shared_ptr<Object> eval_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right) {
+    if (left->type() == ObjectType::INTEGER_OBJ && right->type() == ObjectType::INTEGER_OBJ) {
+        return eval_integer_infix_expression(op, left, right);
+    } else {
+        return GLOBAL_NULL;
+    }
+}
+
+std::shared_ptr<Object> eval_integer_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right) {
+    // Cast left and right Objects to Integer Objects and return GLOBAL_NULL if cast unexpectedly fails for either
+    auto left_val = std::dynamic_pointer_cast<Integer>(left);
+    auto right_val = std::dynamic_pointer_cast<Integer>(right);
+
+    if (!left_val || !right_val) {
+        return GLOBAL_NULL;
+    }
+
+    if (op == "+") {
+        return std::make_shared<Integer>(Integer{left_val->value + right_val->value});
+    } else if (op == "-") {
+        return std::make_shared<Integer>(Integer{left_val->value - right_val->value});
+    } else if (op == "*") {
+        return std::make_shared<Integer>(Integer{left_val->value * right_val->value});
+    } else if (op == "/") {
+        return std::make_shared<Integer>(Integer{left_val->value / right_val->value});
+    } else {
+        return GLOBAL_NULL;
+    }
 }
