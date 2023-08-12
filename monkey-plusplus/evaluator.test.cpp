@@ -86,6 +86,14 @@ TEST_CASE("Test Eval Boolean Expression") {
     std::vector<std::tuple<std::string, bool>> tests = {
             std::make_tuple("true", true),
             std::make_tuple("false", false),
+            std::make_tuple("1 < 2", true),
+            std::make_tuple("1 > 2", false),
+            std::make_tuple("1 > 1", false),
+            std::make_tuple("1 < 1", false),
+            std::make_tuple("1 == 1", true),
+            std::make_tuple("1 != 1", false),
+            std::make_tuple("1 == 2", false),
+            std::make_tuple("1 != 2", true),
     };
 
     for (const auto &tt: tests) {

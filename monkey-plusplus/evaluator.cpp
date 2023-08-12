@@ -106,6 +106,14 @@ std::shared_ptr<Object> eval_integer_infix_expression(const std::string &op, con
         return std::make_shared<Integer>(Integer{left_val->value * right_val->value});
     } else if (op == "/") {
         return std::make_shared<Integer>(Integer{left_val->value / right_val->value});
+    } else if (op == "<") {
+        return native_bool_to_boolean_object(left_val->value < right_val->value);
+    } else if (op == ">") {
+        return native_bool_to_boolean_object(left_val->value > right_val->value);
+    } else if (op == "==") {
+        return native_bool_to_boolean_object(left_val->value == right_val->value);
+    } else if (op == "!=") {
+        return native_bool_to_boolean_object(left_val->value != right_val->value);
     } else {
         return GLOBAL_NULL;
     }
