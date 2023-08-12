@@ -41,7 +41,7 @@ std::shared_ptr<Object> native_bool_to_boolean_object(bool input) {
     return GLOBAL_FALSE;
 }
 
-std::shared_ptr<Object> eval_prefix_expression(std::string op, std::shared_ptr<Object> right) {
+std::shared_ptr<Object> eval_prefix_expression(const std::string &op, const std::shared_ptr<Object> &right) {
     if (op == "!") {
         return eval_bang_operator_expression(right);
     } else if (op == "-") {
@@ -51,7 +51,7 @@ std::shared_ptr<Object> eval_prefix_expression(std::string op, std::shared_ptr<O
     }
 }
 
-std::shared_ptr<Object> eval_bang_operator_expression(std::shared_ptr<Object> right) {
+std::shared_ptr<Object> eval_bang_operator_expression(const std::shared_ptr<Object> &right) {
     if (right == GLOBAL_TRUE) {
         return GLOBAL_FALSE;
     } else if (right == GLOBAL_FALSE) {
