@@ -1,8 +1,9 @@
 #include "evaluator.hpp"
 
-// Initialise global Boolean Objects to avoid unnecessary Object creation
-auto TRUE = std::make_shared<Boolean>(Boolean{true});
-auto FALSE = std::make_shared<Boolean>(Boolean{false});
+// Initialise global Boolean and Null Objects to avoid unnecessary Object creation
+auto GLOBAL_NULL = std::make_shared<Null>(Null{});
+auto GLOBAL_TRUE = std::make_shared<Boolean>(Boolean{true});
+auto GLOBAL_FALSE = std::make_shared<Boolean>(Boolean{false});
 
 std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node) {
     // Statements
@@ -32,7 +33,7 @@ std::shared_ptr<Object> eval_statements(const std::vector<std::shared_ptr<Node>>
 
 std::shared_ptr<Object> native_bool_to_boolean_object(bool input) {
     if (input) {
-        return TRUE;
+        return GLOBAL_TRUE;
     }
-    return FALSE;
+    return GLOBAL_FALSE;
 }
