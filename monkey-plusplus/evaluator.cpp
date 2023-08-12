@@ -44,6 +44,8 @@ std::shared_ptr<Object> native_bool_to_boolean_object(bool input) {
 std::shared_ptr<Object> eval_prefix_expression(std::string op, std::shared_ptr<Object> right) {
     if (op == "!") {
         return eval_bang_operator_expression(right);
+    } else if (op == "-") {
+        return eval_minus_prefix_operator_expression(right);
     } else {
         return GLOBAL_NULL;
     }
@@ -59,4 +61,18 @@ std::shared_ptr<Object> eval_bang_operator_expression(std::shared_ptr<Object> ri
     } else {
         return GLOBAL_FALSE;
     }
+}
+
+std::shared_ptr<Object> eval_minus_prefix_operator_expression(const std::shared_ptr<Object> &right) {
+    if (right->type() != ObjectType::INTEGER_OBJ) {
+        return GLOBAL_NULL;
+    }
+
+    // Cast Object to Integer Object and also return GLOBAL_NULL if cast unexpectedly fails
+    auto original = std::dynamic_pointer_cast<Integer>(right);
+    if (!original) {
+        return GLOBAL_NULL;
+    }
+
+    return std::make_shared<Integer>(Integer{-(original->value)});
 }

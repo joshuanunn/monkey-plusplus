@@ -14,4 +14,6 @@ std::shared_ptr<Object> eval_prefix_expression(std::string op, std::shared_ptr<O
 
 std::shared_ptr<Object> eval_bang_operator_expression(std::shared_ptr<Object> right);
 
+std::shared_ptr<Object> eval_minus_prefix_operator_expression(const std::shared_ptr<Object> &right);
+
 #endif //MONKEY_PLUSPLUS_EVALUATOR_HPP

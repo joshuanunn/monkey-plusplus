@@ -58,6 +58,8 @@ TEST_CASE("Test Eval Integer Expression") {
     std::vector<std::tuple<std::string, int>> tests = {
             std::make_tuple("5;", 5),
             std::make_tuple("10;", 10),
+            std::make_tuple("-5;", -5),
+            std::make_tuple("-10;", -10),
     };
 
     for (const auto &tt: tests) {
