@@ -17,7 +17,10 @@ ObjectType Boolean::type() const {
 }
 
 std::string Boolean::inspect() const {
-    return std::to_string(value);
+    if (!value) {
+        return "false";
+    }
+    return "true";
 }
 
 ObjectType Null::type() const {
