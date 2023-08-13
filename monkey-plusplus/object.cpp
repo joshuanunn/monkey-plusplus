@@ -1,5 +1,15 @@
 #include "object.hpp"
 
+ReturnValue::ReturnValue(std::shared_ptr<Object> v) : value(v) {}
+
+ObjectType ReturnValue::type() const {
+    return ObjectType::RETURN_VALUE_OBJ;
+}
+
+std::string ReturnValue::inspect() const {
+    return value->inspect();
+}
+
 Integer::Integer(int v) : value(v) {}
 
 ObjectType Integer::type() const {

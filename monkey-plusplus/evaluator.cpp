@@ -12,9 +12,12 @@ std::shared_ptr<Null> get_null_ref() {
 std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node) {
     // Statements
     if (auto p = std::dynamic_pointer_cast<Program>(node)) {
-        return eval_statements(p->statements);
+        return eval_program(p);
+    } else if (auto r = std::dynamic_pointer_cast<ReturnStatement>(node)) {
+        auto val = eval(r->return_value);
+        return std::make_shared<ReturnValue>(ReturnValue{val});
     } else if (auto b = std::dynamic_pointer_cast<BlockStatement>(node)) {
-        return eval_statements(b->statements);
+        return eval_block_statement(b);
     } else if (auto e = std::dynamic_pointer_cast<ExpressionStatement>(node)) {
         return eval(e->expression);
     // Expressions
@@ -60,11 +63,29 @@ bool is_truthy(const std::shared_ptr<Object> &obj) {
     }
 }
 
-std::shared_ptr<Object> eval_statements(const std::vector<std::shared_ptr<Node>> &stmts) {
+std::shared_ptr<Object> eval_program(const std::shared_ptr<Program> &program) {
     std::shared_ptr<Object> result;
 
-    for (const auto &statement: stmts) {
+    for (const auto &statement: program->statements) {
         result = eval(statement);
+
+        if (auto return_value = std::dynamic_pointer_cast<ReturnValue>(result)) {
+            return return_value->value;
+        }
+    }
+
+    return result;
+}
+
+std::shared_ptr<Object> eval_block_statement(const std::shared_ptr<BlockStatement> &block) {
+    std::shared_ptr<Object> result;
+
+    for (const auto &statement: block->statements) {
+        result = eval(statement);
+
+        if (auto return_value = std::dynamic_pointer_cast<ReturnValue>(result)) {
+            return return_value;
+        }
     }
 
     return result;

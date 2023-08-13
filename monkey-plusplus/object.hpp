@@ -1,12 +1,14 @@
 #ifndef MONKEY_PLUSPLUS_OBJECT_HPP
 #define MONKEY_PLUSPLUS_OBJECT_HPP
 
+#include <memory>
 #include <string>
 
 enum class ObjectType {
     INTEGER_OBJ,
     BOOLEAN_OBJ,
-    NULL_OBJ
+    NULL_OBJ,
+    RETURN_VALUE_OBJ
 };
 
 struct Object {
@@ -15,6 +17,16 @@ struct Object {
     virtual ObjectType type() const = 0;
 
     virtual std::string inspect() const = 0;
+};
+
+struct ReturnValue : public Object {
+    explicit ReturnValue(std::shared_ptr<Object> v);
+
+    std::shared_ptr<Object> value;
+
+    ObjectType type() const override;
+
+    std::string inspect() const override;
 };
 
 struct Integer : public Object {

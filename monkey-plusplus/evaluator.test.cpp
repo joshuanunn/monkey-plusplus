@@ -179,3 +179,28 @@ TEST_CASE("Test If Else Expressions With Null Return") {
         REQUIRE(test_null_object(evaluated));
     }
 }
+
+TEST_CASE("Test Return Statements") {
+    std::vector<std::tuple<std::string, int>> tests = {
+            std::make_tuple("return 10;", 10),
+            std::make_tuple("return 10; 9;", 10),
+            std::make_tuple("return 2 * 5; 9;", 10),
+            std::make_tuple("9; return 2 * 5; 9;", 10),
+            std::make_tuple(R"(
+if (10 > 1) {
+  if (10 > 1) {
+    return 10;
+  }
+
+  return 1;
+})", 10),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto evaluated = test_eval(tt_input);
+
+        REQUIRE(test_integer_object(evaluated, tt_expected));
+    }
+}

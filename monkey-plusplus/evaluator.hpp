@@ -12,7 +12,9 @@ std::shared_ptr<Object> eval_if_expression(const std::shared_ptr<IfExpression> &
 
 bool is_truthy(const std::shared_ptr<Object> &obj);
 
-std::shared_ptr<Object> eval_statements(const std::vector<std::shared_ptr<Node>> &stmts);
+std::shared_ptr<Object> eval_program(const std::shared_ptr<Program> &program);
+
+std::shared_ptr<Object> eval_block_statement(const std::shared_ptr<BlockStatement> &block);
 
 std::shared_ptr<Object> native_bool_to_boolean_object(bool input);
 
