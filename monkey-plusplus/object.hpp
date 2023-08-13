@@ -1,6 +1,7 @@
 #ifndef MONKEY_PLUSPLUS_OBJECT_HPP
 #define MONKEY_PLUSPLUS_OBJECT_HPP
 
+#include <map>
 #include <memory>
 #include <string>
 
@@ -8,8 +9,11 @@ enum class ObjectType {
     INTEGER_OBJ,
     BOOLEAN_OBJ,
     NULL_OBJ,
-    RETURN_VALUE_OBJ
+    RETURN_VALUE_OBJ,
+    ERROR_OBJ
 };
+
+std::string objecttype_literal(ObjectType);
 
 struct Object {
     virtual ~Object() = default;
@@ -23,6 +27,16 @@ struct ReturnValue : public Object {
     explicit ReturnValue(std::shared_ptr<Object> v);
 
     std::shared_ptr<Object> value;
+
+    ObjectType type() const override;
+
+    std::string inspect() const override;
+};
+
+struct Error : public Object {
+    explicit Error(std::string v);
+
+    std::string message;
 
     ObjectType type() const override;
 

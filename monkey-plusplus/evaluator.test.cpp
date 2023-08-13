@@ -204,3 +204,41 @@ if (10 > 1) {
         REQUIRE(test_integer_object(evaluated, tt_expected));
     }
 }
+
+TEST_CASE("Test Error Handling") {
+    std::vector<std::tuple<std::string, std::string>> tests = {
+            std::make_tuple("5 + true;", "type mismatch: INTEGER + BOOLEAN"),
+            std::make_tuple("5 + true; 5;", "type mismatch: INTEGER + BOOLEAN"),
+            std::make_tuple("-true", "unknown operator: -BOOLEAN"),
+            std::make_tuple("true + false;", "unknown operator: BOOLEAN + BOOLEAN"),
+            std::make_tuple("5; true + false; 5", "unknown operator: BOOLEAN + BOOLEAN"),
+            std::make_tuple("if (10 > 1) { true + false; }", "unknown operator: BOOLEAN + BOOLEAN"),
+            std::make_tuple(R"(
+if (10 > 1) {
+  if (10 > 1) {
+    return true + false;
+  }
+
+  return 1;
+})", "unknown operator: BOOLEAN + BOOLEAN"),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected_message] = tt;
+
+        auto evaluated = test_eval(tt_input);
+
+        auto error_obj = std::dynamic_pointer_cast<Error>(evaluated);
+
+        // Check that we have an Error Object by checking if the dynamic pointer cast fails (returns nullptr)
+        if (!error_obj) {
+            std::cerr << "no error object returned." << std::endl;
+        }
+        REQUIRE(error_obj);
+
+        if (error_obj->message != tt_expected_message) {
+            std::cerr << "wrong error message. expected=" << tt_expected_message << ", got=" << error_obj->message << std::endl;
+        }
+        REQUIRE(error_obj->message == tt_expected_message);
+    }
+}
