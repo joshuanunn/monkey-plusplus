@@ -99,8 +99,8 @@ std::unique_ptr<ExpressionStatement> Parser::parse_expression_statement() {
     return stmt;
 }
 
-std::unique_ptr<BlockStatement> Parser::parse_block_statement() {
-    auto block = std::make_unique<BlockStatement>(BlockStatement{cur_token});
+std::shared_ptr<BlockStatement> Parser::parse_block_statement() {
+    auto block = std::make_shared<BlockStatement>(BlockStatement{cur_token});
 
     next_token();
 

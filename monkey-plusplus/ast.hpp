@@ -100,8 +100,8 @@ struct IfExpression : public Expression {
 
     Token token;
     std::shared_ptr<Expression> condition;
-    std::unique_ptr<BlockStatement> consequence;
-    std::unique_ptr<BlockStatement> alternative;
+    std::shared_ptr<BlockStatement> consequence;
+    std::shared_ptr<BlockStatement> alternative;
 
     std::string token_literal() const override;
 
@@ -113,7 +113,7 @@ struct FunctionLiteral : public Expression {
 
     Token token;
     std::vector<std::shared_ptr<Identifier>> parameters;
-    std::unique_ptr<BlockStatement> body;
+    std::shared_ptr<BlockStatement> body;
 
     std::string token_literal() const override;
 

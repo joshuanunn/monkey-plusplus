@@ -5,13 +5,21 @@ auto GLOBAL_NULL = std::make_shared<Null>(Null{});
 auto GLOBAL_TRUE = std::make_shared<Boolean>(Boolean{true});
 auto GLOBAL_FALSE = std::make_shared<Boolean>(Boolean{false});
 
+std::shared_ptr<Null> get_null_ref() {
+    return GLOBAL_NULL;
+}
+
 std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node) {
     // Statements
     if (auto p = std::dynamic_pointer_cast<Program>(node)) {
         return eval_statements(p->statements);
+    } else if (auto b = std::dynamic_pointer_cast<BlockStatement>(node)) {
+        return eval_statements(b->statements);
     } else if (auto e = std::dynamic_pointer_cast<ExpressionStatement>(node)) {
         return eval(e->expression);
     // Expressions
+    } else if (auto i = std::dynamic_pointer_cast<IfExpression>(node)) {
+        return eval_if_expression(i);
     } else if (auto pe = std::dynamic_pointer_cast<PrefixExpression>(node)) {
         auto right = eval(pe->right);
         return eval_prefix_expression(pe->op, right);
@@ -26,6 +34,30 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node) {
     }
 
     return nullptr;
+}
+
+std::shared_ptr<Object> eval_if_expression(const std::shared_ptr<IfExpression> &ie) {
+    auto condition = eval(ie->condition);
+
+    if (is_truthy(condition)) {
+        return eval(ie->consequence);
+    } else if (ie->alternative) {
+        return eval(ie->alternative);
+    } else {
+        return GLOBAL_NULL;
+    }
+}
+
+bool is_truthy(const std::shared_ptr<Object> &obj) {
+    if (obj == GLOBAL_NULL) {
+        return false;
+    } else if (obj == GLOBAL_TRUE) {
+        return true;
+    } else if (obj == GLOBAL_FALSE) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 std::shared_ptr<Object> eval_statements(const std::vector<std::shared_ptr<Node>> &stmts) {

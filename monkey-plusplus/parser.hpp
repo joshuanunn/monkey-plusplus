@@ -36,7 +36,7 @@ struct Parser {
 
     std::unique_ptr<ExpressionStatement> parse_expression_statement();
 
-    std::unique_ptr<BlockStatement> parse_block_statement();
+    std::shared_ptr<BlockStatement> parse_block_statement();
 
     std::unique_ptr<Statement> parse_statement();
 
