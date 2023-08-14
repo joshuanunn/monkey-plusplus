@@ -1,12 +1,14 @@
 #include <iostream>
 
 #include "repl.hpp"
+#include "environment.hpp"
 #include "evaluator.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 
 void start_repl() {
     std::string line;
+    auto env = new_environment();
 
     while (true) {
         std::cout << PROMPT;
@@ -22,7 +24,7 @@ void start_repl() {
             continue;
         }
 
-        auto evaluated = eval(std::move(program));
+        auto evaluated = eval(std::move(program), env);
         if (evaluated) {
             std::cout << evaluated->inspect() << std::endl;
         }

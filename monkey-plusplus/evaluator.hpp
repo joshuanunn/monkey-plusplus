@@ -6,9 +6,11 @@
 
 std::shared_ptr<Null> get_null_ref();
 
-std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node);
+std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::shared_ptr<Environment> &env);
 
-std::shared_ptr<Object> eval_if_expression(const std::shared_ptr<IfExpression> &ie);
+std::shared_ptr<Object> eval_identifier(const std::shared_ptr<Identifier> &node, const std::shared_ptr<Environment> &env);
+
+std::shared_ptr<Object> eval_if_expression(const std::shared_ptr<IfExpression> &ie, const std::shared_ptr<Environment> &env);
 
 bool is_truthy(const std::shared_ptr<Object> &obj);
 
@@ -16,9 +18,9 @@ std::shared_ptr<Error> new_error(std::string message);
 
 bool is_error(std::shared_ptr<Object> obj);
 
-std::shared_ptr<Object> eval_program(const std::shared_ptr<Program> &program);
+std::shared_ptr<Object> eval_program(const std::shared_ptr<Program> &program, const std::shared_ptr<Environment> &env);
 
-std::shared_ptr<Object> eval_block_statement(const std::shared_ptr<BlockStatement> &block);
+std::shared_ptr<Object> eval_block_statement(const std::shared_ptr<BlockStatement> &block, const std::shared_ptr<Environment> &env);
 
 std::shared_ptr<Object> native_bool_to_boolean_object(bool input);
 

@@ -5,6 +5,7 @@
 
 #include "../include/catch.hpp"
 
+#include "environment.hpp"
 #include "evaluator.hpp"
 #include "lexer.hpp"
 #include "object.hpp"
@@ -14,8 +15,9 @@ std::shared_ptr<Object> test_eval (const std::string &input) {
     auto l = std::make_unique<Lexer>(Lexer(input));
     auto p = Parser(std::move(l));
     auto program = p.parse_program();
+    auto env = new_environment();
 
-    return eval(std::move(program));
+    return eval(std::move(program), env);
 }
 
 bool test_integer_object(std::shared_ptr<Object> obj, int expected) {
@@ -221,6 +223,7 @@ if (10 > 1) {
 
   return 1;
 })", "unknown operator: BOOLEAN + BOOLEAN"),
+            std::make_tuple("foobar", "identifier not found: foobar"),
     };
 
     for (const auto &tt: tests) {
@@ -240,5 +243,22 @@ if (10 > 1) {
             std::cerr << "wrong error message. expected=" << tt_expected_message << ", got=" << error_obj->message << std::endl;
         }
         REQUIRE(error_obj->message == tt_expected_message);
+    }
+}
+
+TEST_CASE("Test Let Statements") {
+    std::vector<std::tuple<std::string, int>> tests = {
+            std::make_tuple("let a = 5; a;", 5),
+            std::make_tuple("let a = 5 * 5; a;", 25),
+            std::make_tuple("let a = 5; let b = a; b;", 5),
+            std::make_tuple("let a = 5; let b = a; let c = a + b + 5; c;", 15),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto evaluated = test_eval(tt_input);
+
+        REQUIRE(test_integer_object(evaluated, tt_expected));
     }
 }

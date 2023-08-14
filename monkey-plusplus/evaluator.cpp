@@ -1,3 +1,4 @@
+#include "environment.hpp"
 #include "evaluator.hpp"
 
 // Initialise global Boolean and Null Objects to avoid unnecessary Object creation
@@ -9,35 +10,43 @@ std::shared_ptr<Null> get_null_ref() {
     return GLOBAL_NULL;
 }
 
-std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node) {
+std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::shared_ptr<Environment> &env) {
     // Statements
     if (auto p = std::dynamic_pointer_cast<Program>(node)) {
-        return eval_program(p);
+        return eval_program(p, env);
+    } else if (auto l = std::dynamic_pointer_cast<LetStatement>(node)) {
+        auto val = eval(l->value, env);
+        if (is_error(val)) {
+            return val;
+        }
+        env->set(l->name->value, val);
     } else if (auto r = std::dynamic_pointer_cast<ReturnStatement>(node)) {
-        auto val = eval(r->return_value);
+        auto val = eval(r->return_value, env);
         if (is_error(val)) {
             return val;
         }
         return std::make_shared<ReturnValue>(ReturnValue{val});
     } else if (auto b = std::dynamic_pointer_cast<BlockStatement>(node)) {
-        return eval_block_statement(b);
+        return eval_block_statement(b, env);
     } else if (auto e = std::dynamic_pointer_cast<ExpressionStatement>(node)) {
-        return eval(e->expression);
+        return eval(e->expression, env);
     // Expressions
+    } else if (auto id = std::dynamic_pointer_cast<Identifier>(node)) {
+        return eval_identifier(id, env);
     } else if (auto i = std::dynamic_pointer_cast<IfExpression>(node)) {
-        return eval_if_expression(i);
+        return eval_if_expression(i, env);
     } else if (auto pe = std::dynamic_pointer_cast<PrefixExpression>(node)) {
-        auto right = eval(pe->right);
+        auto right = eval(pe->right, env);
         if (is_error(right)) {
             return right;
         }
         return eval_prefix_expression(pe->op, right);
     } else if (auto ie = std::dynamic_pointer_cast<InfixExpression>(node)) {
-        auto left = eval(ie->left);
+        auto left = eval(ie->left, env);
         if (is_error(left)) {
             return left;
         }
-        auto right = eval(ie->right);
+        auto right = eval(ie->right, env);
         if (is_error(right)) {
             return right;
         }
@@ -51,16 +60,25 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node) {
     return nullptr;
 }
 
-std::shared_ptr<Object> eval_if_expression(const std::shared_ptr<IfExpression> &ie) {
-    auto condition = eval(ie->condition);
+std::shared_ptr<Object> eval_identifier(const std::shared_ptr<Identifier> &node, const std::shared_ptr<Environment> &env) {
+    auto[val, ok] = env->get(node->value);
+    if (!ok) {
+        return new_error("identifier not found: " + node->value);
+    }
+
+    return val;
+}
+
+std::shared_ptr<Object> eval_if_expression(const std::shared_ptr<IfExpression> &ie, const std::shared_ptr<Environment> &env) {
+    auto condition = eval(ie->condition, env);
     if (is_error(condition)) {
         return condition;
     }
 
     if (is_truthy(condition)) {
-        return eval(ie->consequence);
+        return eval(ie->consequence, env);
     } else if (ie->alternative) {
-        return eval(ie->alternative);
+        return eval(ie->alternative, env);
     } else {
         return GLOBAL_NULL;
     }
@@ -89,11 +107,11 @@ bool is_error(std::shared_ptr<Object> obj) {
     return false;
 }
 
-std::shared_ptr<Object> eval_program(const std::shared_ptr<Program> &program) {
+std::shared_ptr<Object> eval_program(const std::shared_ptr<Program> &program, const std::shared_ptr<Environment> &env) {
     std::shared_ptr<Object> result;
 
     for (const auto &statement: program->statements) {
-        result = eval(statement);
+        result = eval(statement, env);
 
         if (auto return_value = std::dynamic_pointer_cast<ReturnValue>(result)) {
             return return_value->value;
@@ -107,11 +125,11 @@ std::shared_ptr<Object> eval_program(const std::shared_ptr<Program> &program) {
     return result;
 }
 
-std::shared_ptr<Object> eval_block_statement(const std::shared_ptr<BlockStatement> &block) {
+std::shared_ptr<Object> eval_block_statement(const std::shared_ptr<BlockStatement> &block, const std::shared_ptr<Environment> &env) {
     std::shared_ptr<Object> result;
 
     for (const auto &statement: block->statements) {
-        result = eval(statement);
+        result = eval(statement, env);
 
         if (auto return_value = std::dynamic_pointer_cast<ReturnValue>(result)) {
             return return_value;
