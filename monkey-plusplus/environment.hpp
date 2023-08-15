@@ -2,7 +2,9 @@
 #define MONKEY_PLUSPLUS_ENVIRONMENT_HPP
 
 #include <map>
+#include <memory>
 #include <string>
+#include <vector>
 #include "object.hpp"
 
 struct Environment {

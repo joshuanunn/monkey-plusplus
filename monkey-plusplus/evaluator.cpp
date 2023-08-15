@@ -31,6 +31,10 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::share
     } else if (auto e = std::dynamic_pointer_cast<ExpressionStatement>(node)) {
         return eval(e->expression, env);
     // Expressions
+    } else if (auto f = std::dynamic_pointer_cast<FunctionLiteral>(node)) {
+        auto params = f->parameters;
+        auto body = f->body;
+        return std::make_shared<Function>(Function{params, body, env});
     } else if (auto id = std::dynamic_pointer_cast<Identifier>(node)) {
         return eval_identifier(id, env);
     } else if (auto i = std::dynamic_pointer_cast<IfExpression>(node)) {

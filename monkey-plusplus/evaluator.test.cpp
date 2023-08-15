@@ -262,3 +262,32 @@ TEST_CASE("Test Let Statements") {
         REQUIRE(test_integer_object(evaluated, tt_expected));
     }
 }
+
+TEST_CASE("Test Function Object") {
+    std::string input = "fn(x) { x + 2;};";
+
+    auto evaluated = test_eval(input);
+
+    auto fn = std::dynamic_pointer_cast<Function>(evaluated);
+
+    // Check that we have a Function Object by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!fn) {
+        std::cerr << "object is not Function." << std::endl;
+    }
+    REQUIRE(fn);
+
+    if (fn->parameters.size() != 1) {
+        std::cerr << "function has wrong parameters." << std::endl;
+    }
+    REQUIRE(fn->parameters.size() == 1);
+
+    if (fn->parameters.at(0)->string() != "x") {
+        std::cerr << "parameter is not 'x'. got=" << fn->parameters.at(0)->string() << std::endl;
+    }
+    REQUIRE(fn->parameters.at(0)->string() == "x");
+
+    if (fn->body->string() != "(x + 2)") {
+        std::cerr << "body is not (x + 2). got=" << fn->body->string() << std::endl;
+    }
+    REQUIRE(fn->body->string() == "(x + 2)");
+}

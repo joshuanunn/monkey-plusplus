@@ -4,13 +4,15 @@
 #include <map>
 #include <memory>
 #include <string>
+#include "ast.hpp"
 
 enum class ObjectType {
     INTEGER_OBJ,
     BOOLEAN_OBJ,
     NULL_OBJ,
     RETURN_VALUE_OBJ,
-    ERROR_OBJ
+    ERROR_OBJ,
+    FUNCTION_OBJ
 };
 
 std::string objecttype_literal(ObjectType);
@@ -21,6 +23,20 @@ struct Object {
     virtual ObjectType type() const = 0;
 
     virtual std::string inspect() const = 0;
+};
+
+struct Environment;
+
+struct Function : public Object {
+    Function(std::vector<std::shared_ptr<Identifier>> p, std::shared_ptr<BlockStatement> b, const std::shared_ptr<Environment> &e);
+
+    std::vector<std::shared_ptr<Identifier>> parameters;
+    std::shared_ptr<BlockStatement> body;
+    std::shared_ptr<Environment> env;
+
+    ObjectType type() const override;
+
+    std::string inspect() const override;
 };
 
 struct ReturnValue : public Object {

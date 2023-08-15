@@ -1,5 +1,29 @@
 #include "object.hpp"
 
+Function::Function(std::vector<std::shared_ptr<Identifier>> p, std::shared_ptr<BlockStatement> b,
+                   const std::shared_ptr<Environment> &e) : parameters{std::move(p)}, body{std::move(b)}, env{e} {}
+
+ObjectType Function::type() const {
+    return ObjectType::FUNCTION_OBJ;
+}
+
+std::string Function::inspect() const {
+    std::string out = "fn(";
+
+    int counter = 0;
+    for (const auto &p: parameters) {
+        if (counter > 0) {
+            out.append(", ");
+        }
+        out += p->string();
+        counter++;
+    }
+
+    out.append(") {\n" + body->string() + "\n}");
+
+    return out;
+}
+
 ReturnValue::ReturnValue(std::shared_ptr<Object> v) : value(v) {}
 
 ObjectType ReturnValue::type() const {
@@ -57,6 +81,7 @@ std::map<ObjectType, std::string> objecttype_literals = {
         {ObjectType::NULL_OBJ,"NULL"},
         {ObjectType::RETURN_VALUE_OBJ,"RETURN_VALUE"},
         {ObjectType::ERROR_OBJ,"ERROR"},
+        {ObjectType::FUNCTION_OBJ,"FUNCTION"},
 };
 
 std::string objecttype_literal(ObjectType t) {

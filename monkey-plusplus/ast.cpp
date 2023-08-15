@@ -122,7 +122,7 @@ std::string BlockStatement::string() const {
     std::string msg;
 
     for (const auto &stmt: statements) {
-        msg += stmt->string();
+        msg.append(stmt->string());
     }
 
     return msg;
