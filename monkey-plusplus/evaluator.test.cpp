@@ -264,7 +264,7 @@ TEST_CASE("Test Let Statements") {
 }
 
 TEST_CASE("Test Function Object") {
-    std::string input = "fn(x) { x + 2;};";
+    std::string input = "fn(x) { x + 2; };";
 
     auto evaluated = test_eval(input);
 
@@ -290,4 +290,37 @@ TEST_CASE("Test Function Object") {
         std::cerr << "body is not (x + 2). got=" << fn->body->string() << std::endl;
     }
     REQUIRE(fn->body->string() == "(x + 2)");
+}
+
+TEST_CASE("Test Function Application") {
+    std::vector<std::tuple<std::string, int>> tests = {
+            std::make_tuple("let identity = fn(x) { x; }; identity(5);", 5),
+            std::make_tuple("let identity = fn(x) { return x; }; identity(5);", 5),
+            std::make_tuple("let double = fn(x) { x * 2; }; double(5);", 10),
+            std::make_tuple("let add = fn(x, y) { x + y; }; add(5, 5);", 10),
+            std::make_tuple("let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20),
+            std::make_tuple("fn(x) { x; }(5)", 5),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto evaluated = test_eval(tt_input);
+
+        REQUIRE(test_integer_object(evaluated, tt_expected));
+    }
+}
+
+TEST_CASE("Test Closures") {
+    std::string input = R"(
+let newAdder = fn(x) {
+  fn(y) { x + y };
+};
+
+let addTwo = newAdder(2);
+addTwo(2);)";
+
+    auto evaluated = test_eval(input);
+
+    REQUIRE(test_integer_object(evaluated, 4));
 }

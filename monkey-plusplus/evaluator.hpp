@@ -34,4 +34,12 @@ std::shared_ptr<Object> eval_infix_expression(const std::string &op, const std::
 
 std::shared_ptr<Object> eval_integer_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right);
 
+std::vector<std::shared_ptr<Object>> eval_expressions(const std::vector<std::shared_ptr<Expression>> &exps, const std::shared_ptr<Environment> &env);
+
+std::shared_ptr<Object> apply_function(const std::shared_ptr<Object> &fn, const std::vector<std::shared_ptr<Object>> &args);
+
+std::shared_ptr<Environment> extend_function_env(const std::shared_ptr<Function> &fn, const std::vector<std::shared_ptr<Object>> &args);
+
+std::shared_ptr<Object> unwrap_return_value(const std::shared_ptr<Object> &obj);
+
 #endif //MONKEY_PLUSPLUS_EVALUATOR_HPP

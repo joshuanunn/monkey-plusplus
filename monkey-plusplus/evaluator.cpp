@@ -35,6 +35,16 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::share
         auto params = f->parameters;
         auto body = f->body;
         return std::make_shared<Function>(Function{params, body, env});
+    } else if (auto c = std::dynamic_pointer_cast<CallExpression>(node)) {
+        auto function = eval(c->function, env);
+        if (is_error(function)) {
+            return function;
+        }
+        auto args = eval_expressions(c->arguments, env);
+        if (args.size() == 1 && is_error(args.at(0))) {
+            return args.at(0);
+        }
+        return apply_function(function, args);
     } else if (auto id = std::dynamic_pointer_cast<Identifier>(node)) {
         return eval_identifier(id, env);
     } else if (auto i = std::dynamic_pointer_cast<IfExpression>(node)) {
@@ -232,4 +242,52 @@ std::shared_ptr<Object> eval_integer_infix_expression(const std::string &op, con
     } else {
         return new_error("unknown operator: " + objecttype_literal(left->type()) + " " + op + " " + objecttype_literal(right->type()));
     }
+}
+
+std::vector<std::shared_ptr<Object>> eval_expressions(const std::vector<std::shared_ptr<Expression>> &exps, const std::shared_ptr<Environment> &env) {
+
+    std::vector<std::shared_ptr<Object>> result;
+
+    for (const auto &e: exps) {
+        auto evaluated = eval(e, env);
+        if (is_error(evaluated)) {
+            return std::vector<std::shared_ptr<Object>>{evaluated};
+        }
+        result.push_back(evaluated);
+    }
+
+    return result;
+}
+
+std::shared_ptr<Object> apply_function(const std::shared_ptr<Object> &fn, const std::vector<std::shared_ptr<Object>> &args) {
+    auto function = std::dynamic_pointer_cast<Function>(fn);
+
+    if (!function) {
+        return new_error("not a function.");
+    }
+
+    auto entended_env = extend_function_env(function, args);
+    auto evaluated = eval(function->body, entended_env);
+
+    return unwrap_return_value(evaluated);
+}
+
+std::shared_ptr<Environment> extend_function_env(const std::shared_ptr<Function> &fn, const std::vector<std::shared_ptr<Object>> &args) {
+    auto env = new_enclosed_environment(fn->env);
+
+    for (int i = 0; i < fn->parameters.size(); i++) {
+        env->set(fn->parameters.at(i)->value, args.at(i));
+    }
+
+    return env;
+}
+
+std::shared_ptr<Object> unwrap_return_value(const std::shared_ptr<Object> &obj) {
+    auto return_value = std::dynamic_pointer_cast<ReturnValue>(obj);
+
+    if (return_value) {
+        return return_value->value;
+    }
+
+    return obj;
 }
