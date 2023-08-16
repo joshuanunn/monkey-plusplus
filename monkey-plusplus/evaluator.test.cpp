@@ -224,6 +224,7 @@ if (10 > 1) {
   return 1;
 })", "unknown operator: BOOLEAN + BOOLEAN"),
             std::make_tuple("foobar", "identifier not found: foobar"),
+            std::make_tuple(R"("Hello" - "World")", "unknown operator: STRING - STRING"),
     };
 
     for (const auto &tt: tests) {
@@ -327,6 +328,25 @@ addTwo(2);)";
 
 TEST_CASE("Test String Literal") {
     std::string input = R"("Hello World!")";
+
+    auto evaluated = test_eval(input);
+
+    auto str = std::dynamic_pointer_cast<String>(evaluated);
+
+    // Check that we have a String Object by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!str) {
+        std::cerr << "object is not String." << std::endl;
+    }
+    REQUIRE(str);
+
+    if (str->value != "Hello World!") {
+        std::cerr << "String has wrong value. got=" << str->value << std::endl;
+    }
+    REQUIRE(str->value == "Hello World!");
+}
+
+TEST_CASE("Test String Concatenation") {
+    std::string input = R"("Hello" + " " + "World!")";
 
     auto evaluated = test_eval(input);
 

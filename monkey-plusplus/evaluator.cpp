@@ -205,6 +205,8 @@ std::shared_ptr<Object> eval_minus_prefix_operator_expression(const std::shared_
 std::shared_ptr<Object> eval_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right) {
     if (left->type() == ObjectType::INTEGER_OBJ && right->type() == ObjectType::INTEGER_OBJ) {
         return eval_integer_infix_expression(op, left, right);
+    } else if (left->type() == ObjectType::STRING_OBJ && right->type() == ObjectType::STRING_OBJ) {
+        return eval_string_infix_expression(op, left, right);
     } else if (op == "==") {
         return native_bool_to_boolean_object(left == right);
     } else if (op == "!=") {
@@ -244,6 +246,22 @@ std::shared_ptr<Object> eval_integer_infix_expression(const std::string &op, con
     } else {
         return new_error("unknown operator: " + objecttype_literal(left->type()) + " " + op + " " + objecttype_literal(right->type()));
     }
+}
+
+std::shared_ptr<Object> eval_string_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right) {
+    // Cast left and right Objects to String Objects and return GLOBAL_NULL if cast unexpectedly fails for either
+    auto left_val = std::dynamic_pointer_cast<String>(left);
+    auto right_val = std::dynamic_pointer_cast<String>(right);
+
+    if (!left_val || !right_val) {
+        return GLOBAL_NULL;
+    }
+
+    if (op != "+") {
+        return new_error("unknown operator: " + objecttype_literal(left->type()) + " " + op + " " + objecttype_literal(right->type()));
+    }
+
+    return std::make_shared<String>(String{left_val->value + right_val->value});
 }
 
 std::vector<std::shared_ptr<Object>> eval_expressions(const std::vector<std::shared_ptr<Expression>> &exps, const std::shared_ptr<Environment> &env) {
