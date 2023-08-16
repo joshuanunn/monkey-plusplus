@@ -27,6 +27,8 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;
+"foobar"
+"foo bar"
 )";
 
     auto test_input = Lexer(input);
@@ -105,12 +107,17 @@ if (5 < 10) {
             Token{TokenType::NOT_EQ, "!="},
             Token{TokenType::INT, "9"},
             Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::STRING, "foobar"},
+            Token{TokenType::STRING, "foo bar"},
             Token{TokenType::ENDOFFILE, ""},
     };
 
     for (const Token &t: tests) {
         auto tok = test_input.next_token();
-
+        if (!(tok == t)) {
+            std::cerr << "tokentype wrong. expected='" << tokentype_literal(t.type) << "(" << t.literal << ")', got='"
+                      << tokentype_literal(tok.type) << "(" << tok.literal << ")'" << std::endl;
+        }
         REQUIRE(tok == t);
     }
 }

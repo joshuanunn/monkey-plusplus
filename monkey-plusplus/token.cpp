@@ -29,6 +29,7 @@ std::map<TokenType, std::string> tokentype_literals = {
         {TokenType::ENDOFFILE, "EOF"},
         {TokenType::IDENT,     "IDENT"},
         {TokenType::INT,       "INT"},
+        {TokenType::STRING,    "STRING"},
         {TokenType::ASSIGN,    "="},
         {TokenType::PLUS,      "+"},
         {TokenType::MINUS,     "-"},

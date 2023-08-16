@@ -19,6 +19,8 @@ struct Lexer {
 
     char peek_char();
 
+    std::string read_string();
+
     Token next_token();
 
 private:

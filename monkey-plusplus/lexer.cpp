@@ -51,6 +51,17 @@ char Lexer::peek_char() {
     }
 }
 
+std::string Lexer::read_string() {
+    int start_position = position + 1;
+    while(true) {
+        read_char();
+        if (ch == '"' || ch == 0) {
+            break;
+        }
+    }
+    return input.substr(start_position, (position - start_position));
+}
+
 Token Lexer::next_token() {
     Token tok;
 
@@ -115,6 +126,10 @@ Token Lexer::next_token() {
             break;
         case (')'): {
             tok = {TokenType::RPAREN, std::string{ch}};
+        }
+            break;
+        case ('"'): {
+            tok = {TokenType::STRING, read_string()};
         }
             break;
         case ('{'): {
