@@ -94,6 +94,16 @@ std::string BooleanLiteral::string() const {
 
 BooleanLiteral::BooleanLiteral(const Token &t, bool v) : token{t}, value{v} {}
 
+std::string StringLiteral::token_literal() const {
+    return token.literal;
+}
+
+std::string StringLiteral::string() const {
+    return token.literal;
+}
+
+StringLiteral::StringLiteral(const Token &t, std::string v) : token{t}, value{std::move(v)} {}
+
 std::string PrefixExpression::token_literal() const {
     return token.literal;
 }

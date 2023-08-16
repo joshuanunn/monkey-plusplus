@@ -52,6 +52,8 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_boolean() const;
 
+    std::shared_ptr<Expression> parse_string_literal() const;
+
     std::shared_ptr<Expression> parse_prefix_expression();
 
     std::shared_ptr<Expression> parse_infix_expression(std::shared_ptr<Expression> left);

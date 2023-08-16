@@ -927,3 +927,46 @@ TEST_CASE("Test Call Expression Parameter Parsing") {
         }
     }
 }
+
+TEST_CASE("Test String Literal Expression") {
+    std::string input = R"("hello world";)";
+    std::string value = "hello world";
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program has not enough statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Can now cast ExpressionStatement to a StringLiteral
+    auto literal = std::dynamic_pointer_cast<StringLiteral>(expression_stmt->expression);
+
+    // Check that we have a StringLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!literal) {
+        std::cerr << "exp is not a StringLiteral." << std::endl;
+    }
+    REQUIRE(literal);
+
+    // Check StringLiteral in Expression Statement is correct
+    if (literal->value != value) {
+        std::cerr << "literal->value not " << value << ". got=" << literal->value << std::endl;
+    }
+    REQUIRE(literal->value == value);
+}

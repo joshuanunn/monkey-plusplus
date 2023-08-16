@@ -59,6 +59,17 @@ struct BooleanLiteral : public Expression {
     std::string string() const override;
 };
 
+struct StringLiteral : public Expression {
+    StringLiteral(const Token &t, std::string v);
+
+    Token token;
+    std::string value;
+
+    std::string token_literal() const override;
+
+    std::string string() const override;
+};
+
 struct PrefixExpression : public Expression {
     PrefixExpression(const Token &t, const std::string &o);
 
