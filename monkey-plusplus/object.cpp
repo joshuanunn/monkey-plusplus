@@ -67,6 +67,16 @@ std::string Boolean::inspect() const {
     return "true";
 }
 
+String::String(std::string v) : value(std::move(v)) {}
+
+ObjectType String::type() const {
+    return ObjectType::STRING_OBJ;
+}
+
+std::string String::inspect() const {
+    return value;
+}
+
 ObjectType Null::type() const {
     return ObjectType::NULL_OBJ;
 }
@@ -82,6 +92,7 @@ std::map<ObjectType, std::string> objecttype_literals = {
         {ObjectType::RETURN_VALUE_OBJ,"RETURN_VALUE"},
         {ObjectType::ERROR_OBJ,"ERROR"},
         {ObjectType::FUNCTION_OBJ,"FUNCTION"},
+        {ObjectType::STRING_OBJ,"STRING"},
 };
 
 std::string objecttype_literal(ObjectType t) {

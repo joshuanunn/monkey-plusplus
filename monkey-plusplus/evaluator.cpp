@@ -69,6 +69,8 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::share
         return std::make_shared<Integer>(Integer{il->value});
     } else if (auto bl = std::dynamic_pointer_cast<BooleanLiteral>(node)) {
         return native_bool_to_boolean_object(bl->value);
+    } else if (auto sl = std::dynamic_pointer_cast<StringLiteral>(node)) {
+        return std::make_shared<String>(String{sl->value});
     }
 
     return nullptr;

@@ -12,7 +12,8 @@ enum class ObjectType {
     NULL_OBJ,
     RETURN_VALUE_OBJ,
     ERROR_OBJ,
-    FUNCTION_OBJ
+    FUNCTION_OBJ,
+    STRING_OBJ
 };
 
 std::string objecttype_literal(ObjectType);
@@ -73,6 +74,16 @@ struct Boolean : public Object {
     explicit Boolean(bool v);
 
     bool value;
+
+    ObjectType type() const override;
+
+    std::string inspect() const override;
+};
+
+struct String : public Object {
+    explicit String(std::string v);
+
+    std::string value;
 
     ObjectType type() const override;
 

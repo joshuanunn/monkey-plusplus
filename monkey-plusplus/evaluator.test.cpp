@@ -324,3 +324,22 @@ addTwo(2);)";
 
     REQUIRE(test_integer_object(evaluated, 4));
 }
+
+TEST_CASE("Test String Literal") {
+    std::string input = R"("Hello World!")";
+
+    auto evaluated = test_eval(input);
+
+    auto str = std::dynamic_pointer_cast<String>(evaluated);
+
+    // Check that we have a String Object by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!str) {
+        std::cerr << "object is not String." << std::endl;
+    }
+    REQUIRE(str);
+
+    if (str->value != "Hello World!") {
+        std::cerr << "String has wrong value. got=" << str->value << std::endl;
+    }
+    REQUIRE(str->value == "Hello World!");
+}
