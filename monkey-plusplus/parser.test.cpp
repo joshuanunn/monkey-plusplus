@@ -970,3 +970,48 @@ TEST_CASE("Test String Literal Expression") {
     }
     REQUIRE(literal->value == value);
 }
+
+TEST_CASE("Test Parsing Array Literals") {
+    std::string input = "[1, 2 * 2, 3 + 3]";
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to an ArrayLiteral, as this is what we are expecting
+    auto array = std::dynamic_pointer_cast<ArrayLiteral>(expression_stmt->expression);
+
+    // Check that we have an ArrayLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!array) {
+        std::cerr << "exp is not an ArrayLiteral." << std::endl;
+    }
+    REQUIRE(array);
+
+    if (array->elements.size() != 3) {
+        std::cerr << "len(array->elements) not 3. got=" << array->elements.size() << std::endl;
+    }
+    REQUIRE(array->elements.size() == 3);
+
+    REQUIRE(test_literal_expression(array->elements.at(0), 1));
+    REQUIRE(test_infix_expression(array->elements.at(1), 2, "*", 2));
+    REQUIRE(test_infix_expression(array->elements.at(2), 3, "+", 3));
+}

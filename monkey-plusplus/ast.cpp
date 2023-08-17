@@ -182,6 +182,30 @@ std::string FunctionLiteral::string() const {
 
 FunctionLiteral::FunctionLiteral(const Token &t) : token(t) {}
 
+std::string ArrayLiteral::token_literal() const {
+    return token.literal;
+}
+
+std::string ArrayLiteral::string() const {
+    std::string out = token.literal + "[";
+
+    int counter = 0;
+
+    for (const auto &e: elements) {
+        if (counter != 0) {
+            out += ", ";
+        }
+        out += e->string();
+        counter++;
+    }
+
+    out += "]";
+
+    return out;
+}
+
+ArrayLiteral::ArrayLiteral(const Token &t) : token(t) {}
+
 std::string CallExpression::token_literal() const {
     return token.literal;
 }

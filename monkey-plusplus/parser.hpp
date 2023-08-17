@@ -42,6 +42,8 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_expression(Precedence precedence);
 
+    std::vector<std::shared_ptr<Expression>> parse_expression_list(TokenType end);
+
     std::shared_ptr<Expression> parse_identifier() const;
 
     std::shared_ptr<Expression> parse_integer_literal();
@@ -54,11 +56,11 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_string_literal() const;
 
+    std::shared_ptr<Expression> parse_array_literal();
+
     std::shared_ptr<Expression> parse_prefix_expression();
 
     std::shared_ptr<Expression> parse_infix_expression(std::shared_ptr<Expression> left);
-
-    std::vector<std::shared_ptr<Expression>> parse_call_arguments();
 
     std::shared_ptr<Expression> parse_call_expression(std::shared_ptr<Expression> function);
 

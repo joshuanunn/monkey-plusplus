@@ -131,6 +131,17 @@ struct FunctionLiteral : public Expression {
     std::string string() const override;
 };
 
+struct ArrayLiteral : public Expression {
+    explicit ArrayLiteral(const Token &t);
+
+    Token token;
+    std::vector<std::shared_ptr<Expression>> elements;
+
+    std::string token_literal() const override;
+
+    std::string string() const override;
+};
+
 struct CallExpression : public Expression {
     explicit CallExpression(const Token &t, std::shared_ptr<Expression> f);
 

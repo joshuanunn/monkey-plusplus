@@ -28,6 +28,7 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     register_prefix(TokenType::IF, std::mem_fn(&Parser::parse_if_expression));
     register_prefix(TokenType::FUNCTION, std::mem_fn(&Parser::parse_function_literal));
     register_prefix(TokenType::STRING, std::mem_fn(&Parser::parse_string_literal));
+    register_prefix(TokenType::LBRACKET, std::mem_fn(&Parser::parse_array_literal));
 
     // Register infix method pointers lookups for each token type
     register_infix(TokenType::PLUS, std::mem_fn(&Parser::parse_infix_expression));
@@ -158,6 +159,30 @@ std::shared_ptr<Expression> Parser::parse_expression(Precedence precedence) {
     return left_exp;
 }
 
+std::vector<std::shared_ptr<Expression>> Parser::parse_expression_list(TokenType end) {
+    std::vector<std::shared_ptr<Expression>> list;
+
+    if (peek_token_is(end)) {
+        next_token();
+        return list;
+    }
+
+    next_token();
+    list.push_back(parse_expression(Precedence::LOWEST));
+
+    while(peek_token_is(TokenType::COMMA)) {
+        next_token();
+        next_token();
+        list.push_back(parse_expression(Precedence::LOWEST));
+    }
+
+    if (!expect_peek(end)) {
+        return std::vector<std::shared_ptr<Expression>>{};
+    }
+
+    return list;
+}
+
 std::shared_ptr<Expression> Parser::parse_identifier() const {
     return std::make_shared<Identifier>(Identifier{cur_token, cur_token.literal});
 }
@@ -235,6 +260,14 @@ std::shared_ptr<Expression> Parser::parse_string_literal() const {
     return std::make_shared<StringLiteral>(StringLiteral{cur_token, cur_token.literal});
 }
 
+std::shared_ptr<Expression> Parser::parse_array_literal() {
+    auto array = std::make_shared<ArrayLiteral>(ArrayLiteral{cur_token});
+
+    array->elements = parse_expression_list(TokenType::RBRACKET);
+
+    return array;
+}
+
 std::shared_ptr<Expression> Parser::parse_prefix_expression() {
     auto expression = std::make_shared<PrefixExpression>(PrefixExpression{cur_token, cur_token.literal});
 
@@ -258,34 +291,10 @@ std::shared_ptr<Expression> Parser::parse_infix_expression(std::shared_ptr<Expre
     return expression;
 }
 
-std::vector<std::shared_ptr<Expression>> Parser::parse_call_arguments() {
-    std::vector<std::shared_ptr<Expression>> args;
-
-    if (peek_token_is(TokenType::RPAREN)) {
-        next_token();
-        return args;
-    }
-
-    next_token();
-    args.push_back(parse_expression(Precedence::LOWEST));
-
-    while (peek_token_is(TokenType::COMMA)) {
-        next_token();
-        next_token();
-        args.push_back(parse_expression(Precedence::LOWEST));
-    }
-
-    if (!expect_peek(TokenType::RPAREN)) {
-        return std::vector<std::shared_ptr<Expression>>{};
-    }
-
-    return args;
-}
-
 std::shared_ptr<Expression> Parser::parse_call_expression(std::shared_ptr<Expression> function) {
     auto exp = std::make_shared<CallExpression>(CallExpression{cur_token, function});
 
-    exp->arguments = parse_call_arguments();
+    exp->arguments = parse_expression_list(TokenType::RPAREN);
 
     return exp;
 }
