@@ -34,6 +34,27 @@ std::string Builtin::inspect() const {
     return "builtin function";
 }
 
+ObjectType Array::type() const {
+    return ObjectType::ARRAY_OBJ;
+}
+
+std::string Array::inspect() const {
+    std::string out = "[";
+
+    int counter = 0;
+    for (const auto &e: elements) {
+        if (counter > 0) {
+            out.append(", ");
+        }
+        out += e->inspect();
+        counter++;
+    }
+
+    out.append("]");
+
+    return out;
+}
+
 ReturnValue::ReturnValue(std::shared_ptr<Object> v) : value(v) {}
 
 ObjectType ReturnValue::type() const {
@@ -104,6 +125,7 @@ std::map<ObjectType, std::string> objecttype_literals = {
         {ObjectType::FUNCTION_OBJ,"FUNCTION"},
         {ObjectType::STRING_OBJ,"STRING"},
         {ObjectType::BUILTIN_OBJ,"BUILTIN"},
+        {ObjectType::ARRAY_OBJ,"ARRAY"},
 };
 
 std::string objecttype_literal(ObjectType t) {

@@ -405,3 +405,26 @@ TEST_CASE("Test Builtin Function Errors") {
         REQUIRE(err_obj->message == tt_expected);
     }
 }
+
+TEST_CASE("Test Array Literals") {
+    std::string input = "[1, 2 * 2, 3 + 3]";
+
+    auto evaluated = test_eval(input);
+
+    auto result = std::dynamic_pointer_cast<Array>(evaluated);
+
+    // Check that we have a String Object by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!result) {
+        std::cerr << "object is not Array." << std::endl;
+    }
+    REQUIRE(result);
+
+    if (result->elements.size() != 3) {
+        std::cerr << "array has wrong num of elements. got=" << result->elements.size() << std::endl;
+    }
+    REQUIRE(result->elements.size() == 3);
+
+    REQUIRE(test_integer_object(result->elements.at(0), 1));
+    REQUIRE(test_integer_object(result->elements.at(1), 4));
+    REQUIRE(test_integer_object(result->elements.at(2), 6));
+}

@@ -15,7 +15,8 @@ enum class ObjectType {
     ERROR_OBJ,
     FUNCTION_OBJ,
     STRING_OBJ,
-    BUILTIN_OBJ
+    BUILTIN_OBJ,
+    ARRAY_OBJ
 };
 
 std::string objecttype_literal(ObjectType);
@@ -49,6 +50,15 @@ struct Builtin : public Object {
     explicit Builtin(builtin_fn v);
 
     builtin_fn builtin_function;
+
+    ObjectType type() const override;
+
+    std::string inspect() const override;
+};
+
+struct Array : public Object {
+
+    std::vector<std::shared_ptr<Object>> elements;
 
     ObjectType type() const override;
 

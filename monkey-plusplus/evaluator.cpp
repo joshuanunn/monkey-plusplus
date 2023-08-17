@@ -45,6 +45,14 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::share
             return args.at(0);
         }
         return apply_function(function, args);
+    } else if (auto a = std::dynamic_pointer_cast<ArrayLiteral>(node)) {
+        auto elements = eval_expressions(a->elements, env);
+        if (elements.size() == 1 && is_error(elements.at(0))) {
+            return elements.at(0);
+        }
+        auto array = std::make_shared<Array>(Array{});
+        array->elements = std::move(elements);
+        return array;
     } else if (auto id = std::dynamic_pointer_cast<Identifier>(node)) {
         return eval_identifier(id, env);
     } else if (auto i = std::dynamic_pointer_cast<IfExpression>(node)) {
