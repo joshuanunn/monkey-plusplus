@@ -73,6 +73,16 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::share
             return right;
         }
         return eval_infix_expression(ie->op, left, right);
+    } else if (auto ix = std::dynamic_pointer_cast<IndexExpression>(node)) {
+        auto left = eval(ix->left, env);
+        if (is_error(left)) {
+            return left;
+        }
+        auto index = eval(ix->index, env);
+        if (is_error(index)) {
+            return index;
+        }
+        return eval_index_expression(left, index);
     } else if (auto il = std::dynamic_pointer_cast<IntegerLiteral>(node)) {
         return std::make_shared<Integer>(Integer{il->value});
     } else if (auto bl = std::dynamic_pointer_cast<BooleanLiteral>(node)) {
@@ -214,6 +224,14 @@ std::shared_ptr<Object> eval_minus_prefix_operator_expression(const std::shared_
     return std::make_shared<Integer>(Integer{-(original->value)});
 }
 
+std::shared_ptr<Object> eval_index_expression(const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &index) {
+    if (left->type() == ObjectType::ARRAY_OBJ && index->type() == ObjectType::INTEGER_OBJ) {
+        return eval_array_index_expression(left, index);
+    } else {
+        return new_error("index operator not supported: " + objecttype_literal(left->type()));
+    }
+}
+
 std::shared_ptr<Object> eval_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right) {
     if (left->type() == ObjectType::INTEGER_OBJ && right->type() == ObjectType::INTEGER_OBJ) {
         return eval_integer_infix_expression(op, left, right);
@@ -228,6 +246,25 @@ std::shared_ptr<Object> eval_infix_expression(const std::string &op, const std::
     } else {
         return new_error("unknown operator: " + objecttype_literal(left->type()) + " " + op + " " + objecttype_literal(right->type()));
     }
+}
+
+std::shared_ptr<Object> eval_array_index_expression(const std::shared_ptr<Object> &array, const std::shared_ptr<Object> &index) {
+    // Cast left and right Objects to Integer Objects and return GLOBAL_NULL if cast unexpectedly fails for either
+    auto array_object = std::dynamic_pointer_cast<Array>(array);
+    auto idx = std::dynamic_pointer_cast<Integer>(index);
+
+    if (!array_object || !idx) {
+        return GLOBAL_NULL;
+    }
+
+    auto index_value = idx->value;
+    auto max_value = array_object->elements.size() - 1;
+
+    if (index_value < 0 || index_value > max_value) {
+        return GLOBAL_NULL;
+    }
+
+    return array_object->elements.at(index_value);
 }
 
 std::shared_ptr<Object> eval_integer_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right) {

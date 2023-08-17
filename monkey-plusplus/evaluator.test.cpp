@@ -428,3 +428,37 @@ TEST_CASE("Test Array Literals") {
     REQUIRE(test_integer_object(result->elements.at(1), 4));
     REQUIRE(test_integer_object(result->elements.at(2), 6));
 }
+
+TEST_CASE("Test Array Index Expressions") {
+    std::vector<std::tuple<std::string, int>> tests = {
+            std::make_tuple("[1, 2, 3][0]", 1),
+            std::make_tuple("[1, 2, 3][1]", 2),
+            std::make_tuple("[1, 2, 3][2]", 3),
+            std::make_tuple("let i = 0; [1][i];", 1),
+            std::make_tuple("[1, 2, 3][1 + 1];", 3),
+            std::make_tuple("let myArray = [1, 2, 3]; myArray[2];", 3),
+            std::make_tuple("let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", 6),
+            std::make_tuple("let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i]", 2),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto evaluated = test_eval(tt_input);
+
+        REQUIRE(test_integer_object(evaluated, tt_expected));
+    }
+}
+
+TEST_CASE("Test Array Index Expression Errors") {
+    std::vector<std::string> tests = {
+            "[1, 2, 3][3]",
+            "[1, 2, 3][-1]",
+    };
+
+    for (const auto &tt_input: tests) {
+        auto evaluated = test_eval(tt_input);
+
+        REQUIRE(test_null_object(evaluated));
+    }
+}
