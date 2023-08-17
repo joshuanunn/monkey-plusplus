@@ -1,6 +1,7 @@
 #ifndef MONKEY_PLUSPLUS_OBJECT_HPP
 #define MONKEY_PLUSPLUS_OBJECT_HPP
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -13,7 +14,8 @@ enum class ObjectType {
     RETURN_VALUE_OBJ,
     ERROR_OBJ,
     FUNCTION_OBJ,
-    STRING_OBJ
+    STRING_OBJ,
+    BUILTIN_OBJ
 };
 
 std::string objecttype_literal(ObjectType);
@@ -26,6 +28,8 @@ struct Object {
     virtual std::string inspect() const = 0;
 };
 
+typedef std::function<std::shared_ptr<Object>(std::vector<std::shared_ptr<Object>>)> builtin_fn;
+
 struct Environment;
 
 struct Function : public Object {
@@ -34,6 +38,17 @@ struct Function : public Object {
     std::vector<std::shared_ptr<Identifier>> parameters;
     std::shared_ptr<BlockStatement> body;
     std::shared_ptr<Environment> env;
+
+    ObjectType type() const override;
+
+    std::string inspect() const override;
+};
+
+struct Builtin : public Object {
+
+    explicit Builtin(builtin_fn v);
+
+    builtin_fn builtin_function;
 
     ObjectType type() const override;
 

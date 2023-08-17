@@ -2,6 +2,7 @@
 #define MONKEY_PLUSPLUS_EVALUATOR_HPP
 
 #include "ast.hpp"
+#include "builtins.hpp"
 #include "object.hpp"
 
 std::shared_ptr<Null> get_null_ref();

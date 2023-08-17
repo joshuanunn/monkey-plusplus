@@ -78,11 +78,15 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::share
 
 std::shared_ptr<Object> eval_identifier(const std::shared_ptr<Identifier> &node, const std::shared_ptr<Environment> &env) {
     auto[val, ok] = env->get(node->value);
-    if (!ok) {
-        return new_error("identifier not found: " + node->value);
+    if (ok) {
+        return val;
     }
 
-    return val;
+    if (auto builtin = get_builtin_fn(node->value)) {
+        return builtin;
+    }
+
+    return new_error("identifier not found: " + node->value);
 }
 
 std::shared_ptr<Object> eval_if_expression(const std::shared_ptr<IfExpression> &ie, const std::shared_ptr<Environment> &env) {
@@ -280,16 +284,17 @@ std::vector<std::shared_ptr<Object>> eval_expressions(const std::vector<std::sha
 }
 
 std::shared_ptr<Object> apply_function(const std::shared_ptr<Object> &fn, const std::vector<std::shared_ptr<Object>> &args) {
-    auto function = std::dynamic_pointer_cast<Function>(fn);
-
-    if (!function) {
-        return new_error("not a function.");
+    if (auto function = std::dynamic_pointer_cast<Function>(fn)) {
+        auto entended_env = extend_function_env(function, args);
+        auto evaluated = eval(function->body, entended_env);
+        return unwrap_return_value(evaluated);
     }
 
-    auto entended_env = extend_function_env(function, args);
-    auto evaluated = eval(function->body, entended_env);
+    if (auto builtin = std::dynamic_pointer_cast<Builtin>(fn)) {
+        return builtin->builtin_function(args);
+    }
 
-    return unwrap_return_value(evaluated);
+    return new_error("not a function.");
 }
 
 std::shared_ptr<Environment> extend_function_env(const std::shared_ptr<Function> &fn, const std::vector<std::shared_ptr<Object>> &args) {

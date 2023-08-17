@@ -24,6 +24,16 @@ std::string Function::inspect() const {
     return out;
 }
 
+Builtin::Builtin(builtin_fn v) : builtin_function(v) {}
+
+ObjectType Builtin::type() const {
+    return ObjectType::BUILTIN_OBJ;
+}
+
+std::string Builtin::inspect() const {
+    return "builtin function";
+}
+
 ReturnValue::ReturnValue(std::shared_ptr<Object> v) : value(v) {}
 
 ObjectType ReturnValue::type() const {
@@ -93,6 +103,7 @@ std::map<ObjectType, std::string> objecttype_literals = {
         {ObjectType::ERROR_OBJ,"ERROR"},
         {ObjectType::FUNCTION_OBJ,"FUNCTION"},
         {ObjectType::STRING_OBJ,"STRING"},
+        {ObjectType::BUILTIN_OBJ,"BUILTIN"},
 };
 
 std::string objecttype_literal(ObjectType t) {

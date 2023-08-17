@@ -363,3 +363,45 @@ TEST_CASE("Test String Concatenation") {
     }
     REQUIRE(str->value == "Hello World!");
 }
+
+TEST_CASE("Test Builtin Functions") {
+    std::vector<std::tuple<std::string, int>> tests = {
+            //std::make_tuple(R"(len(""))", 0),
+            std::make_tuple(R"(len("four"))", 4),
+            std::make_tuple(R"(len("hello world"))", 11),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto evaluated = test_eval(tt_input);
+
+        REQUIRE(test_integer_object(evaluated, tt_expected));
+    }
+}
+
+TEST_CASE("Test Builtin Function Errors") {
+    std::vector<std::tuple<std::string, std::string>> tests = {
+            std::make_tuple("len(1)", "argument to 'len' not supported."),
+            std::make_tuple(R"(len("one", "two"))", "wrong number of arguments. got=2, want=1"),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto evaluated = test_eval(tt_input);
+
+        auto err_obj = std::dynamic_pointer_cast<Error>(evaluated);
+
+        // Check that we have an Error Object by checking if the dynamic pointer cast fails (returns nullptr)
+        if (!err_obj) {
+            std::cerr << "object is not Error." << std::endl;
+        }
+        REQUIRE(err_obj);
+
+        if (err_obj->message != tt_expected) {
+            std::cerr << "wrong error message. expected=" << tt_expected << ", got=" << err_obj->message << std::endl;
+        }
+        REQUIRE(err_obj->message == tt_expected);
+    }
+}
