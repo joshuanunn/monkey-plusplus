@@ -187,7 +187,7 @@ std::string ArrayLiteral::token_literal() const {
 }
 
 std::string ArrayLiteral::string() const {
-    std::string out = token.literal + "[";
+    std::string out = "[";
 
     int counter = 0;
 
@@ -205,6 +205,22 @@ std::string ArrayLiteral::string() const {
 }
 
 ArrayLiteral::ArrayLiteral(const Token &t) : token(t) {}
+
+std::string IndexExpression::token_literal() const {
+    return token.literal;
+}
+
+std::string IndexExpression::string() const {
+    std::string out = "(";
+    out += left->string();
+    out += "[";
+    out += index->string();
+    out += "])";
+
+    return out;
+}
+
+IndexExpression::IndexExpression(const Token &t) : token(t) {}
 
 std::string CallExpression::token_literal() const {
     return token.literal;

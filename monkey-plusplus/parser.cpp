@@ -11,7 +11,8 @@ std::map<TokenType, Precedence> precedences = {
         {TokenType::MINUS, Precedence::SUM},
         {TokenType::SLASH, Precedence::PRODUCT},
         {TokenType::ASTERISK, Precedence::PRODUCT},
-        {TokenType::LPAREN, Precedence::CALL}
+        {TokenType::LPAREN, Precedence::CALL},
+        {TokenType::LBRACKET, Precedence::INDEX},
 };
 
 Parser::Parser(std::unique_ptr<Lexer> lexer) {
@@ -40,6 +41,7 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     register_infix(TokenType::LT, std::mem_fn(&Parser::parse_infix_expression));
     register_infix(TokenType::GT, std::mem_fn(&Parser::parse_infix_expression));
     register_infix(TokenType::LPAREN, std::mem_fn(&Parser::parse_call_expression));
+    register_infix(TokenType::LBRACKET, std::mem_fn(&Parser::parse_index_expression));
 
     // Read two tokens, so cur_token and peek_token are both set
     next_token();
@@ -276,6 +278,22 @@ std::shared_ptr<Expression> Parser::parse_prefix_expression() {
     expression->right = parse_expression(Precedence::PREFIX);
 
     return expression;
+}
+
+std::shared_ptr<Expression> Parser::parse_index_expression(std::shared_ptr<Expression> left) {
+    auto exp = std::make_shared<IndexExpression>(IndexExpression{cur_token});
+
+    exp->left = std::move(left);
+
+    next_token();
+
+    exp->index = parse_expression(Precedence::LOWEST);
+
+    if (!expect_peek(TokenType::RBRACKET)) {
+        return nullptr;
+    }
+
+    return exp;
 }
 
 std::shared_ptr<Expression> Parser::parse_infix_expression(std::shared_ptr<Expression> left) {

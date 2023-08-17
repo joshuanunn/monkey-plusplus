@@ -507,6 +507,8 @@ TEST_CASE("Test Operator Precedence Parsing") {
             std::make_tuple("a + add(b * c) + d", "((a + add((b * c))) + d)"),
             std::make_tuple("add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))", "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"),
             std::make_tuple("add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))"),
+            std::make_tuple("a * [1, 2, 3, 4][b * c] * d", "((a * ([1, 2, 3, 4][(b * c)])) * d)"),
+            std::make_tuple("add(a * b[2], b[1], 2 * [1, 2][1])", "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))"),
     };
 
     for (const auto &tt: tests) {
@@ -1014,4 +1016,43 @@ TEST_CASE("Test Parsing Array Literals") {
     REQUIRE(test_literal_expression(array->elements.at(0), 1));
     REQUIRE(test_infix_expression(array->elements.at(1), 2, "*", 2));
     REQUIRE(test_infix_expression(array->elements.at(2), 3, "+", 3));
+}
+
+TEST_CASE("Test Parsing Index Expressions") {
+    std::string input = "myArray[1 + 1]";
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to an IndexExpression, as this is what we are expecting
+    auto index_exp = std::dynamic_pointer_cast<IndexExpression>(expression_stmt->expression);
+
+    // Check that we have an IndexExpression by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!index_exp) {
+        std::cerr << "exp is not an IndexExpression." << std::endl;
+    }
+    REQUIRE(index_exp);
+
+    REQUIRE(test_identifier(index_exp->left, "myArray"));
+    REQUIRE(test_infix_expression(index_exp->index, 1, "+", 1));
 }

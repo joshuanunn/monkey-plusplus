@@ -19,7 +19,8 @@ enum class Precedence {
     SUM,            // +
     PRODUCT,        // *
     PREFIX,         // -X or !X
-    CALL            // my_function(X)
+    CALL,           // my_function(X)
+    INDEX           // array[index]
 };
 
 struct Parser {
@@ -59,6 +60,8 @@ struct Parser {
     std::shared_ptr<Expression> parse_array_literal();
 
     std::shared_ptr<Expression> parse_prefix_expression();
+
+    std::shared_ptr<Expression> parse_index_expression(std::shared_ptr<Expression> left);
 
     std::shared_ptr<Expression> parse_infix_expression(std::shared_ptr<Expression> left);
 
