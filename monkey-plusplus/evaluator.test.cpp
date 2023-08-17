@@ -366,7 +366,7 @@ TEST_CASE("Test String Concatenation") {
 
 TEST_CASE("Test Builtin Functions") {
     std::vector<std::tuple<std::string, int>> tests = {
-            //std::make_tuple(R"(len(""))", 0),
+            std::make_tuple(R"(len(""))", 0),
             std::make_tuple(R"(len("four"))", 4),
             std::make_tuple(R"(len("hello world"))", 11),
     };
