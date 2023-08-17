@@ -46,6 +46,8 @@ std::map<TokenType, std::string> tokentype_literals = {
         {TokenType::RPAREN,    ")"},
         {TokenType::LBRACE,    "{"},
         {TokenType::RBRACE,    "}"},
+        {TokenType::LBRACKET,  "["},
+        {TokenType::RBRACKET,  "]"},
         {TokenType::FUNCTION,  "FUNCTION"},
         {TokenType::LET,       "LET"},
         {TokenType::TRUE,      "TRUE"},

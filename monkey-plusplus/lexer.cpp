@@ -140,6 +140,14 @@ Token Lexer::next_token() {
             tok = {TokenType::RBRACE, std::string{ch}};
         }
             break;
+        case ('['): {
+            tok = {TokenType::LBRACKET, std::string{ch}};
+        }
+            break;
+        case (']'): {
+            tok = {TokenType::RBRACKET, std::string{ch}};
+        }
+            break;
         case (0): {
             tok = {TokenType::ENDOFFILE, ""};
         }
