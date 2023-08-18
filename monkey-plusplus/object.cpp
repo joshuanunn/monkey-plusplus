@@ -34,6 +34,14 @@ std::string Builtin::inspect() const {
     return "builtin function";
 }
 
+Array::Array() = default;
+
+Array::Array(const Array &a) {
+    for (const auto &e: a.elements) {
+        elements.push_back(e);
+    }
+}
+
 ObjectType Array::type() const {
     return ObjectType::ARRAY_OBJ;
 }

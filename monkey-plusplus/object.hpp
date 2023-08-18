@@ -57,6 +57,9 @@ struct Builtin : public Object {
 };
 
 struct Array : public Object {
+    explicit Array();
+
+    Array(const Array &a);
 
     std::vector<std::shared_ptr<Object>> elements;
 

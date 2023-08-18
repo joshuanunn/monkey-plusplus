@@ -5,15 +5,107 @@ std::shared_ptr<Object> len(std::vector<std::shared_ptr<Object>> args) {
         return new_error("wrong number of arguments. got=" + std::to_string(args.size()) + ", want=1");
     }
 
-    if (auto arg = std::dynamic_pointer_cast<String>(args.at(0))) {
-        return std::make_shared<Integer>(arg->value.size());
+    if (auto array = std::dynamic_pointer_cast<Array>(args.at(0))) {
+        return std::make_shared<Integer>(array->elements.size());
+    } else if (auto str = std::dynamic_pointer_cast<String>(args.at(0))) {
+        return std::make_shared<Integer>(str->value.size());
     }
 
     return new_error("argument to 'len' not supported.");
 }
 
+std::shared_ptr<Object> first(std::vector<std::shared_ptr<Object>> args) {
+    if (args.size() != 1) {
+        return new_error("wrong number of arguments. got=" + std::to_string(args.size()) + ", want=1");
+    }
+
+    if (args.at(0)->type() != ObjectType::ARRAY_OBJ) {
+        return new_error("argument to 'first' must be ARRAY, got " + objecttype_literal(args.at(0)->type()));
+    }
+
+    if (auto arr = std::dynamic_pointer_cast<Array>(args.at(0))) {
+        if (!arr->elements.empty()) {
+            return arr->elements.at(0);
+        }
+    }
+
+    return get_null_ref();
+}
+
+std::shared_ptr<Object> last(std::vector<std::shared_ptr<Object>> args) {
+    if (args.size() != 1) {
+        return new_error("wrong number of arguments. got=" + std::to_string(args.size()) + ", want=1");
+    }
+
+    if (args.at(0)->type() != ObjectType::ARRAY_OBJ) {
+        return new_error("argument to 'last' must be ARRAY, got " + objecttype_literal(args.at(0)->type()));
+    }
+
+    if (auto arr = std::dynamic_pointer_cast<Array>(args.at(0))) {
+        auto length = arr->elements.size();
+        if (length > 0) {
+            return arr->elements.at(length-1);
+        }
+    }
+
+    return get_null_ref();
+}
+
+std::shared_ptr<Object> rest(std::vector<std::shared_ptr<Object>> args) {
+    if (args.size() != 1) {
+        return new_error("wrong number of arguments. got=" + std::to_string(args.size()) + ", want=1");
+    }
+
+    if (args.at(0)->type() != ObjectType::ARRAY_OBJ) {
+        return new_error("argument to 'rest' must be ARRAY, got " + objecttype_literal(args.at(0)->type()));
+    }
+
+    if (auto arr = std::dynamic_pointer_cast<Array>(args.at(0))) {
+        auto length = arr->elements.size();
+        if (length > 0) {
+            std::vector<std::shared_ptr<Object>> new_elements;
+
+            // Iterate over vector from second element onwards (i.e. skip first element)
+            for (auto i = std::next(arr->elements.begin()); i != arr->elements.end(); ++i) {
+                new_elements.push_back(*i);
+            }
+            auto new_array = std::make_shared<Array>(Array{});
+            new_array->elements = std::move(new_elements);
+
+            return new_array;
+        }
+    }
+
+    return get_null_ref();
+}
+
+std::shared_ptr<Object> push(std::vector<std::shared_ptr<Object>> args) {
+    if (args.size() != 2) {
+        return new_error("wrong number of arguments. got=" + std::to_string(args.size()) + ", want=2");
+    }
+
+    if (args.at(0)->type() != ObjectType::ARRAY_OBJ) {
+        return new_error("argument to 'push' must be ARRAY, got " + objecttype_literal(args.at(0)->type()));
+    }
+
+    if (auto arr = std::dynamic_pointer_cast<Array>(args.at(0))) {
+        // Copy existing array and add new element to end
+        auto new_array = std::make_shared<Array>(Array(*arr));
+
+        new_array->elements.push_back(std::move(args.at(1)));
+
+        return new_array;
+    }
+
+    return get_null_ref();
+}
+
 std::map<std::string, builtin_fn> builtins = {
         {"len", len},
+        {"first", first},
+        {"last", last},
+        {"rest", rest},
+        {"push", push},
 };
 
 std::shared_ptr<Builtin> get_builtin_fn(const std::string &name) {

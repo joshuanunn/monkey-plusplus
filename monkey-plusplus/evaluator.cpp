@@ -14,23 +14,49 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::share
     // Statements
     if (auto p = std::dynamic_pointer_cast<Program>(node)) {
         return eval_program(p, env);
-    } else if (auto l = std::dynamic_pointer_cast<LetStatement>(node)) {
-        auto val = eval(l->value, env);
-        if (is_error(val)) {
-            return val;
-        }
-        env->set(l->name->value, val);
+    } else if (auto b = std::dynamic_pointer_cast<BlockStatement>(node)) {
+        return eval_block_statement(b, env);
+    } else if (auto e = std::dynamic_pointer_cast<ExpressionStatement>(node)) {
+        return eval(e->expression, env);
     } else if (auto r = std::dynamic_pointer_cast<ReturnStatement>(node)) {
         auto val = eval(r->return_value, env);
         if (is_error(val)) {
             return val;
         }
         return std::make_shared<ReturnValue>(ReturnValue{val});
-    } else if (auto b = std::dynamic_pointer_cast<BlockStatement>(node)) {
-        return eval_block_statement(b, env);
-    } else if (auto e = std::dynamic_pointer_cast<ExpressionStatement>(node)) {
-        return eval(e->expression, env);
+    } else if (auto l = std::dynamic_pointer_cast<LetStatement>(node)) {
+        auto val = eval(l->value, env);
+        if (is_error(val)) {
+            return val;
+        }
+        env->set(l->name->value, val);
     // Expressions
+    } else if (auto il = std::dynamic_pointer_cast<IntegerLiteral>(node)) {
+        return std::make_shared<Integer>(Integer{il->value});
+    } else if (auto sl = std::dynamic_pointer_cast<StringLiteral>(node)) {
+        return std::make_shared<String>(String{sl->value});
+    } else if (auto bl = std::dynamic_pointer_cast<BooleanLiteral>(node)) {
+        return native_bool_to_boolean_object(bl->value);
+    } else if (auto pe = std::dynamic_pointer_cast<PrefixExpression>(node)) {
+        auto right = eval(pe->right, env);
+        if (is_error(right)) {
+            return right;
+        }
+        return eval_prefix_expression(pe->op, right);
+    } else if (auto ie = std::dynamic_pointer_cast<InfixExpression>(node)) {
+        auto left = eval(ie->left, env);
+        if (is_error(left)) {
+            return left;
+        }
+        auto right = eval(ie->right, env);
+        if (is_error(right)) {
+            return right;
+        }
+        return eval_infix_expression(ie->op, left, right);
+    } else if (auto i = std::dynamic_pointer_cast<IfExpression>(node)) {
+        return eval_if_expression(i, env);
+    } else if (auto id = std::dynamic_pointer_cast<Identifier>(node)) {
+        return eval_identifier(id, env);
     } else if (auto f = std::dynamic_pointer_cast<FunctionLiteral>(node)) {
         auto params = f->parameters;
         auto body = f->body;
@@ -53,26 +79,6 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::share
         auto array = std::make_shared<Array>(Array{});
         array->elements = std::move(elements);
         return array;
-    } else if (auto id = std::dynamic_pointer_cast<Identifier>(node)) {
-        return eval_identifier(id, env);
-    } else if (auto i = std::dynamic_pointer_cast<IfExpression>(node)) {
-        return eval_if_expression(i, env);
-    } else if (auto pe = std::dynamic_pointer_cast<PrefixExpression>(node)) {
-        auto right = eval(pe->right, env);
-        if (is_error(right)) {
-            return right;
-        }
-        return eval_prefix_expression(pe->op, right);
-    } else if (auto ie = std::dynamic_pointer_cast<InfixExpression>(node)) {
-        auto left = eval(ie->left, env);
-        if (is_error(left)) {
-            return left;
-        }
-        auto right = eval(ie->right, env);
-        if (is_error(right)) {
-            return right;
-        }
-        return eval_infix_expression(ie->op, left, right);
     } else if (auto ix = std::dynamic_pointer_cast<IndexExpression>(node)) {
         auto left = eval(ix->left, env);
         if (is_error(left)) {
@@ -83,12 +89,6 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::share
             return index;
         }
         return eval_index_expression(left, index);
-    } else if (auto il = std::dynamic_pointer_cast<IntegerLiteral>(node)) {
-        return std::make_shared<Integer>(Integer{il->value});
-    } else if (auto bl = std::dynamic_pointer_cast<BooleanLiteral>(node)) {
-        return native_bool_to_boolean_object(bl->value);
-    } else if (auto sl = std::dynamic_pointer_cast<StringLiteral>(node)) {
-        return std::make_shared<String>(String{sl->value});
     }
 
     return nullptr;

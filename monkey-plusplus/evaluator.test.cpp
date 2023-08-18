@@ -364,11 +364,15 @@ TEST_CASE("Test String Concatenation") {
     REQUIRE(str->value == "Hello World!");
 }
 
-TEST_CASE("Test Builtin Functions") {
+TEST_CASE("Test Builtin Functions Returning Integers") {
     std::vector<std::tuple<std::string, int>> tests = {
             std::make_tuple(R"(len(""))", 0),
             std::make_tuple(R"(len("four"))", 4),
             std::make_tuple(R"(len("hello world"))", 11),
+            std::make_tuple(R"(len([1, 2, 3]))", 3),
+            std::make_tuple(R"(len([]))", 0),
+            std::make_tuple(R"(first([1, 2, 3]))", 1),
+            std::make_tuple(R"(last([1, 2, 3]))", 3),
     };
 
     for (const auto &tt: tests) {
@@ -380,10 +384,63 @@ TEST_CASE("Test Builtin Functions") {
     }
 }
 
-TEST_CASE("Test Builtin Function Errors") {
+TEST_CASE("Test Builtin Functions Returning Arrays") {
+    std::vector<std::tuple<std::string, std::vector<int>>> tests = {
+            std::make_tuple(R"(rest([1, 2, 3]))", std::vector<int>{2, 3}),
+            std::make_tuple(R"(rest([1, 2]))", std::vector<int>{2}),
+            std::make_tuple(R"(rest([1]))", std::vector<int>{}),
+            std::make_tuple(R"(push([1, 2], 3))", std::vector<int>{1, 2, 3}),
+            std::make_tuple(R"(push([1], 2))", std::vector<int>{1, 2}),
+            std::make_tuple(R"(push([], 1))", std::vector<int>{1}),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto evaluated = test_eval(tt_input);
+
+        auto array = std::dynamic_pointer_cast<Array>(evaluated);
+
+        // Check that we have an Array Object by checking if the dynamic pointer cast fails (returns nullptr)
+        if (!array) {
+            std::cerr << "object is not Array." << std::endl;
+        }
+        REQUIRE(array);
+
+        if (array->elements.size() != tt_expected.size()) {
+            std::cerr << "wrong num of elements. want=" << tt_expected.size()
+                      << ", got=" << array->elements.size() << std::endl;
+        }
+        REQUIRE(array->elements.size() == tt_expected.size());
+
+        for (int i = 0; i < tt_expected.size(); i++) {
+            REQUIRE(test_integer_object(array->elements.at(i), tt_expected.at(i)));
+        }
+    }
+}
+
+TEST_CASE("Test Builtin Functions Returning Null") {
+    std::vector<std::string> tests = {
+            R"(first([]))",
+            R"(last([]))",
+            R"(rest([]))",
+    };
+
+    for (const auto &tt: tests) {
+
+        auto evaluated = test_eval(tt);
+
+        REQUIRE(test_null_object(evaluated));
+    }
+}
+
+TEST_CASE("Test Builtin Function Returning Errors") {
     std::vector<std::tuple<std::string, std::string>> tests = {
             std::make_tuple("len(1)", "argument to 'len' not supported."),
             std::make_tuple(R"(len("one", "two"))", "wrong number of arguments. got=2, want=1"),
+            std::make_tuple(R"(first(1))", "argument to 'first' must be ARRAY, got INTEGER"),
+            std::make_tuple(R"(last(1))", "argument to 'last' must be ARRAY, got INTEGER"),
+            std::make_tuple(R"(push(1, 1))", "argument to 'push' must be ARRAY, got INTEGER"),
     };
 
     for (const auto &tt: tests) {
