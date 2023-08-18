@@ -545,3 +545,81 @@ shortGreeting()
         REQUIRE(test_integer_object(val, tt_expected));
     }
 }
+
+TEST_CASE("Building Map Example from Book") {
+    std::string input = R"(
+let map = fn(arr, f) {
+  let iter = fn(arr, accumulated) {
+    if (len(arr) == 0) {
+      accumulated
+    } else {
+      iter(rest(arr), push(accumulated, f(first(arr))));
+    }
+  };
+
+  iter(arr, []);
+};
+
+let a = [1, 2, 3, 4];
+let double = fn(x) { x * 2 };
+map(a, double);
+)";
+
+    std::vector<int> expected = {2, 4, 6, 8};
+
+    auto evaluated = test_eval(input);
+
+    auto array = std::dynamic_pointer_cast<Array>(evaluated);
+
+    // Check that we have an Array Object by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!array) {
+        std::cerr << "object is not Array." << std::endl;
+    }
+    REQUIRE(array);
+
+    if (array->elements.size() != expected.size()) {
+        std::cerr << "wrong num of elements. want=" << expected.size()
+                  << ", got=" << array->elements.size() << std::endl;
+    }
+    REQUIRE(array->elements.size() == expected.size());
+
+    for (int i = 0; i < expected.size(); i++) {
+        REQUIRE(test_integer_object(array->elements.at(i), expected.at(i)));
+    }
+}
+
+TEST_CASE("Building Sum Reduce Example from Book") {
+    std::string input = R"(
+let reduce = fn(arr, initial, f) {
+  let iter = fn(arr, result) {
+    if (len(arr) == 0) {
+      result
+    } else {
+      iter(rest(arr), f(result, first(arr)));
+    }
+  };
+
+  iter(arr, initial);
+};
+
+let sum = fn(arr) {
+  reduce(arr, 0, fn(initial, el) { initial + el });
+}
+
+sum([1, 2, 3, 4, 5]);
+)";
+
+    int expected = 15;
+
+    auto evaluated = test_eval(input);
+
+    auto val = std::dynamic_pointer_cast<Integer>(evaluated);
+
+    // Check that we have an Integer Object by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!val) {
+        std::cerr << "object is not Integer." << std::endl;
+    }
+    REQUIRE(val);
+
+    REQUIRE(test_integer_object(val, expected));
+}
