@@ -330,8 +330,8 @@ std::vector<std::shared_ptr<Object>> eval_expressions(const std::vector<std::sha
 
 std::shared_ptr<Object> apply_function(const std::shared_ptr<Object> &fn, const std::vector<std::shared_ptr<Object>> &args) {
     if (auto function = std::dynamic_pointer_cast<Function>(fn)) {
-        auto entended_env = extend_function_env(function, args);
-        auto evaluated = eval(function->body, entended_env);
+        auto extended_env = extend_function_env(function, args);
+        auto evaluated = eval(function->body, extended_env);
         return unwrap_return_value(evaluated);
     }
 
