@@ -30,6 +30,7 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
     register_prefix(TokenType::FUNCTION, std::mem_fn(&Parser::parse_function_literal));
     register_prefix(TokenType::STRING, std::mem_fn(&Parser::parse_string_literal));
     register_prefix(TokenType::LBRACKET, std::mem_fn(&Parser::parse_array_literal));
+    register_prefix(TokenType::LBRACE, std::mem_fn(&Parser::parse_hash_literal));
 
     // Register infix method pointers lookups for each token type
     register_infix(TokenType::PLUS, std::mem_fn(&Parser::parse_infix_expression));
@@ -268,6 +269,34 @@ std::shared_ptr<Expression> Parser::parse_array_literal() {
     array->elements = parse_expression_list(TokenType::RBRACKET);
 
     return array;
+}
+
+std::shared_ptr<Expression> Parser::parse_hash_literal() {
+    auto hash = std::make_shared<HashLiteral>(HashLiteral{cur_token});
+
+    while(!peek_token_is(TokenType::RBRACE)) {
+        next_token();
+        auto key = parse_expression(Precedence::LOWEST);
+
+        if(!expect_peek(TokenType::COLON)) {
+            return nullptr;
+        }
+
+        next_token();
+        auto value = parse_expression(Precedence::LOWEST);
+
+        hash->pairs[std::move(key)] = std::move(value);
+
+        if (!peek_token_is(TokenType::RBRACE) && !expect_peek(TokenType::COMMA)) {
+            return nullptr;
+        }
+    }
+
+    if (!expect_peek(TokenType::RBRACE)) {
+        return nullptr;
+    }
+
+    return hash;
 }
 
 std::shared_ptr<Expression> Parser::parse_prefix_expression() {

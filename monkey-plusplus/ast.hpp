@@ -142,6 +142,17 @@ struct ArrayLiteral : public Expression {
     std::string string() const override;
 };
 
+struct HashLiteral : public Expression {
+    explicit HashLiteral(const Token &t);
+
+    Token token;
+    std::map<std::shared_ptr<Expression>,std::shared_ptr<Expression>> pairs;
+
+    std::string token_literal() const override;
+
+    std::string string() const override;
+};
+
 struct IndexExpression : public Expression {
     explicit IndexExpression(const Token &t);
 

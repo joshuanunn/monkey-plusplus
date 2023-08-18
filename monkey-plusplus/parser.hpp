@@ -59,6 +59,8 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_array_literal();
 
+    std::shared_ptr<Expression> parse_hash_literal();
+
     std::shared_ptr<Expression> parse_prefix_expression();
 
     std::shared_ptr<Expression> parse_index_expression(std::shared_ptr<Expression> left);

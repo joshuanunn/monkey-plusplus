@@ -206,6 +206,31 @@ std::string ArrayLiteral::string() const {
 
 ArrayLiteral::ArrayLiteral(const Token &t) : token(t) {}
 
+std::string HashLiteral::token_literal() const {
+    return token.literal;
+}
+
+std::string HashLiteral::string() const {
+    std::string out = "{";
+
+    int counter = 0;
+
+    for (const auto &p: pairs) {
+        if (counter++ != 0) {
+            out += ", ";
+        }
+
+        const auto[key, value] = p;
+        out += key->string() + ":" + value->string();
+    }
+
+    out += "}";
+
+    return out;
+}
+
+HashLiteral::HashLiteral(const Token &t) : token(t) {}
+
 std::string IndexExpression::token_literal() const {
     return token.literal;
 }

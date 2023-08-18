@@ -1056,3 +1056,287 @@ TEST_CASE("Test Parsing Index Expressions") {
     REQUIRE(test_identifier(index_exp->left, "myArray"));
     REQUIRE(test_infix_expression(index_exp->index, 1, "+", 1));
 }
+
+TEST_CASE("Test Parsing Empty Hash Literal") {
+    std::string input = "{}";
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to a HashLiteral, as this is what we are expecting
+    auto hash = std::dynamic_pointer_cast<HashLiteral>(expression_stmt->expression);
+
+    // Check that we have a HashLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!hash) {
+        std::cerr << "stmt->expression is not a HashLiteral." << std::endl;
+    }
+    REQUIRE(hash);
+
+    if (!hash->pairs.empty()) {
+        std::cerr << "hash->pairs has wrong length. got=" << hash->pairs.size() << std::endl;
+    }
+    REQUIRE(hash->pairs.empty());
+}
+
+TEST_CASE("Test Parsing Hash Literal String Keys") {
+    std::string input = R"({"one": 1, "two": 2, "three": 3})";
+
+    std::map<std::string, int> expected = {
+            {"one", 1},
+            {"two", 2},
+            {"three", 3},
+    };
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to a HashLiteral, as this is what we are expecting
+    auto hash = std::dynamic_pointer_cast<HashLiteral>(expression_stmt->expression);
+
+    // Check that we have a HashLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!hash) {
+        std::cerr << "stmt->expression is not a HashLiteral." << std::endl;
+    }
+    REQUIRE(hash);
+
+    if (hash->pairs.size() != expected.size()) {
+        std::cerr << "hash->pairs has wrong length. got=" << hash->pairs.size() << std::endl;
+    }
+    REQUIRE(hash->pairs.size() == expected.size());
+
+    for (const auto &kv: hash->pairs) {
+        const auto[key, value] = kv;
+
+        auto literal = std::dynamic_pointer_cast<StringLiteral>(key);
+        if (!literal) {
+            std::cerr << "hash->pair->key is not a StringLiteral." << std::endl;
+        }
+        REQUIRE(literal);
+
+        auto expected_value = expected[literal->string()];
+
+        REQUIRE(test_integer_literal(value, expected_value));
+    }
+}
+
+TEST_CASE("Test Parsing Hash Literal Boolean Keys") {
+    std::string input = R"({true: 1, false: 2})";
+
+    std::map<std::string, int> expected = {
+            {"true", 1},
+            {"false", 2},
+    };
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to a HashLiteral, as this is what we are expecting
+    auto hash = std::dynamic_pointer_cast<HashLiteral>(expression_stmt->expression);
+
+    // Check that we have a HashLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!hash) {
+        std::cerr << "stmt->expression is not a HashLiteral." << std::endl;
+    }
+    REQUIRE(hash);
+
+    if (hash->pairs.size() != expected.size()) {
+        std::cerr << "hash->pairs has wrong length. got=" << hash->pairs.size() << std::endl;
+    }
+    REQUIRE(hash->pairs.size() == expected.size());
+
+    for (const auto &kv: hash->pairs) {
+        const auto[key, value] = kv;
+
+        auto boolean = std::dynamic_pointer_cast<BooleanLiteral>(key);
+        if (!boolean) {
+            std::cerr << "hash->pair->key is not a BooleanLiteral." << std::endl;
+        }
+        REQUIRE(boolean);
+
+        auto expected_value = expected[boolean->string()];
+
+        REQUIRE(test_integer_literal(value, expected_value));
+    }
+}
+
+TEST_CASE("Test Parsing Hash Literal Integer Keys") {
+    std::string input = R"({1: 1, 2: 2, 3: 3})";
+
+    std::map<std::string, int> expected = {
+            {"1", 1},
+            {"2", 2},
+            {"3", 3},
+    };
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to a HashLiteral, as this is what we are expecting
+    auto hash = std::dynamic_pointer_cast<HashLiteral>(expression_stmt->expression);
+
+    // Check that we have a HashLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!hash) {
+        std::cerr << "stmt->expression is not a HashLiteral." << std::endl;
+    }
+    REQUIRE(hash);
+
+    if (hash->pairs.size() != expected.size()) {
+        std::cerr << "hash->pairs has wrong length. got=" << hash->pairs.size() << std::endl;
+    }
+    REQUIRE(hash->pairs.size() == expected.size());
+
+    for (const auto &kv: hash->pairs) {
+        const auto[key, value] = kv;
+
+        auto integer = std::dynamic_pointer_cast<IntegerLiteral>(key);
+        if (!integer) {
+            std::cerr << "hash->pair->key is not an IntegerLiteral." << std::endl;
+        }
+        REQUIRE(integer);
+
+        auto expected_value = expected[integer->string()];
+
+        REQUIRE(test_integer_literal(value, expected_value));
+    }
+}
+
+TEST_CASE("Test Parsing Hash Literals With Expressions") {
+    std::string input = R"({"one": 0 + 1, "two": 10 - 8, "three": 15 / 5})";
+
+    std::map<std::string, std::tuple<int, std::string, int>> expected = {
+            {"one", std::make_tuple(0, "+", 1)},
+            {"two", std::make_tuple(10, "-", 8)},
+            {"three", std::make_tuple(15, "/", 5)},
+    };
+
+    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto p = Parser(std::move(l));
+
+    auto program = p.parse_program();
+
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived ExpressionStatement, as we are confident that it is one
+    auto expression_stmt = std::dynamic_pointer_cast<ExpressionStatement>(stmt);
+
+    // Check that we have an Expression Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!expression_stmt) {
+        std::cerr << "program.statements.at(0) is not an ExpressionStatement." << std::endl;
+    }
+    REQUIRE(expression_stmt);
+
+    // Cast Expression to a HashLiteral, as this is what we are expecting
+    auto hash = std::dynamic_pointer_cast<HashLiteral>(expression_stmt->expression);
+
+    // Check that we have a HashLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!hash) {
+        std::cerr << "stmt->expression is not a HashLiteral." << std::endl;
+    }
+    REQUIRE(hash);
+
+    if (hash->pairs.size() != expected.size()) {
+        std::cerr << "hash->pairs has wrong length. got=" << hash->pairs.size() << std::endl;
+    }
+    REQUIRE(hash->pairs.size() == expected.size());
+
+    for (const auto &kv: hash->pairs) {
+        const auto[key, value] = kv;
+
+        auto literal = std::dynamic_pointer_cast<StringLiteral>(key);
+        if (!literal) {
+            std::cerr << "hash->pair->key is not a StringLiteral." << std::endl;
+        }
+        REQUIRE(literal);
+
+        auto[left_int, op, right_int] = expected[literal->string()];
+
+        REQUIRE(test_infix_expression(value, left_int, op, right_int));
+    }
+}
