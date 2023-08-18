@@ -12,7 +12,7 @@ std::tuple<std::shared_ptr<Object>, bool> Environment::get(const std::string &na
 
     if (!ok && outer) {
         contains = outer->store.find(name);
-        ok = !(contains == store.end());
+        ok = !(contains == outer->store.end());
         if (ok) {
             obj = outer->store[name];
         }

@@ -462,3 +462,29 @@ TEST_CASE("Test Array Index Expression Errors") {
         REQUIRE(test_null_object(evaluated));
     }
 }
+
+TEST_CASE("Test Builtin Functions Called Within User Functions (Bugfix)") {
+    std::vector<std::tuple<std::string, int>> tests = {
+            std::make_tuple(R"(
+let shortGreeting = fn() {
+  len("hello")
+};
+
+shortGreeting()
+)", 5),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto evaluated = test_eval(tt_input);
+
+        auto val = std::dynamic_pointer_cast<Integer>(evaluated);
+
+        // Check that we have an Integer Object by checking if the dynamic pointer cast fails (returns nullptr)
+        if (!val) {
+            std::cerr << "object is not Integer." << std::endl;
+        }
+        REQUIRE(test_integer_object(val, tt_expected));
+    }
+}
