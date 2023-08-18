@@ -116,6 +116,10 @@ Token Lexer::next_token() {
             tok = {TokenType::SEMICOLON, std::string{ch}};
         }
             break;
+        case (':'): {
+            tok = {TokenType::COLON, std::string{ch}};
+        }
+            break;
         case (','): {
             tok = {TokenType::COMMA, std::string{ch}};
         }

@@ -30,6 +30,7 @@ if (5 < 10) {
 "foobar"
 "foo bar"
 [1, 2];
+{"foo": "bar"}
 )";
 
     auto test_input = Lexer(input);
@@ -116,6 +117,11 @@ if (5 < 10) {
             Token{TokenType::INT, "2"},
             Token{TokenType::RBRACKET, "]"},
             Token{TokenType::SEMICOLON, ";"},
+            Token{TokenType::LBRACE, "{"},
+            Token{TokenType::STRING, "foo"},
+            Token{TokenType::COLON, ":"},
+            Token{TokenType::STRING, "bar"},
+            Token{TokenType::RBRACE, "}"},
             Token{TokenType::ENDOFFILE, ""},
     };
 

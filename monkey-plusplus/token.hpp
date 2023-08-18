@@ -28,6 +28,7 @@ enum class TokenType {
 
     // Delimiters
     SEMICOLON,
+    COLON,
     COMMA,
 
     LPAREN,

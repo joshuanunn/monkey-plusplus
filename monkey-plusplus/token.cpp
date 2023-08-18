@@ -41,6 +41,7 @@ std::map<TokenType, std::string> tokentype_literals = {
         {TokenType::EQ,        "=="},
         {TokenType::NOT_EQ,    "!="},
         {TokenType::SEMICOLON, ";"},
+        {TokenType::COLON,     ":"},
         {TokenType::COMMA,     ","},
         {TokenType::LPAREN,    "("},
         {TokenType::RPAREN,    ")"},
