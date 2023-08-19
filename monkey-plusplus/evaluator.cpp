@@ -89,6 +89,8 @@ std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::share
             return index;
         }
         return eval_index_expression(left, index);
+    } else if (auto hl = std::dynamic_pointer_cast<HashLiteral>(node)) {
+        return eval_hash_literal(hl, env);
     }
 
     return nullptr;
@@ -311,6 +313,34 @@ std::shared_ptr<Object> eval_string_infix_expression(const std::string &op, cons
     }
 
     return std::make_shared<String>(String{left_val->value + right_val->value});
+}
+
+std::shared_ptr<Object> eval_hash_literal(const std::shared_ptr<HashLiteral> &node, const std::shared_ptr<Environment> &env) {
+    std::map<HashKey, HashPair> pairs;
+
+    for (const auto &kv: node->pairs) {
+        const auto[key_node, value_node] = kv;
+
+        auto key = eval(key_node, env);
+        if (is_error(key)) {
+            return key;
+        }
+
+        auto hash_key = std::dynamic_pointer_cast<Hashable>(key);
+        if (!hash_key) {
+            return new_error("unusable as hash key.");
+        }
+
+        auto value = eval(value_node, env);
+        if (is_error(value)) {
+            return value;
+        }
+
+        auto hashed = hash_key->hash_key();
+        pairs[hashed] = HashPair{key, value};
+    }
+
+    return std::make_shared<Hash>(Hash{pairs});
 }
 
 std::vector<std::shared_ptr<Object>> eval_expressions(const std::vector<std::shared_ptr<Expression>> &exps, const std::shared_ptr<Environment> &env) {

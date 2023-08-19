@@ -623,3 +623,57 @@ sum([1, 2, 3, 4, 5]);
 
     REQUIRE(test_integer_object(val, expected));
 }
+
+TEST_CASE("Test Hash Literals") {
+    std::string input = R"(
+let two = "two";
+{
+    "one": 10 - 9,
+    two: 1 + 1,
+    "thr" + "ee": 6 / 2,
+    4: 4,
+    true: 5,
+    false: 6
+}
+)";
+
+    std::map<HashKey, int> expected = {
+            {String{"one"}.hash_key(), 1},
+            {String{"two"}.hash_key(), 2},
+            {String{"three"}.hash_key(), 3},
+            {Integer{4}.hash_key(), 4},
+            {std::dynamic_pointer_cast<Hashable>(native_bool_to_boolean_object(true))->hash_key(), 5},
+            {std::dynamic_pointer_cast<Hashable>(native_bool_to_boolean_object(false))->hash_key(), 6},
+    };
+
+    auto evaluated = test_eval(input);
+
+    auto result = std::dynamic_pointer_cast<Hash>(evaluated);
+
+    // Check that we have a Hash Object by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!result) {
+        std::cerr << "Eval didn't return Hash." << std::endl;
+    }
+    REQUIRE(result);
+
+    if (result->pairs.size() != expected.size()) {
+        std::cerr << "Hash has wrong num of pairs. got=" << result->pairs.size() << std::endl;
+    }
+    REQUIRE(result->pairs.size() == expected.size());
+
+    for (const auto &kv: expected) {
+        const auto[expected_key, expected_value] = kv;
+
+        auto contains = result->pairs.find(expected_key);
+
+        // If object is not a defined keyword, then return warning
+        if (contains == result->pairs.end()) {
+            std::cerr << "no pair for given key in pairs" << std::endl;
+            REQUIRE(false);
+        }
+
+        auto pair = result->pairs[expected_key];
+
+        REQUIRE(test_integer_object(pair.value, expected_value));
+    }
+}
