@@ -29,6 +29,18 @@ struct Object {
     virtual std::string inspect() const = 0;
 };
 
+struct HashKey {
+    HashKey(ObjectType t, uint64_t v);
+
+    ObjectType type;
+
+    uint64_t value;
+
+    bool operator==(const HashKey &other) const;
+
+    bool operator!=(const HashKey &other) const;
+};
+
 typedef std::function<std::shared_ptr<Object>(std::vector<std::shared_ptr<Object>>)> builtin_fn;
 
 struct Environment;
@@ -96,6 +108,8 @@ struct Integer : public Object {
     ObjectType type() const override;
 
     std::string inspect() const override;
+
+    HashKey hash_key() const;
 };
 
 struct Boolean : public Object {
@@ -106,6 +120,8 @@ struct Boolean : public Object {
     ObjectType type() const override;
 
     std::string inspect() const override;
+
+    HashKey hash_key() const;
 };
 
 struct String : public Object {
@@ -116,6 +132,8 @@ struct String : public Object {
     ObjectType type() const override;
 
     std::string inspect() const override;
+
+    HashKey hash_key() const;
 };
 
 struct Null : public Object {

@@ -12,6 +12,9 @@ evaluatortest : lexer.o token.o ast.o parser.o object.o environment.o builtins.o
 lexertest : lexer.o token.o lexer.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
+objecttest : lexer.o token.o ast.o parser.o object.o environment.o builtins.o evaluator.o object.test.o
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
 parsertest : lexer.o token.o ast.o parser.o parser.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
@@ -24,8 +27,11 @@ test-evaluator : evaluatortest
 test-lexer : lexertest
 	./lexertest
 
+test-object : objecttest
+	./objecttest
+
 test-parser : parsertest
 	./parsertest
 
 clean :
-	rm -rf *.o asttest evaluatortest lexertest parsertest monkey
+	rm -rf *.o asttest evaluatortest lexertest objecttest parsertest monkey

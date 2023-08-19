@@ -1,5 +1,15 @@
 #include "object.hpp"
 
+HashKey::HashKey(ObjectType t, uint64_t v) : type(t), value(v) {}
+
+bool HashKey::operator==(const HashKey &other) const {
+    return type == other.type && value == other.value;
+}
+
+bool HashKey::operator!=(const HashKey &other) const {
+    return !(type == other.type && value == other.value);
+}
+
 Function::Function(std::vector<std::shared_ptr<Identifier>> p, std::shared_ptr<BlockStatement> b,
                    const std::shared_ptr<Environment> &e) : parameters{std::move(p)}, body{std::move(b)}, env{e} {}
 
@@ -93,6 +103,10 @@ std::string Integer::inspect() const {
     return std::to_string(value);
 }
 
+HashKey Integer::hash_key() const {
+    return HashKey{type(), static_cast<uint64_t>(value)};
+}
+
 Boolean::Boolean(bool v) : value(v) {}
 
 ObjectType Boolean::type() const {
@@ -106,6 +120,10 @@ std::string Boolean::inspect() const {
     return "true";
 }
 
+HashKey Boolean::hash_key() const {
+    return HashKey{type(), static_cast<uint64_t>(value)};
+}
+
 String::String(std::string v) : value(std::move(v)) {}
 
 ObjectType String::type() const {
@@ -114,6 +132,21 @@ ObjectType String::type() const {
 
 std::string String::inspect() const {
     return value;
+}
+
+// Hashing algorithm using a 64-bit FNV-1a hash in line with that used in Go (hash/fnv)
+// C++ source adapted (under MIT License) from: https://github.com/SRombauts/cpp-algorithms
+HashKey String::hash_key() const {
+    const char* apStr = value.data();
+
+    uint64_t hash = 14695981039346656037ULL; // 64 bit offset_basis = 14695981039346656037
+
+    for (uint32_t idx = 0; apStr[idx] != 0; ++idx) {
+        // 64 bit FNV_prime = 240 + 28 + 0xb3 = 1099511628211
+        hash = 1099511628211ULL * (hash ^ static_cast<unsigned char>(apStr[idx]));
+    }
+
+    return HashKey{type(), hash};
 }
 
 ObjectType Null::type() const {
