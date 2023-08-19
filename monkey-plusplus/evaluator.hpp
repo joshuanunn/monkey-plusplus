@@ -37,6 +37,8 @@ std::shared_ptr<Object> eval_infix_expression(const std::string &op, const std::
 
 std::shared_ptr<Object> eval_array_index_expression(const std::shared_ptr<Object> &array, const std::shared_ptr<Object> &index);
 
+std::shared_ptr<Object> eval_hash_index_expression(const std::shared_ptr<Object> &hash, const std::shared_ptr<Object> &index);
+
 std::shared_ptr<Object> eval_integer_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right);
 
 std::shared_ptr<Object> eval_string_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right);

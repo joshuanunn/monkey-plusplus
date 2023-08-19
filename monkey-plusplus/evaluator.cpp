@@ -229,6 +229,8 @@ std::shared_ptr<Object> eval_minus_prefix_operator_expression(const std::shared_
 std::shared_ptr<Object> eval_index_expression(const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &index) {
     if (left->type() == ObjectType::ARRAY_OBJ && index->type() == ObjectType::INTEGER_OBJ) {
         return eval_array_index_expression(left, index);
+    } else if (left->type() == ObjectType::HASH_OBJ) {
+        return eval_hash_index_expression(left, index);
     } else {
         return new_error("index operator not supported: " + objecttype_literal(left->type()));
     }
@@ -267,6 +269,25 @@ std::shared_ptr<Object> eval_array_index_expression(const std::shared_ptr<Object
     }
 
     return array_object->elements.at(index_value);
+}
+
+std::shared_ptr<Object> eval_hash_index_expression(const std::shared_ptr<Object> &hash, const std::shared_ptr<Object> &index) {
+    auto hash_object = std::dynamic_pointer_cast<Hash>(hash);
+
+    auto key = std::dynamic_pointer_cast<Hashable>(index);
+    if (!key) {
+        return new_error("unusable as hash key: " + objecttype_literal(index->type()));
+    }
+
+    auto contains = hash_object->pairs.find(key->hash_key());
+
+    if (contains == hash_object->pairs.end()) {
+        return get_null_ref();
+    }
+
+    auto pair = hash_object->pairs[key->hash_key()];
+
+    return pair.value;
 }
 
 std::shared_ptr<Object> eval_integer_infix_expression(const std::string &op, const std::shared_ptr<Object> &left, const std::shared_ptr<Object> &right) {

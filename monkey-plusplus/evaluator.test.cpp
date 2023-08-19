@@ -225,6 +225,7 @@ if (10 > 1) {
 })", "unknown operator: BOOLEAN + BOOLEAN"),
             std::make_tuple("foobar", "identifier not found: foobar"),
             std::make_tuple(R"("Hello" - "World")", "unknown operator: STRING - STRING"),
+            std::make_tuple(R"({"name": "Monkey"}[fn(x) { x }];)", "unusable as hash key: FUNCTION"),
     };
 
     for (const auto &tt: tests) {
@@ -675,5 +676,36 @@ let two = "two";
         auto pair = result->pairs[expected_key];
 
         REQUIRE(test_integer_object(pair.value, expected_value));
+    }
+}
+
+TEST_CASE("Test Hash Index Expressions") {
+    std::vector<std::tuple<std::string, int>> tests = {
+            std::make_tuple(R"({"foo": 5}["foo"])", 5),
+            std::make_tuple(R"(let key = "foo"; {"foo": 5}[key])", 5),
+            std::make_tuple(R"({5: 5}[5])", 5),
+            std::make_tuple(R"({true: 5}[true])", 5),
+            std::make_tuple(R"({false: 5}[false])", 5),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto evaluated = test_eval(tt_input);
+
+        REQUIRE(test_integer_object(evaluated, tt_expected));
+    }
+}
+
+TEST_CASE("Test Hash Index Expression Errors") {
+    std::vector<std::string> tests = {
+            R"({"foo": 5}["bar"])",
+            R"({}["foo"])",
+    };
+
+    for (const auto &tt_input: tests) {
+        auto evaluated = test_eval(tt_input);
+
+        REQUIRE(test_null_object(evaluated));
     }
 }
