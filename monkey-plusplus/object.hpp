@@ -16,7 +16,8 @@ enum class ObjectType {
     FUNCTION_OBJ,
     STRING_OBJ,
     BUILTIN_OBJ,
-    ARRAY_OBJ
+    ARRAY_OBJ,
+    HASH_OBJ
 };
 
 std::string objecttype_literal(ObjectType);
@@ -39,6 +40,30 @@ struct HashKey {
     bool operator==(const HashKey &other) const;
 
     bool operator!=(const HashKey &other) const;
+
+    bool operator<(const HashKey &other) const;
+};
+
+struct HashPair {
+    std::shared_ptr<Object> key;
+
+    std::shared_ptr<Object> value;
+};
+
+struct Hashable {
+    virtual ~Hashable() = default;
+
+    virtual HashKey hash_key() const = 0;
+};
+
+struct Hash : public Object {
+    Hash(std::map<HashKey, HashPair> p);
+
+    std::map<HashKey, HashPair> pairs;
+
+    ObjectType type() const override;
+
+    std::string inspect() const override;
 };
 
 typedef std::function<std::shared_ptr<Object>(std::vector<std::shared_ptr<Object>>)> builtin_fn;
@@ -100,7 +125,7 @@ struct Error : public Object {
     std::string inspect() const override;
 };
 
-struct Integer : public Object {
+struct Integer : public Object, Hashable {
     explicit Integer(int v);
 
     int value;
@@ -112,7 +137,7 @@ struct Integer : public Object {
     HashKey hash_key() const;
 };
 
-struct Boolean : public Object {
+struct Boolean : public Object, Hashable {
     explicit Boolean(bool v);
 
     bool value;
@@ -124,7 +149,7 @@ struct Boolean : public Object {
     HashKey hash_key() const;
 };
 
-struct String : public Object {
+struct String : public Object, Hashable {
     explicit String(std::string v);
 
     std::string value;

@@ -10,6 +10,34 @@ bool HashKey::operator!=(const HashKey &other) const {
     return !(type == other.type && value == other.value);
 }
 
+bool HashKey::operator<(const HashKey &other) const {
+    return value < other.value;
+}
+
+Hash::Hash(std::map<HashKey, HashPair> p) : pairs(std::move(p)) {}
+
+ObjectType Hash::type() const {
+    return ObjectType::HASH_OBJ;
+}
+
+std::string Hash::inspect() const {
+    std::string out = "{";
+
+    int counter = 0;
+    for (const auto &kv: pairs) {
+        if (counter > 0) {
+            out.append(", ");
+        }
+        const auto[_, pair] = kv;
+        out += pair.key->inspect() + ": " + pair.value->inspect();
+        counter++;
+    }
+
+    out.append("}");
+
+    return out;
+}
+
 Function::Function(std::vector<std::shared_ptr<Identifier>> p, std::shared_ptr<BlockStatement> b,
                    const std::shared_ptr<Environment> &e) : parameters{std::move(p)}, body{std::move(b)}, env{e} {}
 
@@ -167,6 +195,7 @@ std::map<ObjectType, std::string> objecttype_literals = {
         {ObjectType::STRING_OBJ,"STRING"},
         {ObjectType::BUILTIN_OBJ,"BUILTIN"},
         {ObjectType::ARRAY_OBJ,"ARRAY"},
+        {ObjectType::HASH_OBJ,"HASH"},
 };
 
 std::string objecttype_literal(ObjectType t) {
