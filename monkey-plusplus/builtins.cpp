@@ -1,6 +1,6 @@
 #include "builtins.hpp"
 
-std::shared_ptr<Object> len(std::vector<std::shared_ptr<Object>> args) {
+std::shared_ptr<Object> __len(std::vector<std::shared_ptr<Object>> args) {
     if (args.size() != 1) {
         return new_error("wrong number of arguments. got=" + std::to_string(args.size()) + ", want=1");
     }
@@ -14,7 +14,7 @@ std::shared_ptr<Object> len(std::vector<std::shared_ptr<Object>> args) {
     return new_error("argument to 'len' not supported.");
 }
 
-std::shared_ptr<Object> first(std::vector<std::shared_ptr<Object>> args) {
+std::shared_ptr<Object> __first(std::vector<std::shared_ptr<Object>> args) {
     if (args.size() != 1) {
         return new_error("wrong number of arguments. got=" + std::to_string(args.size()) + ", want=1");
     }
@@ -32,7 +32,7 @@ std::shared_ptr<Object> first(std::vector<std::shared_ptr<Object>> args) {
     return get_null_ref();
 }
 
-std::shared_ptr<Object> last(std::vector<std::shared_ptr<Object>> args) {
+std::shared_ptr<Object> __last(std::vector<std::shared_ptr<Object>> args) {
     if (args.size() != 1) {
         return new_error("wrong number of arguments. got=" + std::to_string(args.size()) + ", want=1");
     }
@@ -51,7 +51,7 @@ std::shared_ptr<Object> last(std::vector<std::shared_ptr<Object>> args) {
     return get_null_ref();
 }
 
-std::shared_ptr<Object> rest(std::vector<std::shared_ptr<Object>> args) {
+std::shared_ptr<Object> __rest(std::vector<std::shared_ptr<Object>> args) {
     if (args.size() != 1) {
         return new_error("wrong number of arguments. got=" + std::to_string(args.size()) + ", want=1");
     }
@@ -79,7 +79,7 @@ std::shared_ptr<Object> rest(std::vector<std::shared_ptr<Object>> args) {
     return get_null_ref();
 }
 
-std::shared_ptr<Object> push(std::vector<std::shared_ptr<Object>> args) {
+std::shared_ptr<Object> __push(std::vector<std::shared_ptr<Object>> args) {
     if (args.size() != 2) {
         return new_error("wrong number of arguments. got=" + std::to_string(args.size()) + ", want=2");
     }
@@ -101,11 +101,11 @@ std::shared_ptr<Object> push(std::vector<std::shared_ptr<Object>> args) {
 }
 
 std::map<std::string, builtin_fn> builtins = {
-        {"len", len},
-        {"first", first},
-        {"last", last},
-        {"rest", rest},
-        {"push", push},
+        {"len", __len},
+        {"first", __first},
+        {"last", __last},
+        {"rest", __rest},
+        {"push", __push},
 };
 
 std::shared_ptr<Builtin> get_builtin_fn(const std::string &name) {
