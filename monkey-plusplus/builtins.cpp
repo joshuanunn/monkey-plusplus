@@ -100,12 +100,21 @@ std::shared_ptr<Object> __push(std::vector<std::shared_ptr<Object>> args) {
     return get_null_ref();
 }
 
+std::shared_ptr<Object> __puts(std::vector<std::shared_ptr<Object>> args) {
+    for (const auto &arg: args) {
+        std::cout << arg->inspect() << std::endl;
+    }
+
+    return get_null_ref();
+}
+
 std::map<std::string, builtin_fn> builtins = {
         {"len", __len},
         {"first", __first},
         {"last", __last},
         {"rest", __rest},
         {"push", __push},
+        {"puts", __puts},
 };
 
 std::shared_ptr<Builtin> get_builtin_fn(const std::string &name) {
