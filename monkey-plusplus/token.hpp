@@ -58,7 +58,9 @@ struct Token {
     TokenType type;
     std::string literal;
 
-    bool operator==(const Token &) const;
+    bool operator==(const Token&) const;
+
+    bool operator!=(const Token&) const;
 };
 
 #endif //MONKEY_PLUSPLUS_TOKEN_HPP

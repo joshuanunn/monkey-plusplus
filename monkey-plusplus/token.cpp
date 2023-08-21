@@ -20,8 +20,12 @@ TokenType lookup_ident(const std::string &ident) {
     return keywords[ident];
 }
 
-bool Token::operator==(const Token &t) const {
+bool Token::operator==(const Token& t) const {
     return type == t.type && literal == t.literal;
+}
+
+bool Token::operator!=(const Token& t) const {
+    return !(type == t.type && literal == t.literal);
 }
 
 std::map<TokenType, std::string> tokentype_literals = {
