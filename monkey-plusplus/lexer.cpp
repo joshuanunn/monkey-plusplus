@@ -63,110 +63,111 @@ std::string Lexer::read_string() {
 }
 
 Token Lexer::next_token() {
-    Token tok;
-
     skip_whitespace();
+
+    // Initially assume ILLEGAL Token unless proven otherwise, and store current char
+    auto tok = Token{TokenType::ILLEGAL, std::string{ch}};
 
     switch (ch) {
         case ('='): {
             if (peek_char() == '=') {
-                char ch1 = ch;
                 read_char();
-                tok = {TokenType::EQ, std::string{ch1} + std::string{ch}};
+                tok.type = TokenType::EQ;
+                tok.literal += std::string{ch}; // Append = char to first = to give ==
             } else {
-                tok = {TokenType::ASSIGN, std::string{ch}};
+                tok.type = TokenType::ASSIGN;
             }
-        }
-            break;
+        } break;
+
         case ('+'): {
-            tok = {TokenType::PLUS, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::PLUS;
+        } break;
+
         case ('-'): {
-            tok = {TokenType::MINUS, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::MINUS;
+        } break;
+
         case ('!'): {
             if (peek_char() == '=') {
-                char ch1 = ch;
                 read_char();
-                tok = {TokenType::NOT_EQ, std::string{ch1} + std::string{ch}};
+                tok.type = TokenType::NOT_EQ;
+                tok.literal += std::string{ch}; // Append = char to first ! to give !=
             } else {
-                tok = {TokenType::BANG, std::string{ch}};
+                tok.type = TokenType::BANG;
             }
-        }
-            break;
+        } break;
+
         case ('*'): {
-            tok = {TokenType::ASTERISK, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::ASTERISK;
+        } break;
+
         case ('/'): {
-            tok = {TokenType::SLASH, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::SLASH;
+        } break;
+
         case ('<'): {
-            tok = {TokenType::LT, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::LT;
+        } break;
+
         case ('>'): {
-            tok = {TokenType::GT, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::GT;
+        } break;
+
         case (';'): {
-            tok = {TokenType::SEMICOLON, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::SEMICOLON;
+        } break;
+
         case (':'): {
-            tok = {TokenType::COLON, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::COLON;
+        } break;
+
         case (','): {
-            tok = {TokenType::COMMA, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::COMMA;
+        } break;
+
         case ('('): {
-            tok = {TokenType::LPAREN, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::LPAREN;
+        } break;
+
         case (')'): {
-            tok = {TokenType::RPAREN, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::RPAREN;
+        } break;
+
         case ('"'): {
-            tok = {TokenType::STRING, read_string()};
-        }
-            break;
+            tok.type = TokenType::STRING;
+            tok.literal = read_string(); // Replace " char with enclosing string
+        } break;
+
         case ('{'): {
-            tok = {TokenType::LBRACE, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::LBRACE;
+        } break;
+
         case ('}'): {
-            tok = {TokenType::RBRACE, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::RBRACE;
+        } break;
+
         case ('['): {
-            tok = {TokenType::LBRACKET, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::LBRACKET;
+        } break;
+
         case (']'): {
-            tok = {TokenType::RBRACKET, std::string{ch}};
-        }
-            break;
+            tok.type = TokenType::RBRACKET;
+        } break;
+
         case (0): {
-            tok = {TokenType::ENDOFFILE, ""};
-        }
-            break;
+            tok.type = TokenType::ENDOFFILE;
+            tok.literal = std::string{""}; // Represent EOF literal with blank string
+        } break;
+
         default: {
             if (is_letter(ch)) {
                 tok.literal = read_identifier();
                 tok.type = lookup_ident(tok.literal);
-                return tok;
+                return tok; // Return early
             } else if (is_digit(ch)) {
                 tok.type = TokenType::INT;
                 tok.literal = read_number();
-                return tok;
-            } else {
-                tok = {TokenType::ILLEGAL, std::string{ch}};
+                return tok; // Return early
             }
         }
     }
