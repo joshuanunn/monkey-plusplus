@@ -18,6 +18,9 @@ objecttest : lexer.o token.o ast.o parser.o object.o environment.o builtins.o ev
 parsertest : lexer.o token.o ast.o parser.o parser.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
+tokentest : token.o token.test.o
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
 test-ast : asttest
 	./asttest
 
@@ -33,5 +36,8 @@ test-object : objecttest
 test-parser : parsertest
 	./parsertest
 
+test-token : tokentest
+	./tokentest
+
 clean :
-	rm -rf *.o asttest evaluatortest lexertest objecttest parsertest monkey
+	rm -rf *.o asttest evaluatortest lexertest objecttest parsertest tokentest monkey
