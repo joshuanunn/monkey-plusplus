@@ -20,6 +20,36 @@ TokenType lookup_ident(const std::string &ident) {
     return keywords[ident];
 }
 
+Token::Token(const TokenType &t, std::string l) : type{t}, literal{std::move(l)} {}
+
+Token::Token(const Token &other) : type{other.type}, literal{std::string{other.literal}} {}
+
+Token::Token(Token &&other) noexcept : type(other.type), literal(std::move(other.literal)) {
+    other.type = TokenType::ILLEGAL;
+    other.literal = "";
+}
+
+Token& Token::operator=(const Token& other) {
+    if (this == &other) return *this;
+
+    type = other.type;
+    literal = other.literal;
+
+    return *this;
+}
+
+Token& Token::operator=(Token&& other) noexcept {
+    if (this == &other) return *this;
+
+    std::swap(type, other.type);
+    std::swap(literal, other.literal);
+
+    other.type = TokenType::ILLEGAL;
+    other.literal = "";
+
+    return *this;
+}
+
 bool Token::operator==(const Token& t) const {
     return type == t.type && literal == t.literal;
 }
