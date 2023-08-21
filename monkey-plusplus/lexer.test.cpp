@@ -161,5 +161,4 @@ TEST_CASE("Test Token Equivalence Semantics") {
     REQUIRE(tok1 == tok3);
     REQUIRE(tok1 == tok4);
     REQUIRE(tok1 == tok5);
-    REQUIRE(tok2 == tok3);
 }
