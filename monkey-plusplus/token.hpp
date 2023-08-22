@@ -55,7 +55,7 @@ extern std::map<std::string, TokenType> keywords;
 TokenType lookup_ident(const std::string &ident);
 
 struct Token {
-    Token() = delete; // Default constructor not meaningful
+    Token() = default;
 
     Token(const TokenType& t, std::string l);
 
