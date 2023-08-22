@@ -41,8 +41,8 @@ Token& Token::operator=(const Token& other) {
 Token& Token::operator=(Token&& other) noexcept {
     if (this == &other) return *this;
 
-    std::swap(type, other.type);
-    std::swap(literal, other.literal);
+    type = other.type;
+    literal = std::move(other.literal);
 
     other.type = TokenType::ILLEGAL;
     other.literal = "";
