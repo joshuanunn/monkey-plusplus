@@ -15,9 +15,7 @@ std::map<TokenType, Precedence> precedences = {
         {TokenType::LBRACKET, Precedence::INDEX},
 };
 
-Parser::Parser(std::unique_ptr<Lexer> lexer) {
-    l = std::move(lexer);
-
+Parser::Parser(Lexer&& lexer) : l{std::move(lexer)}, cur_token{}, peek_token{} {
     // Register prefix method pointers lookups for each token type
     register_prefix(TokenType::IDENT, std::mem_fn(&Parser::parse_identifier));
     register_prefix(TokenType::INT, std::mem_fn(&Parser::parse_integer_literal));
@@ -51,7 +49,7 @@ Parser::Parser(std::unique_ptr<Lexer> lexer) {
 
 void Parser::next_token() {
     cur_token = peek_token;
-    peek_token = l->next_token();
+    peek_token = l.next_token();
 }
 
 std::unique_ptr<LetStatement> Parser::parse_let_statement() {

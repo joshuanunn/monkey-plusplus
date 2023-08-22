@@ -15,7 +15,7 @@ void start_repl() {
 
         std::getline(std::cin, line);
 
-        auto l = std::make_unique<Lexer>(Lexer(line));
+        auto l = Lexer(line);
         auto p = Parser(std::move(l));
 
         auto program = p.parse_program();

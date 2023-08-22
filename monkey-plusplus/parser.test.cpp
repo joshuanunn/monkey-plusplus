@@ -197,11 +197,9 @@ let x = 5;
 let y = true;
 let foobar = y;
 )";
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 3) {
@@ -221,11 +219,9 @@ return 5;
 return true;
 return foobar;
 )";
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 3) {
@@ -242,11 +238,9 @@ return foobar;
 TEST_CASE("Test Identifier Expression") {
     std::string input = R"(foobar;)";
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -273,11 +267,9 @@ TEST_CASE("Test Identifier Expression") {
 TEST_CASE("Test Integer Literal Expression") {
     std::string input = R"(5;)";
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -309,11 +301,9 @@ TEST_CASE("Test Parsing Integer Prefix Expressions") {
     for (const auto &tt: prefix_tests) {
         const auto [tt_input, tt_operator, tt_value] = tt;
 
-        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto l = Lexer(tt_input);
         auto p = Parser(std::move(l));
-
         auto program = p.parse_program();
-
         REQUIRE(test_parser_errors(p));
 
         if (program->statements.size() != 1) {
@@ -358,11 +348,9 @@ TEST_CASE("Test Parsing Boolean Prefix Expressions") {
     for (const auto &tt: prefix_tests) {
         const auto [tt_input, tt_operator, tt_value] = tt;
 
-        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto l = Lexer(tt_input);
         auto p = Parser(std::move(l));
-
         auto program = p.parse_program();
-
         REQUIRE(test_parser_errors(p));
 
         if (program->statements.size() != 1) {
@@ -413,11 +401,9 @@ TEST_CASE("Test Parsing Integer Infix Expressions") {
     for (const auto &tt: infix_tests) {
         const auto [tt_input, tt_leftvalue, tt_operator, tt_rightvalue] = tt;
 
-        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto l = Lexer(tt_input);
         auto p = Parser(std::move(l));
-
         auto program = p.parse_program();
-
         REQUIRE(test_parser_errors(p));
 
         if (program->statements.size() != 1) {
@@ -452,11 +438,9 @@ TEST_CASE("Test Parsing Boolean Infix Expressions") {
     for (const auto &tt: infix_tests) {
         const auto [tt_input, tt_leftvalue, tt_operator, tt_rightvalue] = tt;
 
-        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto l = Lexer(tt_input);
         auto p = Parser(std::move(l));
-
         auto program = p.parse_program();
-
         REQUIRE(test_parser_errors(p));
 
         if (program->statements.size() != 1) {
@@ -514,11 +498,9 @@ TEST_CASE("Test Operator Precedence Parsing") {
     for (const auto &tt: tests) {
         const auto [tt_input, tt_expected] = tt;
 
-        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto l = Lexer(tt_input);
         auto p = Parser(std::move(l));
-
         auto program = p.parse_program();
-
         REQUIRE(test_parser_errors(p));
 
         auto actual = program->string();
@@ -539,11 +521,9 @@ TEST_CASE("Test Boolean Expression") {
     for (const auto &tt: tests) {
         const auto [tt_input, tt_expected_boolean] = tt;
 
-        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto l = Lexer(tt_input);
         auto p = Parser(std::move(l));
-
         auto program = p.parse_program();
-
         REQUIRE(test_parser_errors(p));
 
         if (program->statements.size() != 1) {
@@ -570,11 +550,9 @@ TEST_CASE("Test Boolean Expression") {
 TEST_CASE("Test If Expression") {
     std::string input = "if (x < y) { x }";
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -637,11 +615,9 @@ TEST_CASE("Test If Expression") {
 TEST_CASE("Test If Else Expression") {
     std::string input = "if (x < y) { x } else { y }";
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -723,11 +699,9 @@ TEST_CASE("Test If Else Expression") {
 TEST_CASE("Test Function Literal Parsing") {
     std::string input = "fn(x, y) { x + y; }";
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -792,11 +766,9 @@ TEST_CASE("Test Function Parameter Parsing") {
     for (const auto &tt: tests) {
         const auto [tt_input, tt_expected] = tt;
 
-        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto l = Lexer(tt_input);
         auto p = Parser(std::move(l));
-
         auto program = p.parse_program();
-
         REQUIRE(test_parser_errors(p));
 
         auto stmt = program->statements.at(0);
@@ -833,11 +805,9 @@ TEST_CASE("Test Function Parameter Parsing") {
 TEST_CASE("Test Call Expression Parsing") {
     std::string input = "add(1, 2 * 3, 4 + 5);";
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -887,11 +857,9 @@ TEST_CASE("Test Call Expression Parameter Parsing") {
     for (const auto &tt: tests) {
         const auto [tt_input, tt_expected_ident, tt_expected_args] = tt;
 
-        auto l = std::make_unique<Lexer>(Lexer(tt_input));
+        auto l = Lexer(tt_input);
         auto p = Parser(std::move(l));
-
         auto program = p.parse_program();
-
         REQUIRE(test_parser_errors(p));
 
         auto stmt = program->statements.at(0);
@@ -934,11 +902,9 @@ TEST_CASE("Test String Literal Expression") {
     std::string input = R"("hello world";)";
     std::string value = "hello world";
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -976,11 +942,9 @@ TEST_CASE("Test String Literal Expression") {
 TEST_CASE("Test Parsing Array Literals") {
     std::string input = "[1, 2 * 2, 3 + 3]";
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -1021,11 +985,9 @@ TEST_CASE("Test Parsing Array Literals") {
 TEST_CASE("Test Parsing Index Expressions") {
     std::string input = "myArray[1 + 1]";
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -1060,11 +1022,9 @@ TEST_CASE("Test Parsing Index Expressions") {
 TEST_CASE("Test Parsing Empty Hash Literal") {
     std::string input = "{}";
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -1107,11 +1067,9 @@ TEST_CASE("Test Parsing Hash Literal String Keys") {
             {"three", 3},
     };
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -1167,11 +1125,9 @@ TEST_CASE("Test Parsing Hash Literal Boolean Keys") {
             {"false", 2},
     };
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -1228,11 +1184,9 @@ TEST_CASE("Test Parsing Hash Literal Integer Keys") {
             {"3", 3},
     };
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {
@@ -1289,11 +1243,9 @@ TEST_CASE("Test Parsing Hash Literals With Expressions") {
             {"three", std::make_tuple(15, "/", 5)},
     };
 
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
-
     auto program = p.parse_program();
-
     REQUIRE(test_parser_errors(p));
 
     if (program->statements.size() != 1) {

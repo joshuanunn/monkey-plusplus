@@ -27,7 +27,17 @@ struct Parser {
     Token cur_token;
     Token peek_token;
 
-    explicit Parser(std::unique_ptr<Lexer> lexer);
+    Parser() = delete;
+
+    explicit Parser(Lexer&& lexer);
+
+    Parser(const Parser& other) = delete;
+
+    Parser(Parser&& other) noexcept = delete;
+
+    Parser& operator=(const Parser& other) = delete;
+
+    Parser& operator=(Parser&& other) noexcept = delete;
 
     void next_token();
 
@@ -96,7 +106,7 @@ struct Parser {
     void register_infix(TokenType token_type, infix_parse_fn fn);
 
 private:
-    std::unique_ptr<Lexer> l;
+    Lexer l;
     std::vector<std::string> e;
 
     std::map<TokenType, prefix_parse_fn> prefix_parse_fns;

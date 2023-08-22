@@ -8,8 +8,16 @@ bool is_digit(char ch) {
     return '0' <= ch && ch <= '9';
 }
 
-Lexer::Lexer(const std::string &input_in) : input{input_in}, position{}, read_position{} {
+Lexer::Lexer(const std::string& input_in) : input{input_in}, position{}, read_position{}, ch{} {
     read_char();
+}
+
+Lexer::Lexer(Lexer &&other) noexcept: input(std::move(other.input)), position(other.position),
+                                      read_position(other.read_position), ch(other.ch) {
+    other.input = "";
+    other.position = 0;
+    other.read_position = 0;
+    other.ch = 0;
 }
 
 void Lexer::read_char() {
@@ -53,7 +61,7 @@ char Lexer::peek_char() {
 
 std::string Lexer::read_string() {
     int start_position = position + 1;
-    while(true) {
+    while (true) {
         read_char();
         if (ch == '"' || ch == 0) {
             break;
@@ -77,15 +85,18 @@ Token Lexer::next_token() {
             } else {
                 tok.type = TokenType::ASSIGN;
             }
-        } break;
+        }
+            break;
 
         case ('+'): {
             tok.type = TokenType::PLUS;
-        } break;
+        }
+            break;
 
         case ('-'): {
             tok.type = TokenType::MINUS;
-        } break;
+        }
+            break;
 
         case ('!'): {
             if (peek_char() == '=') {
@@ -95,69 +106,85 @@ Token Lexer::next_token() {
             } else {
                 tok.type = TokenType::BANG;
             }
-        } break;
+        }
+            break;
 
         case ('*'): {
             tok.type = TokenType::ASTERISK;
-        } break;
+        }
+            break;
 
         case ('/'): {
             tok.type = TokenType::SLASH;
-        } break;
+        }
+            break;
 
         case ('<'): {
             tok.type = TokenType::LT;
-        } break;
+        }
+            break;
 
         case ('>'): {
             tok.type = TokenType::GT;
-        } break;
+        }
+            break;
 
         case (';'): {
             tok.type = TokenType::SEMICOLON;
-        } break;
+        }
+            break;
 
         case (':'): {
             tok.type = TokenType::COLON;
-        } break;
+        }
+            break;
 
         case (','): {
             tok.type = TokenType::COMMA;
-        } break;
+        }
+            break;
 
         case ('('): {
             tok.type = TokenType::LPAREN;
-        } break;
+        }
+            break;
 
         case (')'): {
             tok.type = TokenType::RPAREN;
-        } break;
+        }
+            break;
 
         case ('"'): {
             tok.type = TokenType::STRING;
             tok.literal = read_string(); // Replace " char with enclosing string
-        } break;
+        }
+            break;
 
         case ('{'): {
             tok.type = TokenType::LBRACE;
-        } break;
+        }
+            break;
 
         case ('}'): {
             tok.type = TokenType::RBRACE;
-        } break;
+        }
+            break;
 
         case ('['): {
             tok.type = TokenType::LBRACKET;
-        } break;
+        }
+            break;
 
         case (']'): {
             tok.type = TokenType::RBRACKET;
-        } break;
+        }
+            break;
 
         case (0): {
             tok.type = TokenType::ENDOFFILE;
             tok.literal = std::string{""}; // Represent EOF literal with blank string
-        } break;
+        }
+            break;
 
         default: {
             if (is_letter(ch)) {

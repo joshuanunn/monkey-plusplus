@@ -7,7 +7,17 @@
 bool is_letter(char ch);
 
 struct Lexer {
-    explicit Lexer(const std::string &input_in);
+    Lexer() = delete;
+
+    explicit Lexer(const std::string& input_in);
+
+    Lexer(const Lexer& other) = delete;
+
+    Lexer(Lexer&& other) noexcept;
+
+    Lexer& operator=(const Lexer& other) = delete;
+
+    Lexer& operator=(Lexer&& other) noexcept = delete;
 
     void read_char();
 
