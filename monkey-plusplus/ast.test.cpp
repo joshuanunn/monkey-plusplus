@@ -12,9 +12,9 @@ TEST_CASE("Test String") {
 
     auto program = Program();
 
-    auto stmt = std::make_unique<LetStatement>(LetStatement{Token{TokenType::LET, "let"}});
+    auto stmt = std::make_shared<LetStatement>(LetStatement{Token{TokenType::LET, "let"}});
 
-    stmt->name = std::make_unique<Identifier>(Identifier(Token{TokenType::IDENT, "myVar"}, "myVar"));
+    stmt->name = std::make_shared<Identifier>(Identifier(Token{TokenType::IDENT, "myVar"}, "myVar"));
     stmt->value = std::make_shared<Identifier>(Identifier(Token{TokenType::IDENT, "anotherVar"}, "anotherVar"));
 
     program.statements.push_back(std::move(stmt));
