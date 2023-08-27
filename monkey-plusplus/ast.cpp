@@ -33,8 +33,7 @@ std::string LetStatement::string() const {
 }
 
 std::shared_ptr<Node> LetStatement::clone() const {
-    auto new_copy = LetStatement{*this};
-    return std::make_shared<LetStatement>(new_copy);
+    return std::make_shared<LetStatement>(LetStatement{*this});
 }
 
 LetStatement::LetStatement(const Token& t) : token{t} {}
@@ -98,8 +97,7 @@ std::string ReturnStatement::string() const {
 }
 
 std::shared_ptr<Node> ReturnStatement::clone() const {
-    auto new_copy = ReturnStatement{*this};
-    return std::make_shared<ReturnStatement>(new_copy);
+    return std::make_shared<ReturnStatement>(ReturnStatement{*this});
 }
 
 ReturnStatement::ReturnStatement(const Token& t) : token(t) {}
@@ -155,8 +153,7 @@ std::string ExpressionStatement::string() const {
 }
 
 std::shared_ptr<Node> ExpressionStatement::clone() const {
-    auto new_copy = ExpressionStatement{*this};
-    return std::make_shared<ExpressionStatement>(new_copy);
+    return std::make_shared<ExpressionStatement>(ExpressionStatement{*this});
 }
 
 ExpressionStatement::ExpressionStatement(const Token& t) : token{t} {}
@@ -208,8 +205,7 @@ std::string Identifier::string() const {
 }
 
 std::shared_ptr<Node> Identifier::clone() const {
-    auto new_copy = Identifier{*this};
-    return std::make_shared<Identifier>(new_copy);
+    return std::make_shared<Identifier>(Identifier{*this});
 }
 
 Identifier::Identifier(const Token& t, const std::string& v) : token{t}, value{v} {}
@@ -256,8 +252,7 @@ std::string IntegerLiteral::string() const {
 }
 
 std::shared_ptr<Node> IntegerLiteral::clone() const {
-    auto new_copy = IntegerLiteral{*this};
-    return std::make_shared<IntegerLiteral>(new_copy);
+    return std::make_shared<IntegerLiteral>(IntegerLiteral{*this});
 }
 
 IntegerLiteral::IntegerLiteral(const Token& t) : token{t}, value{} {}
@@ -304,8 +299,7 @@ std::string BooleanLiteral::string() const {
 }
 
 std::shared_ptr<Node> BooleanLiteral::clone() const {
-    auto new_copy = BooleanLiteral{*this};
-    return std::make_shared<BooleanLiteral>(new_copy);
+    return std::make_shared<BooleanLiteral>(BooleanLiteral{*this});
 }
 
 BooleanLiteral::BooleanLiteral(const Token& t, bool v) : token{t}, value{v} {}
@@ -352,8 +346,7 @@ std::string StringLiteral::string() const {
 }
 
 std::shared_ptr<Node> StringLiteral::clone() const {
-    auto new_copy = StringLiteral{*this};
-    return std::make_shared<StringLiteral>(new_copy);
+    return std::make_shared<StringLiteral>(StringLiteral{*this});
 }
 
 StringLiteral::StringLiteral(const Token& t, std::string v) : token{t}, value{std::move(v)} {}
@@ -400,8 +393,7 @@ std::string PrefixExpression::string() const {
 }
 
 std::shared_ptr<Node> PrefixExpression::clone() const {
-    auto new_copy = PrefixExpression{*this};
-    return std::make_shared<PrefixExpression>(new_copy);
+    return std::make_shared<PrefixExpression>(PrefixExpression{*this});
 }
 
 PrefixExpression::PrefixExpression(const Token& t, const std::string& o) : token{t}, op{o} {}
@@ -458,8 +450,7 @@ std::string InfixExpression::string() const {
 }
 
 std::shared_ptr<Node> InfixExpression::clone() const {
-    auto new_copy = InfixExpression{*this};
-    return std::make_shared<InfixExpression>(new_copy);
+    return std::make_shared<InfixExpression>(InfixExpression{*this});
 }
 
 InfixExpression::InfixExpression(const Token& t, const std::string &o) : token{t}, op{o} {}
@@ -528,8 +519,7 @@ std::string BlockStatement::string() const {
 }
 
 std::shared_ptr<Node> BlockStatement::clone() const {
-    auto new_copy = BlockStatement{*this};
-    return std::make_shared<BlockStatement>(new_copy);
+    return std::make_shared<BlockStatement>(BlockStatement{*this});
 }
 
 BlockStatement::BlockStatement(const Token& t) : token{t} {}
@@ -588,8 +578,7 @@ std::string IfExpression::string() const {
 }
 
 std::shared_ptr<Node> IfExpression::clone() const {
-    auto new_copy = IfExpression{*this};
-    return std::make_shared<IfExpression>(new_copy);
+    return std::make_shared<IfExpression>(IfExpression{*this});
 }
 
 IfExpression::IfExpression(const Token& t) : token{t} {}
@@ -668,8 +657,7 @@ std::string FunctionLiteral::string() const {
 }
 
 std::shared_ptr<Node> FunctionLiteral::clone() const {
-    auto new_copy = FunctionLiteral{*this};
-    return std::make_shared<FunctionLiteral>(new_copy);
+    return std::make_shared<FunctionLiteral>(FunctionLiteral{*this});
 }
 
 FunctionLiteral::FunctionLiteral(const Token& t) : token{t} {}
@@ -743,8 +731,7 @@ std::string ArrayLiteral::string() const {
 }
 
 std::shared_ptr<Node> ArrayLiteral::clone() const {
-    auto new_copy = ArrayLiteral{*this};
-    return std::make_shared<ArrayLiteral>(new_copy);
+    return std::make_shared<ArrayLiteral>(ArrayLiteral{*this});
 }
 
 ArrayLiteral::ArrayLiteral(const Token& t) : token{t} {}
@@ -811,8 +798,7 @@ std::string HashLiteral::string() const {
 }
 
 std::shared_ptr<Node> HashLiteral::clone() const {
-    auto new_copy = HashLiteral{*this};
-    return std::make_shared<HashLiteral>(new_copy);
+    return std::make_shared<HashLiteral>(HashLiteral{*this});
 }
 
 HashLiteral::HashLiteral(const Token& t) : token{t} {}
@@ -876,8 +862,7 @@ std::string IndexExpression::string() const {
 }
 
 std::shared_ptr<Node> IndexExpression::clone() const {
-    auto new_copy = IndexExpression{*this};
-    return std::make_shared<IndexExpression>(new_copy);
+    return std::make_shared<IndexExpression>(IndexExpression{*this});
 }
 
 IndexExpression::IndexExpression(const Token& t) : token{t} {}
@@ -949,8 +934,7 @@ std::string CallExpression::string() const {
 }
 
 std::shared_ptr<Node> CallExpression::clone() const {
-    auto new_copy = CallExpression{*this};
-    return std::make_shared<CallExpression>(new_copy);
+    return std::make_shared<CallExpression>(CallExpression{*this});
 }
 
 CallExpression::CallExpression(const Token& t, std::shared_ptr<Expression> f) : token{t}, function{f} {}
@@ -1019,8 +1003,7 @@ std::string Program::string() const {
 }
 
 std::shared_ptr<Node> Program::clone() const {
-    auto new_copy = Program{*this};
-    return std::make_shared<Program>(new_copy);
+    return std::make_shared<Program>(Program{*this});
 }
 
 Program::Program(const Program& other) : statements{} {
