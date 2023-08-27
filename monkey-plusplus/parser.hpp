@@ -41,15 +41,15 @@ struct Parser {
 
     void next_token();
 
-    std::unique_ptr<LetStatement> parse_let_statement();
+    std::shared_ptr<LetStatement> parse_let_statement();
 
-    std::unique_ptr<ReturnStatement> parse_return_statement();
+    std::shared_ptr<ReturnStatement> parse_return_statement();
 
-    std::unique_ptr<ExpressionStatement> parse_expression_statement();
+    std::shared_ptr<ExpressionStatement> parse_expression_statement();
 
     std::shared_ptr<BlockStatement> parse_block_statement();
 
-    std::unique_ptr<Statement> parse_statement();
+    std::shared_ptr<Statement> parse_statement();
 
     std::shared_ptr<Expression> parse_expression(Precedence precedence);
 

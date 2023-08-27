@@ -52,14 +52,14 @@ void Parser::next_token() {
     peek_token = l.next_token();
 }
 
-std::unique_ptr<LetStatement> Parser::parse_let_statement() {
-    auto stmt = std::make_unique<LetStatement>(LetStatement{cur_token});
+std::shared_ptr<LetStatement> Parser::parse_let_statement() {
+    auto stmt = std::make_shared<LetStatement>(LetStatement{cur_token});
 
     if (!expect_peek(TokenType::IDENT)) {
         return nullptr;
     }
 
-    stmt->name = std::make_unique<Identifier>(Identifier{cur_token, cur_token.literal});
+    stmt->name = std::make_shared<Identifier>(Identifier{cur_token, cur_token.literal});
 
     if (!expect_peek(TokenType::ASSIGN)) {
         return nullptr;
@@ -76,8 +76,8 @@ std::unique_ptr<LetStatement> Parser::parse_let_statement() {
     return stmt;
 }
 
-std::unique_ptr<ReturnStatement> Parser::parse_return_statement() {
-    auto stmt = std::make_unique<ReturnStatement>(ReturnStatement{cur_token});
+std::shared_ptr<ReturnStatement> Parser::parse_return_statement() {
+    auto stmt = std::make_shared<ReturnStatement>(ReturnStatement{cur_token});
 
     next_token();
 
@@ -90,10 +90,10 @@ std::unique_ptr<ReturnStatement> Parser::parse_return_statement() {
     return stmt;
 }
 
-std::unique_ptr<ExpressionStatement> Parser::parse_expression_statement() {
-    auto stmt = std::make_unique<ExpressionStatement>(ExpressionStatement{cur_token});
+std::shared_ptr<ExpressionStatement> Parser::parse_expression_statement() {
+    auto stmt = std::make_shared<ExpressionStatement>(ExpressionStatement{cur_token});
 
-    stmt->expression = std::move(parse_expression(Precedence::LOWEST));
+    stmt->expression = parse_expression(Precedence::LOWEST);
 
     if (peek_token_is(TokenType::SEMICOLON)) {
         next_token();
@@ -120,7 +120,7 @@ std::shared_ptr<BlockStatement> Parser::parse_block_statement() {
     return block;
 }
 
-std::unique_ptr<Statement> Parser::parse_statement() {
+std::shared_ptr<Statement> Parser::parse_statement() {
     switch (cur_token.type) {
         case (TokenType::LET):
             return parse_let_statement();
