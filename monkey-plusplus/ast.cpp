@@ -685,7 +685,7 @@ FunctionLiteral::FunctionLiteral(const FunctionLiteral& other) : token{other.tok
 FunctionLiteral::FunctionLiteral(FunctionLiteral&& other) noexcept {
     token = std::move(other.token);
     parameters.swap(other.parameters);
-    body = std::move(body);
+    body = std::move(other.body);
 
     other.token.type = TokenType::ILLEGAL;
     other.token.literal = "";
@@ -711,7 +711,7 @@ FunctionLiteral& FunctionLiteral::operator=(FunctionLiteral&& other) noexcept {
 
     token = std::move(other.token);
     parameters.swap(other.parameters);
-    body = std::move(body);
+    body = std::move(other.body);
 
     other.token.type = TokenType::ILLEGAL;
     other.token.literal = "";
@@ -965,7 +965,7 @@ CallExpression::CallExpression(const CallExpression& other) : token{other.token}
 
 CallExpression::CallExpression(CallExpression&& other) noexcept {
     token = std::move(other.token);
-    function = std::move(function);
+    function = std::move(other.function);
     arguments.swap(other.arguments);
 
     other.token.type = TokenType::ILLEGAL;
@@ -990,7 +990,7 @@ CallExpression& CallExpression::operator=(CallExpression&& other) noexcept {
     if (this == &other) return *this;
 
     token = std::move(other.token);
-    function = std::move(function);
+    function = std::move(other.function);
     arguments.swap(other.arguments);
 
     other.token.type = TokenType::ILLEGAL;
