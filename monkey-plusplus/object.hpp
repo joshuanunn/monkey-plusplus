@@ -28,6 +28,8 @@ struct Object {
     virtual ObjectType type() const = 0;
 
     virtual std::string inspect() const = 0;
+
+    virtual std::shared_ptr<Object> clone() const = 0;
 };
 
 struct HashKey {
@@ -64,6 +66,8 @@ struct Hash : public Object {
     ObjectType type() const override;
 
     std::string inspect() const override;
+
+    std::shared_ptr<Object> clone() const override;
 };
 
 typedef std::function<std::shared_ptr<Object>(std::vector<std::shared_ptr<Object>>)> builtin_fn;
@@ -80,6 +84,8 @@ struct Function : public Object {
     ObjectType type() const override;
 
     std::string inspect() const override;
+
+    std::shared_ptr<Object> clone() const override;
 };
 
 struct Builtin : public Object {
@@ -91,6 +97,8 @@ struct Builtin : public Object {
     ObjectType type() const override;
 
     std::string inspect() const override;
+
+    std::shared_ptr<Object> clone() const override;
 };
 
 struct Array : public Object {
@@ -103,6 +111,8 @@ struct Array : public Object {
     ObjectType type() const override;
 
     std::string inspect() const override;
+
+    std::shared_ptr<Object> clone() const override;
 };
 
 struct ReturnValue : public Object {
@@ -113,6 +123,8 @@ struct ReturnValue : public Object {
     ObjectType type() const override;
 
     std::string inspect() const override;
+
+    std::shared_ptr<Object> clone() const override;
 };
 
 struct Error : public Object {
@@ -123,6 +135,8 @@ struct Error : public Object {
     ObjectType type() const override;
 
     std::string inspect() const override;
+
+    std::shared_ptr<Object> clone() const override;
 };
 
 struct Integer : public Object, Hashable {
@@ -133,6 +147,8 @@ struct Integer : public Object, Hashable {
     ObjectType type() const override;
 
     std::string inspect() const override;
+
+    std::shared_ptr<Object> clone() const override;
 
     HashKey hash_key() const;
 };
@@ -146,6 +162,8 @@ struct Boolean : public Object, Hashable {
 
     std::string inspect() const override;
 
+    std::shared_ptr<Object> clone() const override;
+
     HashKey hash_key() const;
 };
 
@@ -158,11 +176,15 @@ struct String : public Object, Hashable {
 
     std::string inspect() const override;
 
+    std::shared_ptr<Object> clone() const override;
+
     HashKey hash_key() const;
 };
 
 struct Null : public Object {
     ObjectType type() const override;
+
+    std::shared_ptr<Object> clone() const override;
 
     std::string inspect() const override;
 };

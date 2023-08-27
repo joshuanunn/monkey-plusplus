@@ -38,6 +38,10 @@ std::string Hash::inspect() const {
     return out;
 }
 
+std::shared_ptr<Object> Hash::clone() const {
+    return std::make_shared<Hash>(Hash{*this});
+}
+
 Function::Function(std::vector<std::shared_ptr<Identifier>> p, std::shared_ptr<BlockStatement> b,
                    const std::shared_ptr<Environment> &e) : parameters{std::move(p)}, body{std::move(b)}, env{e} {}
 
@@ -62,6 +66,10 @@ std::string Function::inspect() const {
     return out;
 }
 
+std::shared_ptr<Object> Function::clone() const {
+    return std::make_shared<Function>(Function{*this});
+}
+
 Builtin::Builtin(builtin_fn v) : builtin_function(v) {}
 
 ObjectType Builtin::type() const {
@@ -70,6 +78,10 @@ ObjectType Builtin::type() const {
 
 std::string Builtin::inspect() const {
     return "builtin function";
+}
+
+std::shared_ptr<Object> Builtin::clone() const {
+    return std::make_shared<Builtin>(Builtin{*this});
 }
 
 Array::Array() = default;
@@ -101,6 +113,10 @@ std::string Array::inspect() const {
     return out;
 }
 
+std::shared_ptr<Object> Array::clone() const {
+    return std::make_shared<Array>(Array{*this});
+}
+
 ReturnValue::ReturnValue(std::shared_ptr<Object> v) : value(v) {}
 
 ObjectType ReturnValue::type() const {
@@ -111,6 +127,10 @@ std::string ReturnValue::inspect() const {
     return value->inspect();
 }
 
+std::shared_ptr<Object> ReturnValue::clone() const {
+    return std::make_shared<ReturnValue>(ReturnValue{*this});
+}
+
 Error::Error(std::string v) : message(v) {}
 
 ObjectType Error::type() const {
@@ -119,6 +139,10 @@ ObjectType Error::type() const {
 
 std::string Error::inspect() const {
     return "Error: " + message;
+}
+
+std::shared_ptr<Object> Error::clone() const {
+    return std::make_shared<Error>(Error{*this});
 }
 
 Integer::Integer(int v) : value(v) {}
@@ -135,6 +159,10 @@ HashKey Integer::hash_key() const {
     return HashKey{type(), static_cast<uint64_t>(value)};
 }
 
+std::shared_ptr<Object> Integer::clone() const {
+    return std::make_shared<Integer>(Integer{*this});
+}
+
 Boolean::Boolean(bool v) : value(v) {}
 
 ObjectType Boolean::type() const {
@@ -146,6 +174,10 @@ std::string Boolean::inspect() const {
         return "false";
     }
     return "true";
+}
+
+std::shared_ptr<Object> Boolean::clone() const {
+    return std::make_shared<Boolean>(Boolean{*this});
 }
 
 HashKey Boolean::hash_key() const {
@@ -160,6 +192,10 @@ ObjectType String::type() const {
 
 std::string String::inspect() const {
     return value;
+}
+
+std::shared_ptr<Object> String::clone() const {
+    return std::make_shared<String>(String{*this});
 }
 
 // Hashing algorithm using a 64-bit FNV-1a hash in line with that used in Go (hash/fnv)
@@ -183,6 +219,10 @@ ObjectType Null::type() const {
 
 std::string Null::inspect() const {
     return "null";
+}
+
+std::shared_ptr<Object> Null::clone() const {
+    return std::make_shared<Null>(Null{*this});
 }
 
 std::map<ObjectType, std::string> objecttype_literals = {
