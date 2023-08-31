@@ -5,14 +5,13 @@
 
 #include "../include/catch.hpp"
 
-#include "environment.hpp"
 #include "evaluator.hpp"
 #include "lexer.hpp"
 #include "object.hpp"
 #include "parser.hpp"
 
 std::shared_ptr<Object> test_eval (const std::string &input) {
-    auto l = std::make_unique<Lexer>(Lexer(input));
+    auto l = Lexer(input);
     auto p = Parser(std::move(l));
     auto program = p.parse_program();
     auto env = new_environment();

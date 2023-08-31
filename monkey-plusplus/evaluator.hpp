@@ -5,8 +5,6 @@
 #include "builtins.hpp"
 #include "object.hpp"
 
-std::shared_ptr<Null> get_null_ref();
-
 std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::shared_ptr<Environment> &env);
 
 std::shared_ptr<Object> eval_identifier(const std::shared_ptr<Identifier> &node, const std::shared_ptr<Environment> &env);

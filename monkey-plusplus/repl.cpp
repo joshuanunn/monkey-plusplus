@@ -1,9 +1,9 @@
 #include <iostream>
 
 #include "repl.hpp"
-#include "environment.hpp"
 #include "evaluator.hpp"
 #include "lexer.hpp"
+#include "object.hpp"
 #include "parser.hpp"
 
 void start_repl() {

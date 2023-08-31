@@ -1,14 +1,4 @@
-#include "environment.hpp"
 #include "evaluator.hpp"
-
-// Initialise global Boolean and Null Objects to avoid unnecessary Object creation
-auto GLOBAL_NULL = std::make_shared<Null>(Null{});
-auto GLOBAL_TRUE = std::make_shared<Boolean>(Boolean{true});
-auto GLOBAL_FALSE = std::make_shared<Boolean>(Boolean{false});
-
-std::shared_ptr<Null> get_null_ref() {
-    return GLOBAL_NULL;
-}
 
 std::shared_ptr<Object> eval(const std::shared_ptr<Node> &node, const std::shared_ptr<Environment> &env) {
     // Statements
@@ -120,16 +110,16 @@ std::shared_ptr<Object> eval_if_expression(const std::shared_ptr<IfExpression> &
     } else if (ie->alternative) {
         return eval(ie->alternative, env);
     } else {
-        return GLOBAL_NULL;
+        return get_null_ref();
     }
 }
 
 bool is_truthy(const std::shared_ptr<Object> &obj) {
-    if (obj == GLOBAL_NULL) {
+    if (obj == get_null_ref()) {
         return false;
-    } else if (obj == GLOBAL_TRUE) {
+    } else if (obj == get_true_ref()) {
         return true;
-    } else if (obj == GLOBAL_FALSE) {
+    } else if (obj == get_false_ref()) {
         return false;
     } else {
         return true;
@@ -185,9 +175,9 @@ std::shared_ptr<Object> eval_block_statement(const std::shared_ptr<BlockStatemen
 
 std::shared_ptr<Object> native_bool_to_boolean_object(bool input) {
     if (input) {
-        return GLOBAL_TRUE;
+        return get_true_ref();
     }
-    return GLOBAL_FALSE;
+    return get_false_ref();
 }
 
 std::shared_ptr<Object> eval_prefix_expression(const std::string &op, const std::shared_ptr<Object> &right) {
@@ -201,14 +191,14 @@ std::shared_ptr<Object> eval_prefix_expression(const std::string &op, const std:
 }
 
 std::shared_ptr<Object> eval_bang_operator_expression(const std::shared_ptr<Object> &right) {
-    if (right == GLOBAL_TRUE) {
-        return GLOBAL_FALSE;
-    } else if (right == GLOBAL_FALSE) {
-        return GLOBAL_TRUE;
-    } else if (right == GLOBAL_NULL) {
-        return GLOBAL_TRUE;
+    if (right == get_true_ref()) {
+        return get_false_ref();
+    } else if (right == get_false_ref()) {
+        return get_true_ref();
+    } else if (right == get_null_ref()) {
+        return get_true_ref();
     } else {
-        return GLOBAL_FALSE;
+        return get_false_ref();
     }
 }
 
@@ -220,7 +210,7 @@ std::shared_ptr<Object> eval_minus_prefix_operator_expression(const std::shared_
     // Cast Object to Integer Object and also return GLOBAL_NULL if cast unexpectedly fails
     auto original = std::dynamic_pointer_cast<Integer>(right);
     if (!original) {
-        return GLOBAL_NULL;
+        return get_null_ref();
     }
 
     return std::make_shared<Integer>(Integer{-(original->value)});
@@ -258,14 +248,14 @@ std::shared_ptr<Object> eval_array_index_expression(const std::shared_ptr<Object
     auto idx = std::dynamic_pointer_cast<Integer>(index);
 
     if (!array_object || !idx) {
-        return GLOBAL_NULL;
+        return get_null_ref();
     }
 
     auto index_value = idx->value;
     auto max_value = array_object->elements.size() - 1;
 
     if (index_value < 0 || index_value > max_value) {
-        return GLOBAL_NULL;
+        return get_null_ref();
     }
 
     return array_object->elements.at(index_value);
@@ -296,7 +286,7 @@ std::shared_ptr<Object> eval_integer_infix_expression(const std::string &op, con
     auto right_val = std::dynamic_pointer_cast<Integer>(right);
 
     if (!left_val || !right_val) {
-        return GLOBAL_NULL;
+        return get_null_ref();
     }
 
     if (op == "+") {
@@ -326,7 +316,7 @@ std::shared_ptr<Object> eval_string_infix_expression(const std::string &op, cons
     auto right_val = std::dynamic_pointer_cast<String>(right);
 
     if (!left_val || !right_val) {
-        return GLOBAL_NULL;
+        return get_null_ref();
     }
 
     if (op != "+") {
@@ -394,7 +384,7 @@ std::shared_ptr<Object> apply_function(const std::shared_ptr<Object> &fn, const 
 }
 
 std::shared_ptr<Environment> extend_function_env(const std::shared_ptr<Function> &fn, const std::vector<std::shared_ptr<Object>> &args) {
-    auto env = new_enclosed_environment(fn->env);
+    auto env = new_enclosed_environment(*fn->env);
 
     for (int i = 0; i < fn->parameters.size(); i++) {
         env->set(fn->parameters.at(i)->value, args.at(i));

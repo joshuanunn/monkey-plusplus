@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 #include "ast.hpp"
 
 enum class ObjectType {
@@ -31,6 +32,32 @@ struct Object {
 
     virtual std::shared_ptr<Object> clone() const = 0;
 };
+
+struct Environment {
+    Environment() = default;
+
+    Environment(const Environment& other);
+
+    Environment(Environment&& other) noexcept;
+
+    Environment& operator=(const Environment& other);
+
+    Environment& operator=(Environment&& other) noexcept;
+
+    std::map<std::string, std::shared_ptr<Object>> store;
+
+    std::shared_ptr<Environment> outer;
+
+    std::tuple<std::shared_ptr<Object>, bool> get(const std::string &name);
+
+    std::shared_ptr<Object> set(std::string name, std::shared_ptr<Object> val);
+
+    std::shared_ptr<Environment> clone() const;
+};
+
+std::shared_ptr<Environment> new_environment();
+
+std::shared_ptr<Environment> new_enclosed_environment(const Environment &outer);
 
 struct HashKey {
     HashKey(ObjectType t, uint64_t v);
@@ -61,6 +88,14 @@ struct Hashable {
 struct Hash : public Object {
     Hash(std::map<HashKey, HashPair> p);
 
+    Hash(const Hash& other);
+
+    Hash(Hash&& other) noexcept;
+
+    Hash& operator=(const Hash& other);
+
+    Hash& operator=(Hash&& other) noexcept;
+
     std::map<HashKey, HashPair> pairs;
 
     ObjectType type() const override;
@@ -72,13 +107,21 @@ struct Hash : public Object {
 
 typedef std::function<std::shared_ptr<Object>(std::vector<std::shared_ptr<Object>>)> builtin_fn;
 
-struct Environment;
-
 struct Function : public Object {
     Function(std::vector<std::shared_ptr<Identifier>> p, std::shared_ptr<BlockStatement> b, const std::shared_ptr<Environment> &e);
 
+    Function(const Function& other);
+
+    Function(Function&& other) noexcept;
+
+    Function& operator=(const Function& other);
+
+    Function& operator=(Function&& other) noexcept;
+
     std::vector<std::shared_ptr<Identifier>> parameters;
+
     std::shared_ptr<BlockStatement> body;
+
     std::shared_ptr<Environment> env;
 
     ObjectType type() const override;
@@ -92,6 +135,14 @@ struct Builtin : public Object {
 
     explicit Builtin(builtin_fn v);
 
+    Builtin(const Builtin& other);
+
+    Builtin(Builtin&& other) noexcept;
+
+    Builtin& operator=(const Builtin& other);
+
+    Builtin& operator=(Builtin&& other) noexcept;
+
     builtin_fn builtin_function;
 
     ObjectType type() const override;
@@ -104,7 +155,13 @@ struct Builtin : public Object {
 struct Array : public Object {
     explicit Array();
 
-    Array(const Array &a);
+    Array(const Array& other);
+
+    Array(Array&& other) noexcept;
+
+    Array& operator=(const Array& other);
+
+    Array& operator=(Array&& other) noexcept;
 
     std::vector<std::shared_ptr<Object>> elements;
 
@@ -118,6 +175,14 @@ struct Array : public Object {
 struct ReturnValue : public Object {
     explicit ReturnValue(std::shared_ptr<Object> v);
 
+    ReturnValue(const ReturnValue& other);
+
+    ReturnValue(ReturnValue&& other) noexcept;
+
+    ReturnValue& operator=(const ReturnValue& other);
+
+    ReturnValue& operator=(ReturnValue&& other) noexcept;
+
     std::shared_ptr<Object> value;
 
     ObjectType type() const override;
@@ -130,6 +195,14 @@ struct ReturnValue : public Object {
 struct Error : public Object {
     explicit Error(std::string v);
 
+    Error(const Error& other);
+
+    Error(Error&& other) noexcept;
+
+    Error& operator=(const Error& other);
+
+    Error& operator=(Error&& other) noexcept;
+
     std::string message;
 
     ObjectType type() const override;
@@ -141,6 +214,14 @@ struct Error : public Object {
 
 struct Integer : public Object, Hashable {
     explicit Integer(int v);
+
+    Integer(const Integer& other);
+
+    Integer(Integer&& other) noexcept;
+
+    Integer& operator=(const Integer& other);
+
+    Integer& operator=(Integer&& other) noexcept;
 
     int value;
 
@@ -156,6 +237,14 @@ struct Integer : public Object, Hashable {
 struct Boolean : public Object, Hashable {
     explicit Boolean(bool v);
 
+    Boolean(const Boolean& other);
+
+    Boolean(Boolean&& other) noexcept;
+
+    Boolean& operator=(const Boolean& other);
+
+    Boolean& operator=(Boolean&& other) noexcept;
+
     bool value;
 
     ObjectType type() const override;
@@ -167,8 +256,20 @@ struct Boolean : public Object, Hashable {
     HashKey hash_key() const;
 };
 
+std::shared_ptr<Boolean> get_true_ref();
+
+std::shared_ptr<Boolean> get_false_ref();
+
 struct String : public Object, Hashable {
     explicit String(std::string v);
+
+    String(const String& other);
+
+    String(String&& other) noexcept;
+
+    String& operator=(const String& other);
+
+    String& operator=(String&& other) noexcept;
 
     std::string value;
 
@@ -182,11 +283,23 @@ struct String : public Object, Hashable {
 };
 
 struct Null : public Object {
+    Null() = default;
+
+    Null(const Null& other) = delete;
+
+    Null(Null&& other) noexcept = default;
+
+    Null& operator=(const Null& other) = delete;
+
+    Null& operator=(Null&& other) noexcept = delete;
+
     ObjectType type() const override;
 
     std::shared_ptr<Object> clone() const override;
 
     std::string inspect() const override;
 };
+
+std::shared_ptr<Null> get_null_ref();
 
 #endif //MONKEY_PLUSPLUS_OBJECT_HPP
