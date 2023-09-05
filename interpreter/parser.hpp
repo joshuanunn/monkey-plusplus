@@ -83,7 +83,7 @@ struct Parser {
 
     std::shared_ptr<Expression> parse_if_expression();
 
-    std::unique_ptr<Program> parse_program();
+    std::shared_ptr<Program> parse_program();
 
     std::vector<std::string> errors() const;
 

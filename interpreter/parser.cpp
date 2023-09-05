@@ -389,8 +389,8 @@ std::shared_ptr<Expression> Parser::parse_if_expression() {
     return expression;
 }
 
-std::unique_ptr<Program> Parser::parse_program() {
-    auto program = std::make_unique<Program>(Program{});
+std::shared_ptr<Program> Parser::parse_program() {
+    auto program = std::make_shared<Program>(Program{});
 
     while (cur_token.type != TokenType::ENDOFFILE) {
         auto stmt = parse_statement();
