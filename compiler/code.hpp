@@ -9,6 +9,8 @@
 
 typedef std::vector<uint8_t> Instructions;
 
+std::ostream& operator<<(std::ostream& out, const Instructions& ins);
+
 typedef uint8_t Opcode;
 
 enum class OpType : Opcode {
@@ -43,6 +45,12 @@ constexpr std::enable_if_t<std::is_enum<Enumeration>::value,
     return static_cast<std::underlying_type_t<Enumeration>>(value);
 }
 
+std::string fmt_instruction(std::shared_ptr<Definition> def, std::vector<int> operands);
+
 Instructions make(OpType op, std::vector<int> operands);
+
+uint16_t read_uint_16(uint8_t lo, uint8_t hi);
+
+std::tuple<std::vector<int>, int> read_operands(std::shared_ptr<Definition> def, Instructions ins);
 
 #endif //MONKEY_PLUSPLUS_CODE_HPP
