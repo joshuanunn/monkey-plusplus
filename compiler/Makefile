@@ -6,11 +6,17 @@ codetest : code.o code.test.o
 compilertest : ast.o code.o compiler.o lexer.o object.o parser.o token.o compiler.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
+vmtest : ast.o code.o compiler.o lexer.o object.o parser.o token.o vm.o vm.test.o
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
 test-code : codetest
 	./codetest
 
 test-compiler : compilertest
 	./compilertest
 
+test-vm : vmtest
+	./vmtest
+
 clean :
-	rm -rf *.o codetest compilertest
+	rm -rf *.o codetest compilertest vmtest
