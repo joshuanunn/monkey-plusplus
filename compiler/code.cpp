@@ -93,7 +93,7 @@ Instructions make(OpType op, std::vector<int> operands) {
     return instruction;
 }
 
-uint16_t read_uint_16(uint8_t lo, uint8_t hi) {
+uint16_t read_uint_16(uint8_t hi, uint8_t lo) {
     return static_cast<uint16_t>(lo) | static_cast<uint16_t>(hi) << 8;
 }
 
@@ -109,7 +109,7 @@ std::tuple<std::vector<int>, int> read_operands(std::shared_ptr<Definition> def,
         switch (width) {
             case 2:
                 // Read 2 byte instruction into a single int (big endian byte order)
-                operands[i] = static_cast<int>(read_uint_16(ins[offset+1], ins[offset]));
+                operands[i] = static_cast<int>(read_uint_16(ins[offset], ins[offset+1]));
                 break;
         }
         offset += width;

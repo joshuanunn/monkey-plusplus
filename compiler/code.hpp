@@ -49,7 +49,7 @@ std::string fmt_instruction(std::shared_ptr<Definition> def, std::vector<int> op
 
 Instructions make(OpType op, std::vector<int> operands);
 
-uint16_t read_uint_16(uint8_t lo, uint8_t hi);
+uint16_t read_uint_16(uint8_t hi, uint8_t lo);
 
 std::tuple<std::vector<int>, int> read_operands(std::shared_ptr<Definition> def, Instructions ins);
 
