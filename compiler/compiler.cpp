@@ -17,13 +17,21 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
             return err;
         }
     } else if (auto ie = std::dynamic_pointer_cast<InfixExpression>(node)) {
+        // Extract left operand
         err = compile(ie->left);
         if (is_error(err)) {
             return err;
         }
+        // Extract right operand
         err = compile(ie->right);
         if (is_error(err)) {
             return err;
+        }
+        // Extract operator
+        if (ie->op == "+") {
+            emit(OpType::OpAdd, std::vector<int>{});
+        } else {
+            return std::make_shared<Error>(Error("unknown operator " + ie->op));
         }
     } else if (auto il = std::dynamic_pointer_cast<IntegerLiteral>(node)) {
         auto integer = std::make_shared<Integer>(Integer{il->value});

@@ -14,7 +14,8 @@ std::ostream& operator<<(std::ostream& out, const Instructions& ins);
 typedef uint8_t Opcode;
 
 enum class OpType : Opcode {
-    OpConstant
+    OpConstant,
+    OpAdd
 };
 
 struct Definition {

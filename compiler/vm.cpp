@@ -23,6 +23,13 @@ void VM::push(std::shared_ptr<Object> o) {
     sp++;
 }
 
+std::shared_ptr<Object> VM::pop() {
+    auto o = stack.at(sp-1);
+    stack.pop_back();
+    sp--;
+    return o;
+}
+
 std::shared_ptr<Object> VM::stack_top() {
     if (sp == 0) {
         return nullptr; // TODO: should we instead return the null object?
@@ -40,6 +47,20 @@ std::shared_ptr<Error> VM::run() {
 
             // Add constant to VM constants
             push(constants.at(const_index));
+        // OpAdd instruction sums next two values beneath it on stack and pushes result back onto stack
+        } else if (op == OpType::OpAdd) {
+            // Pop values to be summed
+            auto right = pop();
+            auto left = pop();
+
+            // Cast to Integer objects and extract int values
+            // TODO: perhaps check for dynamic pointer cast failure (i.e. not Integer)?
+            auto left_value = std::dynamic_pointer_cast<Integer>(left)->value;
+            auto right_value = std::dynamic_pointer_cast<Integer>(right)->value;
+
+            // Push result back onto stack
+            auto result = std::make_shared<Integer>(Integer(left_value + right_value));
+            push(result);
         }
     }
 

@@ -36,7 +36,7 @@ TEST_CASE("Test Integer Arithmetic") {
     std::vector<std::tuple<std::string, int>> tests = {
             std::make_tuple("1", 1),
             std::make_tuple("2", 2),
-            std::make_tuple("1 + 2", 2), // TODO: update 2 to expected 3 after addition functionality fixed
+            std::make_tuple("1 + 2", 3),
     };
 
     for (const auto &tt: tests) {

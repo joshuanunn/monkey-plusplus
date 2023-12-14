@@ -31,6 +31,8 @@ struct VM {
 
     void push(std::shared_ptr<Object> o);
 
+    std::shared_ptr<Object> pop();
+
     std::shared_ptr<Object> stack_top();
 
     std::shared_ptr<Error> run();

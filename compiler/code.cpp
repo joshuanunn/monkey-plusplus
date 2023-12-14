@@ -4,10 +4,11 @@
 #include <iostream>
 
 // Initialise global Definitions
-auto OP_CONSTANT = std::make_shared<Definition>(Definition{"OpConstant", std::vector<int>{2}});
-
 std::map<OpType, std::shared_ptr<Definition>> definitions = {
-        {OpType::OpConstant, OP_CONSTANT}
+        {OpType::OpConstant, std::make_shared<Definition>(
+                Definition{"OpConstant", std::vector<int>{2}})},
+        {OpType::OpAdd, std::make_shared<Definition>(
+                Definition{"OpAdd", std::vector<int>{}})},
 };
 
 std::tuple<std::shared_ptr<Definition>, bool> lookup(const OpType& op) {
@@ -31,6 +32,8 @@ std::string fmt_instruction(std::shared_ptr<Definition> def, std::vector<int> op
     }
 
     switch (operand_count) {
+        case 0:
+            return def->name;
         case 1:
             return def->name + " " + std::to_string(operands.at(0));
     }

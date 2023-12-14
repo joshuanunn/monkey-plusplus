@@ -11,6 +11,8 @@ TEST_CASE("Test Make") {
     std::vector<std::tuple<OpType, std::vector<int>, std::vector<Opcode>>> tests = {
             std::make_tuple(OpType::OpConstant, std::vector<int>{65534},
                             std::vector<Opcode>{as_opcode(OpType::OpConstant), 255, 254}),
+            std::make_tuple(OpType::OpAdd, std::vector<int>{},
+                            std::vector<Opcode>{as_opcode(OpType::OpAdd)}),
     };
 
     for (const auto &tt: tests) {
@@ -36,14 +38,14 @@ TEST_CASE("Test Make") {
 
 TEST_CASE("Test Instructions String") {
     std::vector<Instructions> instructions = std::vector<Instructions>{
-        make(OpType::OpConstant, std::vector<int>{1}),
+        make(OpType::OpAdd, std::vector<int>{}),
         make(OpType::OpConstant, std::vector<int>{2}),
         make(OpType::OpConstant, std::vector<int>{65535}),
     };
 
-    std::string expected = R"(0000 OpConstant 1
-0003 OpConstant 2
-0006 OpConstant 65535
+    std::string expected = R"(0000 OpAdd
+0001 OpConstant 2
+0004 OpConstant 65535
 )";
 
     auto concatted = Instructions{};

@@ -72,6 +72,7 @@ TEST_CASE("Compiler Tests") {
             std::make_tuple("1 + 2", std::vector<int>{1, 2}, std::vector<Instructions>{
                 make(OpType::OpConstant, std::vector<int>{0}),
                 make(OpType::OpConstant, std::vector<int>{1}),
+                make(OpType::OpAdd, std::vector<int>{}),
             }),
     };
 
