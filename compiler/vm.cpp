@@ -4,9 +4,6 @@ VM::VM(std::shared_ptr<Bytecode>&& bytecode) : stack{} {
     instructions = std::move(bytecode->instructions);
     constants = std::move(bytecode->constants);
 
-    // Preallocate the stack to the default STACKSIZE
-    stack.reserve(STACKSIZE);
-
     // Stack pointer starts at 0
     sp = 0;
 }
@@ -17,17 +14,13 @@ void VM::push(std::shared_ptr<Object> o) {
         abort();
     }
 
-    // Push object on to top of stack
-    stack.push_back(o);
-    // Increment stack pointer
-    sp++;
+    // Push object on to top of stack (stack[sp]) and increment stack pointer
+    stack[sp++] = o;
 }
 
 std::shared_ptr<Object> VM::pop() {
-    auto o = stack.at(sp-1);
-    stack.pop_back();
-    sp--;
-    return o;
+    // Pop object on top of stack (stack[sp-1]) and decrement stack pointer
+    return stack[--sp];
 }
 
 std::shared_ptr<Object> VM::stack_top() {
@@ -35,7 +28,7 @@ std::shared_ptr<Object> VM::stack_top() {
         return nullptr; // TODO: should we instead return the null object?
     }
     // Value at top of stack is 1 less than stack pointer
-    return stack.at(sp-1);
+    return stack[sp-1];
 }
 
 std::shared_ptr<Error> VM::run() {

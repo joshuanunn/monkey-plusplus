@@ -25,7 +25,7 @@ struct VM {
 
     Instructions instructions;
 
-    std::vector<std::shared_ptr<Object>> stack;
+    std::shared_ptr<Object> stack[STACKSIZE];
 
     int sp; // Always points to the next value. Top of stack is stack[sp-1]
 
