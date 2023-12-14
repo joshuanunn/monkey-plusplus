@@ -1,5 +1,8 @@
 CXXFLAGS = -g --std=c++17 -I../include
 
+monkey : ast.o code.o compiler.o lexer.o object.o parser.o token.o vm.o repl.o monkey.o
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
 codetest : code.o code.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
@@ -19,4 +22,4 @@ test-vm : vmtest
 	./vmtest
 
 clean :
-	rm -rf *.o codetest compilertest vmtest
+	rm -rf *.o codetest compilertest vmtest monkey
