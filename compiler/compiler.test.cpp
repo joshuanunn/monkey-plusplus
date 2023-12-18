@@ -67,13 +67,20 @@ bool test_integer_constants(const std::vector<int>& expected, const std::vector<
     return true;
 }
 
-TEST_CASE("Compiler Tests") {
+TEST_CASE("Test Integer Arithmetic") {
     std::vector<std::tuple<std::string, std::vector<int>, std::vector<Instructions>>> tests = {
-            std::make_tuple("1 + 2", std::vector<int>{1, 2}, std::vector<Instructions>{
-                make(OpType::OpConstant, std::vector<int>{0}),
-                make(OpType::OpConstant, std::vector<int>{1}),
-                make(OpType::OpAdd, std::vector<int>{}),
-            }),
+        std::make_tuple("1 + 2", std::vector<int>{1, 2}, std::vector<Instructions>{
+            make(OpType::OpConstant, std::vector<int>{0}),
+            make(OpType::OpConstant, std::vector<int>{1}),
+            make(OpType::OpAdd, std::vector<int>{}),
+            make(OpType::OpPop, std::vector<int>{}),
+        }),
+        std::make_tuple("1; 2", std::vector<int>{1, 2}, std::vector<Instructions>{
+            make(OpType::OpConstant, std::vector<int>{0}),
+            make(OpType::OpPop, std::vector<int>{}),
+            make(OpType::OpConstant, std::vector<int>{1}),
+            make(OpType::OpPop, std::vector<int>{}),
+        }),
     };
 
     for (const auto &tt: tests) {

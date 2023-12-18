@@ -15,7 +15,8 @@ typedef uint8_t Opcode;
 
 enum class OpType : Opcode {
     OpConstant,
-    OpAdd
+    OpAdd,
+    OpPop
 };
 
 struct Definition {

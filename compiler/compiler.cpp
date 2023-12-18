@@ -16,6 +16,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
         if (is_error(err)) {
             return err;
         }
+        emit(OpType::OpPop, std::vector<int>{});
     } else if (auto ie = std::dynamic_pointer_cast<InfixExpression>(node)) {
         // Extract left operand
         err = compile(ie->left);

@@ -31,6 +31,10 @@ std::shared_ptr<Object> VM::stack_top() {
     return stack[sp-1];
 }
 
+std::shared_ptr<Object> VM::last_popped_stack_elem() {
+    return stack[sp];
+}
+
 std::shared_ptr<Error> VM::run() {
     for (int ip = 0; ip < instructions.size(); ip++) {
         auto op = static_cast<OpType>(instructions.at(ip));
@@ -54,6 +58,9 @@ std::shared_ptr<Error> VM::run() {
             // Push result back onto stack
             auto result = std::make_shared<Integer>(Integer(left_value + right_value));
             push(result);
+        // OpPop instruction pops the top element off the stack
+        } else if (op == OpType::OpPop) {
+            pop();
         }
     }
 

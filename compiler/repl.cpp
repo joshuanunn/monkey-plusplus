@@ -39,8 +39,8 @@ void start_repl() {
             continue;
         }
 
-        auto stack_top = machine.stack_top();
-        std::cout << stack_top->inspect() << std::endl;
+        auto last_popped = machine.last_popped_stack_elem();
+        std::cout << last_popped->inspect() << std::endl;
     }
 }
 

@@ -60,7 +60,7 @@ TEST_CASE("Test Integer Arithmetic") {
         }
         REQUIRE(!err);
 
-        auto stack_elem = vm.stack_top();
+        auto stack_elem = vm.last_popped_stack_elem();
 
         REQUIRE(test_integer_object(tt_expected, stack_elem));
     }
