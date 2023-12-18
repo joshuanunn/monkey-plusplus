@@ -83,15 +83,25 @@ std::shared_ptr<Error> VM::run() {
 
             // Add constant to VM constants
             push(constants.at(const_index));
+        // OpPop instruction pops the top element off the stack
+        } else if (op == OpType::OpPop) {
+            pop();
         // Binary operations operate on two values beneath on stack
         } else if (op == OpType::OpAdd || op == OpType::OpSub || op == OpType::OpMul || op == OpType::OpDiv) {
             auto err = execute_binary_operation(op);
             if (err) {
                 return err;
             }
-        // OpPop instruction pops the top element off the stack
-        } else if (op == OpType::OpPop) {
-            pop();
+        } else if (op == OpType::OpTrue) {
+            auto err = push(get_true_ref());
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpFalse) {
+            auto err = push(get_false_ref());
+            if (err) {
+                return err;
+            }
         }
     }
 

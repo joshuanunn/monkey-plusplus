@@ -121,3 +121,34 @@ TEST_CASE("Test Integer Arithmetic") {
         REQUIRE(test_integer_constants(tt_expected_constants, bytecode->constants));
     }
 }
+
+TEST_CASE("Test Boolean Expressions") {
+    std::vector<std::tuple<std::string, std::vector<int>, std::vector<Instructions>>> tests = {
+            std::make_tuple("true", std::vector<int>{}, std::vector<Instructions>{
+                    make(OpType::OpTrue, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple("false", std::vector<int>{}, std::vector<Instructions>{
+                    make(OpType::OpFalse, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected_constants, tt_expected_instructions] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto bytecode = compiler->bytecode();
+
+        REQUIRE(test_instructions(tt_expected_instructions, bytecode->instructions));
+    }
+}

@@ -32,6 +32,21 @@ bool test_integer_object(int expected, std::shared_ptr<Object> actual) {
     return true;
 }
 
+bool test_boolean_object(bool expected, std::shared_ptr<Object> actual) {
+    auto boolean_obj = std::dynamic_pointer_cast<Boolean>(actual);
+    if (!boolean_obj) {
+        std::cerr << "object is not Boolean." << std::endl;
+        return false;
+    }
+
+    if (boolean_obj->value != expected) {
+        std::cerr << "object has wrong value. got=" << boolean_obj->value << ", want=" << expected << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 TEST_CASE("Test Integer Arithmetic") {
     std::vector<std::tuple<std::string, int>> tests = {
             std::make_tuple("1", 1),
@@ -72,5 +87,38 @@ TEST_CASE("Test Integer Arithmetic") {
         auto stack_elem = vm.last_popped_stack_elem();
 
         REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}
+
+TEST_CASE("Test Boolean Expressions") {
+    std::vector<std::tuple<std::string, bool>> tests = {
+            std::make_tuple("true", true),
+            std::make_tuple("false", false),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_boolean_object(tt_expected, stack_elem));
     }
 }

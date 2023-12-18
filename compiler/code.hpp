@@ -19,7 +19,9 @@ enum class OpType : Opcode {
     OpSub,
     OpMul,
     OpDiv,
-    OpPop
+    OpPop,
+    OpTrue,
+    OpFalse
 };
 
 struct Definition {

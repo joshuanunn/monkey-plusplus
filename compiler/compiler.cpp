@@ -11,12 +11,14 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
                 return err;
             }
         }
+    // Expression Statement
     } else if (auto e = std::dynamic_pointer_cast<ExpressionStatement>(node)) {
         err = compile(e->expression);
         if (is_error(err)) {
             return err;
         }
         emit(OpType::OpPop, std::vector<int>{});
+    // Infix Expression
     } else if (auto ie = std::dynamic_pointer_cast<InfixExpression>(node)) {
         // Extract left operand
         err = compile(ie->left);
@@ -40,10 +42,18 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
         } else {
             return std::make_shared<Error>(Error("unknown operator " + ie->op));
         }
+    // Integer
     } else if (auto il = std::dynamic_pointer_cast<IntegerLiteral>(node)) {
         auto integer = std::make_shared<Integer>(Integer{il->value});
         auto position = add_constant(integer);
         emit(OpType::OpConstant, std::vector<int>{position});
+    // Boolean
+    } else if (auto bl = std::dynamic_pointer_cast<BooleanLiteral>(node)) {
+        if (bl->value) {
+            emit(OpType::OpTrue, std::vector<int>{});
+        } else {
+            emit(OpType::OpFalse, std::vector<int>{});
+        }
     }
 
     return nullptr;

@@ -17,6 +17,10 @@ std::map<OpType, std::shared_ptr<Definition>> definitions = {
                 Definition{"OpDiv", std::vector<int>{}})},
         {OpType::OpPop, std::make_shared<Definition>(
                 Definition{"OpPop", std::vector<int>{}})},
+        {OpType::OpTrue, std::make_shared<Definition>(
+                Definition{"OpTrue", std::vector<int>{}})},
+        {OpType::OpFalse, std::make_shared<Definition>(
+                Definition{"OpFalse", std::vector<int>{}})},
 };
 
 std::tuple<std::shared_ptr<Definition>, bool> lookup(const OpType& op) {
