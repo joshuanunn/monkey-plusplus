@@ -24,14 +24,6 @@ std::shared_ptr<Object> VM::pop() {
     return stack[--sp];
 }
 
-std::shared_ptr<Object> VM::stack_top() {
-    if (sp == 0) {
-        return nullptr; // TODO: should we instead return the null object?
-    }
-    // Value at top of stack is 1 less than stack pointer
-    return stack[sp-1];
-}
-
 std::shared_ptr<Object> VM::last_popped_stack_elem() {
     return stack[sp];
 }

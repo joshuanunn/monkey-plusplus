@@ -33,8 +33,6 @@ struct VM {
 
     std::shared_ptr<Object> pop();
 
-    std::shared_ptr<Object> stack_top();
-
     std::shared_ptr<Object> last_popped_stack_elem();
 
     std::shared_ptr<Error> execute_binary_operation(OpType op);
