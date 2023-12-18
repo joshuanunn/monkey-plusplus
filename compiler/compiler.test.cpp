@@ -30,7 +30,7 @@ bool test_instructions(const std::vector<Instructions>& expected, const Instruct
     auto concatted = concat_instructions(expected);
 
     if (actual.size() != concatted.size()) {
-        std::cerr << "wrong instructions length.\nwant=" << concatted.size() << "\ngot =" << actual.size() << std::endl;
+        std::cerr << "wrong instructions length.\nwant:\n" << concatted << "\ngot:\n" << actual << std::endl;
         return false;
     }
 
