@@ -16,6 +16,9 @@ typedef uint8_t Opcode;
 enum class OpType : Opcode {
     OpConstant,
     OpAdd,
+    OpSub,
+    OpMul,
+    OpDiv,
     OpPop
 };
 

@@ -31,6 +31,12 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
         // Extract operator
         if (ie->op == "+") {
             emit(OpType::OpAdd, std::vector<int>{});
+        } else if (ie->op == "-") {
+            emit(OpType::OpSub, std::vector<int>{});
+        } else if (ie->op == "*") {
+            emit(OpType::OpMul, std::vector<int>{});
+        } else if (ie->op == "/") {
+            emit(OpType::OpDiv, std::vector<int>{});
         } else {
             return std::make_shared<Error>(Error("unknown operator " + ie->op));
         }

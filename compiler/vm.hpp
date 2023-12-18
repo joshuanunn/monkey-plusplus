@@ -29,13 +29,17 @@ struct VM {
 
     int sp; // Always points to the next value. Top of stack is stack[sp-1]
 
-    void push(std::shared_ptr<Object> o);
+    std::shared_ptr<Error> push(std::shared_ptr<Object> o);
 
     std::shared_ptr<Object> pop();
 
     std::shared_ptr<Object> stack_top();
 
     std::shared_ptr<Object> last_popped_stack_elem();
+
+    std::shared_ptr<Error> execute_binary_operation(OpType op);
+
+    std::shared_ptr<Error> execute_binary_integer_operation(OpType op, std::shared_ptr<Integer> left, std::shared_ptr<Integer> right);
 
     std::shared_ptr<Error> run();
 };

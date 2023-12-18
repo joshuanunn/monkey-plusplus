@@ -37,6 +37,15 @@ TEST_CASE("Test Integer Arithmetic") {
             std::make_tuple("1", 1),
             std::make_tuple("2", 2),
             std::make_tuple("1 + 2", 3),
+            std::make_tuple("1 - 2", -1),
+            std::make_tuple("1 * 2", 2),
+            std::make_tuple("4 / 2", 2),
+            std::make_tuple("50 / 2 * 2 + 10 - 5", 55),
+            std::make_tuple("5 + 5 + 5 + 5 - 10", 10),
+            std::make_tuple("2 * 2 * 2 * 2 * 2", 32),
+            std::make_tuple("5 * 2 + 10", 20),
+            std::make_tuple("5 + 2 * 10", 25),
+            std::make_tuple("5 * (2 + 10)", 60),
     };
 
     for (const auto &tt: tests) {

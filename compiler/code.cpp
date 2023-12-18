@@ -9,6 +9,12 @@ std::map<OpType, std::shared_ptr<Definition>> definitions = {
                 Definition{"OpConstant", std::vector<int>{2}})},
         {OpType::OpAdd, std::make_shared<Definition>(
                 Definition{"OpAdd", std::vector<int>{}})},
+        {OpType::OpSub, std::make_shared<Definition>(
+                Definition{"OpSub", std::vector<int>{}})},
+        {OpType::OpMul, std::make_shared<Definition>(
+                Definition{"OpMul", std::vector<int>{}})},
+        {OpType::OpDiv, std::make_shared<Definition>(
+                Definition{"OpDiv", std::vector<int>{}})},
         {OpType::OpPop, std::make_shared<Definition>(
                 Definition{"OpPop", std::vector<int>{}})},
 };

@@ -81,6 +81,24 @@ TEST_CASE("Test Integer Arithmetic") {
             make(OpType::OpConstant, std::vector<int>{1}),
             make(OpType::OpPop, std::vector<int>{}),
         }),
+        std::make_tuple("1 - 2", std::vector<int>{1, 2}, std::vector<Instructions>{
+                make(OpType::OpConstant, std::vector<int>{0}),
+                make(OpType::OpConstant, std::vector<int>{1}),
+                make(OpType::OpSub, std::vector<int>{}),
+                make(OpType::OpPop, std::vector<int>{}),
+        }),
+        std::make_tuple("1 * 2", std::vector<int>{1, 2}, std::vector<Instructions>{
+                make(OpType::OpConstant, std::vector<int>{0}),
+                make(OpType::OpConstant, std::vector<int>{1}),
+                make(OpType::OpMul, std::vector<int>{}),
+                make(OpType::OpPop, std::vector<int>{}),
+        }),
+        std::make_tuple("2 / 1", std::vector<int>{2, 1}, std::vector<Instructions>{
+                make(OpType::OpConstant, std::vector<int>{0}),
+                make(OpType::OpConstant, std::vector<int>{1}),
+                make(OpType::OpDiv, std::vector<int>{}),
+                make(OpType::OpPop, std::vector<int>{}),
+        }),
     };
 
     for (const auto &tt: tests) {
