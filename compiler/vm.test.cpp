@@ -61,6 +61,10 @@ TEST_CASE("Test Integer Arithmetic") {
             std::make_tuple("5 * 2 + 10", 20),
             std::make_tuple("5 + 2 * 10", 25),
             std::make_tuple("5 * (2 + 10)", 60),
+            std::make_tuple("-5", -5),
+            std::make_tuple("-10", -10),
+            std::make_tuple("-50 + 100 + -50", 0),
+            std::make_tuple("(5 + 10 * 2 + 15 / 3) * 2 + -10", 50),
     };
 
     for (const auto &tt: tests) {
@@ -111,6 +115,12 @@ TEST_CASE("Test Boolean Expressions") {
             std::make_tuple("(1 < 2) == false", false),
             std::make_tuple("(1 > 2) == true", false),
             std::make_tuple("(1 > 2) == false", true),
+            std::make_tuple("!true", false),
+            std::make_tuple("!false", true),
+            std::make_tuple("!5", false),
+            std::make_tuple("!!true", true),
+            std::make_tuple("!!false", false),
+            std::make_tuple("!!5", true),
     };
 
     for (const auto &tt: tests) {

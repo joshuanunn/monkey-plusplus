@@ -107,6 +107,31 @@ std::shared_ptr<Error> VM::execute_binary_integer_operation(OpType op, std::shar
     return push(std::make_shared<Integer>(Integer(result)));
 }
 
+std::shared_ptr<Error> VM::execute_bang_operator() {
+    auto operand = pop();
+
+    if (operand == get_true_ref()) {
+        return push(get_false_ref());
+    } else if (operand == get_false_ref()) {
+        return push(get_true_ref());
+    } else {
+        return push(get_false_ref());
+    }
+}
+
+std::shared_ptr<Error> VM::execute_minus_operator() {
+    auto operand = pop();
+
+    // Cast to Integer and extract current value
+    auto integer_obj = std::dynamic_pointer_cast<Integer>(operand);
+    if (!integer_obj) {
+        return std::make_shared<Error>(Error("unsupported type for negation"));
+    }
+    auto value = integer_obj->value;
+
+    return push(std::make_shared<Integer>(Integer(-value)));
+}
+
 std::shared_ptr<Error> VM::run() {
     for (int ip = 0; ip < instructions.size(); ip++) {
         auto op = static_cast<OpType>(instructions.at(ip));
@@ -137,6 +162,16 @@ std::shared_ptr<Error> VM::run() {
             }
         } else if (op == OpType::OpEqual || op == OpType::OpNotEqual || op == OpType::OpGreaterThan) {
             auto err = execute_comparison(op);
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpBang) {
+            auto err = execute_bang_operator();
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpMinus) {
+            auto err = execute_minus_operator();
             if (err) {
                 return err;
             }

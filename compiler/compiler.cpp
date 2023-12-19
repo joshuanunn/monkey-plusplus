@@ -78,6 +78,21 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
         } else {
             emit(OpType::OpFalse, std::vector<int>{});
         }
+    // Prefix Expression
+    } else if (auto pe = std::dynamic_pointer_cast<PrefixExpression>(node)) {
+        // Extract right operand (to be operated on)
+        err = compile(pe->right);
+        if (is_error(err)) {
+            return err;
+        }
+
+        if (pe->op == "!") {
+            emit(OpType::OpBang, std::vector<int>{});
+        } else if (pe->op == "-") {
+            emit(OpType::OpMinus, std::vector<int>{});
+        } else {
+            return std::make_shared<Error>(Error("unknown operator " + ie->op));
+        }
     }
 
     return nullptr;

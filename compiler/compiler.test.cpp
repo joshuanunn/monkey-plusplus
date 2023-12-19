@@ -99,6 +99,11 @@ TEST_CASE("Test Integer Arithmetic") {
                 make(OpType::OpDiv, std::vector<int>{}),
                 make(OpType::OpPop, std::vector<int>{}),
         }),
+        std::make_tuple("-1", std::vector<int>{1}, std::vector<Instructions>{
+                make(OpType::OpConstant, std::vector<int>{0}),
+                make(OpType::OpMinus, std::vector<int>{}),
+                make(OpType::OpPop, std::vector<int>{}),
+        }),
     };
 
     for (const auto &tt: tests) {
@@ -166,6 +171,11 @@ TEST_CASE("Test Boolean Expressions") {
                     make(OpType::OpTrue, std::vector<int>{}),
                     make(OpType::OpFalse, std::vector<int>{}),
                     make(OpType::OpNotEqual, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple("!true", std::vector<int>{}, std::vector<Instructions>{
+                    make(OpType::OpTrue, std::vector<int>{}),
+                    make(OpType::OpBang, std::vector<int>{}),
                     make(OpType::OpPop, std::vector<int>{}),
             }),
     };
