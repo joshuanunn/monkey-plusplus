@@ -21,7 +21,10 @@ enum class OpType : Opcode {
     OpDiv,
     OpPop,
     OpTrue,
-    OpFalse
+    OpFalse,
+    OpEqual,
+    OpNotEqual,
+    OpGreaterThan
 };
 
 struct Definition {

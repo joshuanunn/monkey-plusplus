@@ -44,6 +44,47 @@ std::shared_ptr<Error> VM::execute_binary_operation(OpType op) {
     return std::make_shared<Error>(Error("unsupported types for binary operation"));
 }
 
+std::shared_ptr<Error> VM::execute_comparison(OpType op) {
+    // Pop operand values from stack
+    auto right = pop();
+    auto left = pop();
+
+    // Try to cast to Integers and defer to execute_integer_comparison if both Integers
+    auto left_integer = std::dynamic_pointer_cast<Integer>(left);
+    auto right_integer = std::dynamic_pointer_cast<Integer>(right);
+
+    if (left_integer && right_integer) {
+        return execute_integer_comparison(op, left_integer, right_integer);
+    }
+
+    // Otherwise cast to Boolean and compare pointers of global True/False Objects
+    auto left_bool = std::dynamic_pointer_cast<Boolean>(left);
+    auto right_bool = std::dynamic_pointer_cast<Boolean>(right);
+
+    if (op == OpType::OpEqual) {
+        return push(native_bool_to_boolean_object(right_bool == left_bool));
+    } else if (op == OpType::OpNotEqual) {
+        return push(native_bool_to_boolean_object(right_bool != left_bool));
+    } else {
+        return std::make_shared<Error>(Error("unknown operator: " + std::to_string(as_opcode(op))));
+    }
+}
+
+std::shared_ptr<Error> VM::execute_integer_comparison(OpType op, std::shared_ptr<Integer> left, std::shared_ptr<Integer> right) {
+    auto left_value = left->value;
+    auto right_value = right->value;
+
+    if (op == OpType::OpEqual) {
+        return push(native_bool_to_boolean_object(right_value == left_value));
+    } else if (op == OpType::OpNotEqual) {
+        return push(native_bool_to_boolean_object(right_value != left_value));
+    } else if (op == OpType::OpGreaterThan) {
+        return push(native_bool_to_boolean_object(left_value > right_value));
+    } else {
+        return std::make_shared<Error>(Error("unknown operator: " + std::to_string(as_opcode(op))));
+    }
+}
+
 std::shared_ptr<Error> VM::execute_binary_integer_operation(OpType op, std::shared_ptr<Integer> left, std::shared_ptr<Integer> right) {
     auto left_value = left->value;
     auto right_value = right->value;
@@ -94,8 +135,20 @@ std::shared_ptr<Error> VM::run() {
             if (err) {
                 return err;
             }
+        } else if (op == OpType::OpEqual || op == OpType::OpNotEqual || op == OpType::OpGreaterThan) {
+            auto err = execute_comparison(op);
+            if (err) {
+                return err;
+            }
         }
     }
 
     return nullptr; // TODO: should we instead return an Error?
+}
+
+std::shared_ptr<Boolean> native_bool_to_boolean_object(bool input) {
+    if (input) {
+        return get_true_ref();
+    }
+    return get_false_ref();
 }

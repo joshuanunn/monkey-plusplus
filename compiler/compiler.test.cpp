@@ -132,6 +132,42 @@ TEST_CASE("Test Boolean Expressions") {
                     make(OpType::OpFalse, std::vector<int>{}),
                     make(OpType::OpPop, std::vector<int>{}),
             }),
+            std::make_tuple("1 > 2", std::vector<int>{1, 2}, std::vector<Instructions>{
+                    make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpConstant, std::vector<int>{1}),
+                    make(OpType::OpGreaterThan, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple("1 < 2", std::vector<int>{2, 1}, std::vector<Instructions>{
+                    make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpConstant, std::vector<int>{1}),
+                    make(OpType::OpGreaterThan, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple("1 == 2", std::vector<int>{1, 2}, std::vector<Instructions>{
+                    make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpConstant, std::vector<int>{1}),
+                    make(OpType::OpEqual, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple("1 != 2", std::vector<int>{1, 2}, std::vector<Instructions>{
+                    make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpConstant, std::vector<int>{1}),
+                    make(OpType::OpNotEqual, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple("true == false", std::vector<int>{}, std::vector<Instructions>{
+                    make(OpType::OpTrue, std::vector<int>{}),
+                    make(OpType::OpFalse, std::vector<int>{}),
+                    make(OpType::OpEqual, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple("true != false", std::vector<int>{}, std::vector<Instructions>{
+                    make(OpType::OpTrue, std::vector<int>{}),
+                    make(OpType::OpFalse, std::vector<int>{}),
+                    make(OpType::OpNotEqual, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
     };
 
     for (const auto &tt: tests) {

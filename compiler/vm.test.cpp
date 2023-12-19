@@ -94,6 +94,23 @@ TEST_CASE("Test Boolean Expressions") {
     std::vector<std::tuple<std::string, bool>> tests = {
             std::make_tuple("true", true),
             std::make_tuple("false", false),
+            std::make_tuple("1 < 2", true),
+            std::make_tuple("1 > 2", false),
+            std::make_tuple("1 < 1", false),
+            std::make_tuple("1 > 1", false),
+            std::make_tuple("1 == 1", true),
+            std::make_tuple("1 != 1", false),
+            std::make_tuple("1 == 2", false),
+            std::make_tuple("1 != 2", true),
+            std::make_tuple("true == true", true),
+            std::make_tuple("false == false", true),
+            std::make_tuple("true == false", false),
+            std::make_tuple("true != false", true),
+            std::make_tuple("false != true", true),
+            std::make_tuple("(1 < 2) == true", true),
+            std::make_tuple("(1 < 2) == false", false),
+            std::make_tuple("(1 > 2) == true", false),
+            std::make_tuple("(1 > 2) == false", true),
     };
 
     for (const auto &tt: tests) {

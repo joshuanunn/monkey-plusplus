@@ -20,16 +20,34 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
         emit(OpType::OpPop, std::vector<int>{});
     // Infix Expression
     } else if (auto ie = std::dynamic_pointer_cast<InfixExpression>(node)) {
+        // Initial catch for less-than operator, so code can be reordered to greater-than
+        if (ie->op == "<") {
+            // Extract operands in reverse (right then left)
+            err = compile(ie->right);
+            if (is_error(err)) {
+                return err;
+            }
+            err = compile(ie->left);
+            if (is_error(err)) {
+                return err;
+            }
+            // Emit greater-than instruction, as operands have been read in reverse
+            emit(OpType::OpGreaterThan, std::vector<int>{});
+            return nullptr;
+        }
+
         // Extract left operand
         err = compile(ie->left);
         if (is_error(err)) {
             return err;
         }
+
         // Extract right operand
         err = compile(ie->right);
         if (is_error(err)) {
             return err;
         }
+
         // Extract operator
         if (ie->op == "+") {
             emit(OpType::OpAdd, std::vector<int>{});
@@ -39,6 +57,12 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
             emit(OpType::OpMul, std::vector<int>{});
         } else if (ie->op == "/") {
             emit(OpType::OpDiv, std::vector<int>{});
+        } else if (ie->op == ">") {
+            emit(OpType::OpGreaterThan, std::vector<int>{});
+        } else if (ie->op == "==") {
+            emit(OpType::OpEqual, std::vector<int>{});
+        } else if (ie->op == "!=") {
+            emit(OpType::OpNotEqual, std::vector<int>{});
         } else {
             return std::make_shared<Error>(Error("unknown operator " + ie->op));
         }

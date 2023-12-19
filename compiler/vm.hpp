@@ -37,9 +37,15 @@ struct VM {
 
     std::shared_ptr<Error> execute_binary_operation(OpType op);
 
+    std::shared_ptr<Error> execute_comparison(OpType op);
+
+    std::shared_ptr<Error> execute_integer_comparison(OpType op, std::shared_ptr<Integer> left, std::shared_ptr<Integer> right);
+
     std::shared_ptr<Error> execute_binary_integer_operation(OpType op, std::shared_ptr<Integer> left, std::shared_ptr<Integer> right);
 
     std::shared_ptr<Error> run();
 };
+
+std::shared_ptr<Boolean> native_bool_to_boolean_object(bool input);
 
 #endif //MONKEY_PLUSPLUS_VM_HPP
