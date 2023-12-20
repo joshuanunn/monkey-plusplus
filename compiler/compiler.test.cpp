@@ -197,6 +197,8 @@ TEST_CASE("Test Boolean Expressions") {
         auto bytecode = compiler->bytecode();
 
         REQUIRE(test_instructions(tt_expected_instructions, bytecode->instructions));
+
+        REQUIRE(test_integer_constants(tt_expected_constants, bytecode->constants));
     }
 }
 
@@ -240,5 +242,7 @@ TEST_CASE("Test Conditionals") {
         auto bytecode = compiler->bytecode();
 
         REQUIRE(test_instructions(tt_expected_instructions, bytecode->instructions));
+
+        REQUIRE(test_integer_constants(tt_expected_constants, bytecode->constants));
     }
 }
