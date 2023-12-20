@@ -36,10 +36,11 @@ bool test_instructions(const std::vector<Instructions>& expected, const Instruct
 
     int i = 0;
     for (const auto& ins: concatted) {
-        if (actual.at(i++) != ins) {
-            std::cerr << "wrong instruction at " << i << ".\nwant=" << concatted << "\ngot =" << actual << std::endl;
+        if (actual.at(i) != ins) {
+            std::cerr << "wrong instruction at " << i << ".\nwant=\n" << concatted << "\ngot =\n" << actual << std::endl;
             return false;
         }
+        i++;
     }
 
     return true;
@@ -176,6 +177,47 @@ TEST_CASE("Test Boolean Expressions") {
             std::make_tuple("!true", std::vector<int>{}, std::vector<Instructions>{
                     make(OpType::OpTrue, std::vector<int>{}),
                     make(OpType::OpBang, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected_constants, tt_expected_instructions] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto bytecode = compiler->bytecode();
+
+        REQUIRE(test_instructions(tt_expected_instructions, bytecode->instructions));
+    }
+}
+
+TEST_CASE("Test Conditionals") {
+    std::vector<std::tuple<std::string, std::vector<int>, std::vector<Instructions>>> tests = {
+            std::make_tuple("if (true) { 10 }; 3333;", std::vector<int>{10, 3333}, std::vector<Instructions>{
+                    make(OpType::OpTrue, std::vector<int>{}),
+                    make(OpType::OpJumpNotTruthy, std::vector<int>{7}),
+                    make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpConstant, std::vector<int>{1}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple("if (true) { 10 } else { 20 }; 3333;", std::vector<int>{10, 20, 3333}, std::vector<Instructions>{
+                    make(OpType::OpTrue, std::vector<int>{}),
+                    make(OpType::OpJumpNotTruthy, std::vector<int>{10}),
+                    make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpJump, std::vector<int>{13}),
+                    make(OpType::OpConstant, std::vector<int>{1}),
+                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpConstant, std::vector<int>{2}),
                     make(OpType::OpPop, std::vector<int>{}),
             }),
     };

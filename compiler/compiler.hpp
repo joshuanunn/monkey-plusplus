@@ -21,6 +21,11 @@ struct Bytecode {
     std::vector<std::shared_ptr<Object>> constants;
 };
 
+struct EmittedInstruction {
+    OpType opcode;
+    int position;
+};
+
 struct Compiler {
     Compiler() = default;
 
@@ -36,6 +41,10 @@ struct Compiler {
 
     std::vector<std::shared_ptr<Object>> constants;
 
+    EmittedInstruction last_instruction;
+
+    EmittedInstruction previous_instruction;
+
     std::shared_ptr<Error> compile(std::shared_ptr<Node> node);
 
     int add_constant(std::shared_ptr<Object> obj);
@@ -43,6 +52,16 @@ struct Compiler {
     int emit(OpType op, std::vector<int> operands);
 
     int add_instruction(Instructions ins);
+
+    void set_last_instruction(OpType op, int pos);
+
+    bool last_instruction_is_pop() const;
+
+    void remove_last_pop();
+
+    void replace_instruction(int pos, Instructions new_instruction);
+
+    void change_operand(int op_pos, int operand);
 
     std::shared_ptr<Bytecode> bytecode();
 };

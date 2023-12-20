@@ -31,6 +31,10 @@ std::map<OpType, std::shared_ptr<Definition>> definitions = {
                 Definition{"OpMinus", std::vector<int>{}})},
         {OpType::OpBang, std::make_shared<Definition>(
                 Definition{"OpBang", std::vector<int>{}})},
+        {OpType::OpJumpNotTruthy, std::make_shared<Definition>(
+                Definition{"OpJumpNotTruthy", std::vector<int>{2}})},
+        {OpType::OpJump, std::make_shared<Definition>(
+                Definition{"OpJump", std::vector<int>{2}})},
 };
 
 std::tuple<std::shared_ptr<Definition>, bool> lookup(const OpType& op) {

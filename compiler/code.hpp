@@ -26,7 +26,9 @@ enum class OpType : Opcode {
     OpNotEqual,
     OpGreaterThan,
     OpMinus,
-    OpBang
+    OpBang,
+    OpJumpNotTruthy,
+    OpJump
 };
 
 struct Definition {
