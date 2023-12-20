@@ -175,6 +175,22 @@ std::shared_ptr<Error> VM::run() {
             if (err) {
                 return err;
             }
+        } else if (op == OpType::OpJumpNotTruthy) {
+            // Read jump target into pos
+            auto pos = (int) read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
+            // Skip two bytes of operand associated with conditional jump
+            ip += 2;
+            // Pop stack top (condition). If not truthy then jump to target, else execute consequence
+            auto condition = pop();
+            if (!is_truthy(condition)) {
+                // Set instruction pointer to (jump target - 1), as ip is incremented on next iteration
+                ip = pos - 1;
+            }
+        } else if (op == OpType::OpJump) {
+            // Read jump target into pos
+            auto pos = (int) read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
+            // Set instruction pointer to (jump target - 1), as ip is incremented on next iteration
+            ip = pos - 1;
         }
     }
 
@@ -186,4 +202,12 @@ std::shared_ptr<Boolean> native_bool_to_boolean_object(bool input) {
         return get_true_ref();
     }
     return get_false_ref();
+}
+
+bool is_truthy(std::shared_ptr<Object> obj) {
+    if (auto b = std::dynamic_pointer_cast<Boolean>(obj)) {
+        return b->value;
+    }
+
+    return true;
 }

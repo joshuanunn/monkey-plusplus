@@ -52,4 +52,6 @@ struct VM {
 
 std::shared_ptr<Boolean> native_bool_to_boolean_object(bool input);
 
+bool is_truthy(std::shared_ptr<Object> obj);
+
 #endif //MONKEY_PLUSPLUS_VM_HPP

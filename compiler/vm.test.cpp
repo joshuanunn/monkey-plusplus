@@ -149,3 +149,41 @@ TEST_CASE("Test Boolean Expressions") {
         REQUIRE(test_boolean_object(tt_expected, stack_elem));
     }
 }
+
+TEST_CASE("Test Conditionals") {
+    std::vector<std::tuple<std::string, int>> tests = {
+            std::make_tuple("if (true) { 10 }", 10),
+            std::make_tuple("if (true) { 10 } else { 20 }", 10),
+            std::make_tuple("if (false) { 10 } else { 20 }", 20),
+            std::make_tuple("if (1) { 10 }", 10),
+            std::make_tuple("if (1 < 2) { 10 }", 10),
+            std::make_tuple("if (1 < 2) { 10 } else { 20 }", 10),
+            std::make_tuple("if (1 > 2) { 10 } else { 20 }", 20),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}
