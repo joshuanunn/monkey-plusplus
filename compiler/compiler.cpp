@@ -113,18 +113,17 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
             remove_last_pop();
         }
 
+        // Emit jump instruction with placeholder value (replaced below)
+        auto jump_pos = emit(OpType::OpJump, std::vector<int>{9999});
+
+        // Update placeholder value of conditional jump instruction to actual value
+        auto after_consequence_pos = (int) instructions.size();
+        change_operand(jump_not_truthy_pos, after_consequence_pos);
+
+        // If no alternative, emit a OpNull instruction, else compile alternative
         if (!i->alternative) {
-            // Update placeholder value of conditional jump instruction to actual value
-            auto after_consequence_pos = (int) instructions.size();
-            change_operand(jump_not_truthy_pos, after_consequence_pos);
+            emit(OpType::OpNull, std::vector<int>{});
         } else {
-            // Emit jump instruction with placeholder value (replaced below)
-            auto jump_pos = emit(OpType::OpJump, std::vector<int>{9999});
-
-            // Update placeholder value of conditional jump instruction to actual value
-            auto after_consequence_pos = (int) instructions.size();
-            change_operand(jump_not_truthy_pos, after_consequence_pos);
-
             err = compile(i->alternative);
             if (is_error(err)) {
                 return err;
@@ -134,11 +133,11 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
             if (last_instruction_is_pop()) {
                 remove_last_pop();
             }
-
-            // Update placeholder value of jump instruction to actual value
-            auto after_alternative_pos = (int) instructions.size();
-            change_operand(jump_pos, after_alternative_pos);
         }
+
+        // Update placeholder value of jump instruction to actual value
+        auto after_alternative_pos = (int) instructions.size();
+        change_operand(jump_pos, after_alternative_pos);
     // Block Statement
     } else if (auto b = std::dynamic_pointer_cast<BlockStatement>(node)) {
         for (auto const& s : b->statements) {

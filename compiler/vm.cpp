@@ -114,6 +114,8 @@ std::shared_ptr<Error> VM::execute_bang_operator() {
         return push(get_false_ref());
     } else if (operand == get_false_ref()) {
         return push(get_true_ref());
+    } else if (operand == get_null_ref()) {
+        return push(get_true_ref());
     } else {
         return push(get_false_ref());
     }
@@ -191,6 +193,11 @@ std::shared_ptr<Error> VM::run() {
             auto pos = (int) read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
             // Set instruction pointer to (jump target - 1), as ip is incremented on next iteration
             ip = pos - 1;
+        } else if (op == OpType::OpNull) {
+            auto err = push(get_null_ref());
+            if (err) {
+                return err;
+            }
         }
     }
 
@@ -207,6 +214,8 @@ std::shared_ptr<Boolean> native_bool_to_boolean_object(bool input) {
 bool is_truthy(std::shared_ptr<Object> obj) {
     if (auto b = std::dynamic_pointer_cast<Boolean>(obj)) {
         return b->value;
+    } else if (auto n = std::dynamic_pointer_cast<Null>(obj)) {
+        return false;
     }
 
     return true;

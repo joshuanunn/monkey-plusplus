@@ -204,8 +204,10 @@ TEST_CASE("Test Conditionals") {
     std::vector<std::tuple<std::string, std::vector<int>, std::vector<Instructions>>> tests = {
             std::make_tuple("if (true) { 10 }; 3333;", std::vector<int>{10, 3333}, std::vector<Instructions>{
                     make(OpType::OpTrue, std::vector<int>{}),
-                    make(OpType::OpJumpNotTruthy, std::vector<int>{7}),
+                    make(OpType::OpJumpNotTruthy, std::vector<int>{10}),
                     make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpJump, std::vector<int>{11}),
+                    make(OpType::OpNull, std::vector<int>{}),
                     make(OpType::OpPop, std::vector<int>{}),
                     make(OpType::OpConstant, std::vector<int>{1}),
                     make(OpType::OpPop, std::vector<int>{}),

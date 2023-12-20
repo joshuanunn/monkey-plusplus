@@ -28,7 +28,8 @@ enum class OpType : Opcode {
     OpMinus,
     OpBang,
     OpJumpNotTruthy,
-    OpJump
+    OpJump,
+    OpNull
 };
 
 struct Definition {

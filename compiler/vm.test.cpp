@@ -47,6 +47,22 @@ bool test_boolean_object(bool expected, std::shared_ptr<Object> actual) {
     return true;
 }
 
+bool test_null_object(std::shared_ptr<Object> actual) {
+    auto result = std::dynamic_pointer_cast<Null>(actual);
+
+    if (!result) {
+        std::cerr << "obj is not Null." << std::endl;
+        return false;
+    }
+
+    if (result != get_null_ref()) {
+        std::cerr << "obj is not Null." << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 TEST_CASE("Test Integer Arithmetic") {
     std::vector<std::tuple<std::string, int>> tests = {
             std::make_tuple("1", 1),
@@ -121,6 +137,7 @@ TEST_CASE("Test Boolean Expressions") {
             std::make_tuple("!!true", true),
             std::make_tuple("!!false", false),
             std::make_tuple("!!5", true),
+            std::make_tuple("!(if (false) { 5; })", true),
     };
 
     for (const auto &tt: tests) {
@@ -159,6 +176,7 @@ TEST_CASE("Test Conditionals") {
             std::make_tuple("if (1 < 2) { 10 }", 10),
             std::make_tuple("if (1 < 2) { 10 } else { 20 }", 10),
             std::make_tuple("if (1 > 2) { 10 } else { 20 }", 20),
+            std::make_tuple("if ((if (false) { 10 })) { 10 } else { 20 }", 20),
     };
 
     for (const auto &tt: tests) {
@@ -185,5 +203,38 @@ TEST_CASE("Test Conditionals") {
         auto stack_elem = vm.last_popped_stack_elem();
 
         REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}
+
+TEST_CASE("Test Conditionals Returning Null") {
+    std::vector<std::tuple<std::string, std::shared_ptr<Object>>> tests = {
+            std::make_tuple("if (1 > 2) { 10 }", get_null_ref()),
+            std::make_tuple("if (false) { 10 }", get_null_ref()),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_null_object(stack_elem));
     }
 }
