@@ -4,6 +4,7 @@
 #include "ast.hpp"
 #include "code.hpp"
 #include "object.hpp"
+#include "symbol_table.hpp"
 
 struct Bytecode {
     Bytecode() = default;
@@ -27,7 +28,7 @@ struct EmittedInstruction {
 };
 
 struct Compiler {
-    Compiler() = default;
+    Compiler();
 
     Compiler(const Compiler& other) = default;
 
@@ -44,6 +45,8 @@ struct Compiler {
     EmittedInstruction last_instruction;
 
     EmittedInstruction previous_instruction;
+
+    std::shared_ptr<SymbolTable> symbol_table;
 
     std::shared_ptr<Error> compile(std::shared_ptr<Node> node);
 

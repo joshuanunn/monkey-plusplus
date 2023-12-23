@@ -1,6 +1,11 @@
 #include "compiler.hpp"
 
-std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
+Compiler::Compiler() {
+    symbol_table = new_symbol_table();
+}
+
+std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
+{
     std::shared_ptr<Error> err;
 
     // Statements
@@ -146,11 +151,21 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
                 return err;
             }
         }
+    // Let Statement
     } else if (auto l = std::dynamic_pointer_cast<LetStatement>(node)) {
         err = compile(l->value);
         if (is_error(err)) {
             return err;
         }
+        auto symbol = symbol_table->define(l->name->value);
+        emit(OpType::OpSetGlobal, std::vector<int>{symbol.index});
+    // Identifier
+    } else if (auto id = std::dynamic_pointer_cast<Identifier>(node)) {
+        auto [symbol, ok] = symbol_table->resolve(id->value);
+        if (!ok) {
+            return std::make_shared<Error>(Error("undefined variable " + id->value));
+        }
+        emit(OpType::OpGetGlobal, std::vector<int>{symbol.index});
     }
 
     return nullptr;

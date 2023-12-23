@@ -6,7 +6,7 @@ monkey : ast.o code.o compiler.o lexer.o object.o parser.o token.o vm.o repl.o m
 codetest : code.o code.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-compilertest : ast.o code.o compiler.o lexer.o object.o parser.o token.o compiler.test.o
+compilertest : ast.o code.o compiler.o lexer.o object.o parser.o symbol_table.o token.o compiler.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 symboltabletest : symbol_table.o symbol_table.test.o
