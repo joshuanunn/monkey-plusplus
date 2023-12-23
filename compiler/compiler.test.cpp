@@ -68,6 +68,28 @@ bool test_integer_constants(const std::vector<int>& expected, const std::vector<
     return true;
 }
 
+bool test_string_constants(const std::vector<std::string>& expected, const std::vector<std::shared_ptr<Object>>& actual) {
+    if (expected.size() != actual.size()) {
+        std::cerr << "wrong number of constants. got=" << actual.size() << ", want=" << expected.size() << std::endl;
+        return false;
+    }
+
+    for (int i = 0; i < expected.size(); i++) {
+        auto string_obj = std::dynamic_pointer_cast<String>(actual.at(i));
+        if (!string_obj) {
+            std::cerr << "object is not String." << std::endl;
+            return false;
+        }
+
+        if (string_obj->value != expected.at(i)) {
+            std::cerr << "object has wrong value. got=" << string_obj->value << ", want=" << expected.at(i) << std::endl;
+            return false;
+        }
+    }
+
+    return true;
+}
+
 TEST_CASE("Test Integer Arithmetic") {
     std::vector<std::tuple<std::string, std::vector<int>, std::vector<Instructions>>> tests = {
         std::make_tuple("1 + 2", std::vector<int>{1, 2}, std::vector<Instructions>{
@@ -299,5 +321,46 @@ two;
         REQUIRE(test_instructions(tt_expected_instructions, bytecode->instructions));
 
         REQUIRE(test_integer_constants(tt_expected_constants, bytecode->constants));
+    }
+}
+
+TEST_CASE("Test String Expressions") {
+    std::vector<std::tuple<std::string, std::vector<std::string>, std::vector<Instructions>>> tests = {
+            std::make_tuple(
+                R"("monkey")",
+                std::vector<std::string>{"monkey"},
+                std::vector<Instructions>{
+                    make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple(
+                R"("mon" + "key")",
+                std::vector<std::string>{"mon", "key"},
+                std::vector<Instructions>{
+                    make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpConstant, std::vector<int>{1}),
+                    make(OpType::OpAdd, std::vector<int>{}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected_constants, tt_expected_instructions] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto bytecode = compiler->bytecode();
+
+        REQUIRE(test_instructions(tt_expected_instructions, bytecode->instructions));
+
+        REQUIRE(test_string_constants(tt_expected_constants, bytecode->constants));
     }
 }

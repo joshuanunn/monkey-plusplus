@@ -48,6 +48,8 @@ struct VM {
 
     std::shared_ptr<Error> execute_binary_integer_operation(OpType op, std::shared_ptr<Integer> left, std::shared_ptr<Integer> right);
 
+    std::shared_ptr<Error> execute_binary_string_operation(OpType op, std::shared_ptr<String> left, std::shared_ptr<String> right);
+
     std::shared_ptr<Error> execute_bang_operator();
 
     std::shared_ptr<Error> execute_minus_operator();

@@ -52,6 +52,14 @@ std::shared_ptr<Error> VM::execute_binary_operation(OpType op) {
         return execute_binary_integer_operation(op, left_integer, right_integer);
     }
 
+    // Cast to String objects and only proceed if both objects are Strings
+    auto left_string = std::dynamic_pointer_cast<String>(left);
+    auto right_string = std::dynamic_pointer_cast<String>(right);
+
+    if (left_string && right_string) {
+        return execute_binary_string_operation(op, left_string, right_string);
+    }
+
     return std::make_shared<Error>(Error("unsupported types for binary operation"));
 }
 
@@ -116,6 +124,18 @@ std::shared_ptr<Error> VM::execute_binary_integer_operation(OpType op, std::shar
 
     // Push result back onto stack
     return push(std::make_shared<Integer>(Integer(result)));
+}
+
+std::shared_ptr<Error> VM::execute_binary_string_operation(OpType op, std::shared_ptr<String> left, std::shared_ptr<String> right) {
+    if (op != OpType::OpAdd) {
+        return std::make_shared<Error>(Error("unknown string operator: " + std::to_string(as_opcode(op))));
+    }
+
+    auto left_value = left->value;
+    auto right_value = right->value;
+
+    // Push result back onto stack
+    return push(std::make_shared<String>(String(left_value + right_value)));
 }
 
 std::shared_ptr<Error> VM::execute_bang_operator() {

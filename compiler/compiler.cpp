@@ -162,6 +162,10 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
             return std::make_shared<Error>(Error("undefined variable " + id->value));
         }
         emit(OpType::OpGetGlobal, std::vector<int>{symbol.index});
+    // String Literal
+    } else if (auto sl = std::dynamic_pointer_cast<StringLiteral>(node)) {
+        auto str = std::make_shared<String>(String{sl->value});
+        emit(OpType::OpConstant, std::vector<int>{add_constant(str)});
     }
 
     return nullptr;

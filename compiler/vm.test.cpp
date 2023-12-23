@@ -63,6 +63,21 @@ bool test_null_object(std::shared_ptr<Object> actual) {
     return true;
 }
 
+bool test_string_object(std::string expected, std::shared_ptr<Object> actual) {
+    auto string_obj = std::dynamic_pointer_cast<String>(actual);
+    if (!string_obj) {
+        std::cerr << "object is not String." << std::endl;
+        return false;
+    }
+
+    if (string_obj->value != expected) {
+        std::cerr << "object has wrong value. got=" << string_obj->value << ", want=" << expected << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 TEST_CASE("Test Integer Arithmetic") {
     std::vector<std::tuple<std::string, int>> tests = {
             std::make_tuple("1", 1),
@@ -270,5 +285,39 @@ TEST_CASE("Test Global Let Statements") {
         auto stack_elem = vm.last_popped_stack_elem();
 
         REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}
+
+TEST_CASE("Test String Expressions") {
+    std::vector<std::tuple<std::string, std::string>> tests = {
+            std::make_tuple(R"("monkey")", "monkey"),
+            std::make_tuple(R"("mon" + "key")", "monkey"),
+            std::make_tuple(R"("mon" + "key" + "banana")", "monkeybanana"),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_string_object(tt_expected, stack_elem));
     }
 }
