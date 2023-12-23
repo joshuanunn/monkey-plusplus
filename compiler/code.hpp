@@ -29,7 +29,9 @@ enum class OpType : Opcode {
     OpBang,
     OpJumpNotTruthy,
     OpJump,
-    OpNull
+    OpNull,
+    OpSetGlobal,
+    OpGetGlobal
 };
 
 struct Definition {

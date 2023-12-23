@@ -146,6 +146,11 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node) {
                 return err;
             }
         }
+    } else if (auto l = std::dynamic_pointer_cast<LetStatement>(node)) {
+        err = compile(l->value);
+        if (is_error(err)) {
+            return err;
+        }
     }
 
     return nullptr;

@@ -9,6 +9,9 @@ codetest : code.o code.test.o
 compilertest : ast.o code.o compiler.o lexer.o object.o parser.o token.o compiler.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
+symboltabletest : symbol_table.o symbol_table.test.o
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
 vmtest : ast.o code.o compiler.o lexer.o object.o parser.o token.o vm.o vm.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
@@ -18,8 +21,11 @@ test-code : codetest
 test-compiler : compilertest
 	./compilertest
 
+test-symboltable : symboltabletest
+	./symboltabletest
+
 test-vm : vmtest
 	./vmtest
 
 clean :
-	rm -rf *.o codetest compilertest vmtest monkey
+	rm -rf *.o codetest compilertest symboltabletest vmtest monkey
