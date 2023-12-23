@@ -1,9 +1,5 @@
 #include "compiler.hpp"
 
-Compiler::Compiler() {
-    symbol_table = new_symbol_table();
-}
-
 std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
 {
     std::shared_ptr<Error> err;
@@ -172,7 +168,17 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
 }
 
 std::shared_ptr<Compiler> new_compiler() {
-    return std::make_shared<Compiler>(Compiler{});
+    return std::make_shared<Compiler>(Compiler{symbol_table: new_symbol_table()});
+}
+
+std::shared_ptr<Compiler> new_compiler_with_state(
+    std::shared_ptr<SymbolTable> s, std::vector<std::shared_ptr<Object>> constants) {
+    auto compiler = std::make_shared<Compiler>(Compiler{
+        constants: constants,
+        symbol_table: s
+    });
+
+    return compiler;
 }
 
 std::shared_ptr<Bytecode> Compiler::bytecode() {

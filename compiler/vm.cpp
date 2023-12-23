@@ -1,8 +1,19 @@
 #include "vm.hpp"
 
-VM::VM(std::shared_ptr<Bytecode>&& bytecode) : stack{} {
+VM::VM(std::shared_ptr<Bytecode>&& bytecode) : stack{}, globals{} {
     instructions = std::move(bytecode->instructions);
     constants = std::move(bytecode->constants);
+
+    // Stack pointer starts at 0
+    sp = 0;
+}
+
+VM::VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>, GLOBALSSIZE> s) : stack{}, globals{} {
+    instructions = std::move(bytecode->instructions);
+    constants = std::move(bytecode->constants);
+
+    // Copy globals from provided source to destination
+    std::copy(std::begin(s), std::end(s), std::begin(globals));
 
     // Stack pointer starts at 0
     sp = 0;
@@ -195,6 +206,19 @@ std::shared_ptr<Error> VM::run() {
             ip = pos - 1;
         } else if (op == OpType::OpNull) {
             auto err = push(get_null_ref());
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpSetGlobal) {
+            auto global_index = read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
+            ip += 2;
+
+            globals[global_index] = pop();
+        } else if (op == OpType::OpGetGlobal) {
+            auto global_index = read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
+            ip += 2;
+
+            auto err = push(globals[global_index]);
             if (err) {
                 return err;
             }

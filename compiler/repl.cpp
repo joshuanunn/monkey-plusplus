@@ -11,6 +11,11 @@ void start_repl() {
     std::string line;
     std::shared_ptr<Error> err;
 
+    // Initialise global state to exist between REPL iterations
+    std::vector<std::shared_ptr<Object>> constants;
+    std::array<std::shared_ptr<Object>, GLOBALSSIZE> globals;
+    auto symbol_table = new_symbol_table();
+
     while (true) {
         std::cout << PROMPT;
 
@@ -25,19 +30,31 @@ void start_repl() {
             continue;
         }
 
-        auto comp = new_compiler();
+        // Initialise new compiler maintaining state from previous iterations
+        auto comp = new_compiler_with_state(symbol_table, constants);
         err = comp->compile(program);
         if (err) {
             std::cout << "Woops! Compilation failed:\n " << err->message << std::endl;
             continue;
         }
 
-        auto machine = VM(comp->bytecode());
+        auto code = comp->bytecode();
+
+        // Add any new constants from this compilation cycle to global REPL constants
+        auto new_constants = code->constants;
+        for (int i = constants.size(); i < new_constants.size(); i++) {
+            constants.push_back(new_constants.at(i)->clone());
+        }
+
+        auto machine = VM(std::move(code), globals);
         err = machine.run();
         if (err) {
             std::cout << "Woops! Executing bytecode failed:\n " << err->message << std::endl;
             continue;
         }
+
+        // Update REPL globals from those after running VM
+        std::copy(std::begin(machine.globals), std::end(machine.globals), std::begin(globals));
 
         auto last_popped = machine.last_popped_stack_elem();
         std::cout << last_popped->inspect() << std::endl;

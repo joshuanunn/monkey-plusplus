@@ -7,6 +7,7 @@
 #include "object.hpp"
 
 constexpr int STACKSIZE = 2048;
+constexpr int GLOBALSSIZE = 65536;
 
 struct VM {
     VM() = delete;
@@ -21,6 +22,8 @@ struct VM {
 
     explicit VM(std::shared_ptr<Bytecode>&& bytecode);
 
+    explicit VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>, GLOBALSSIZE> s);
+
     std::vector<std::shared_ptr<Object>> constants;
 
     Instructions instructions;
@@ -28,6 +31,8 @@ struct VM {
     std::shared_ptr<Object> stack[STACKSIZE];
 
     int sp; // Always points to the next value. Top of stack is stack[sp-1]
+
+    std::array<std::shared_ptr<Object>, GLOBALSSIZE> globals;
 
     std::shared_ptr<Error> push(std::shared_ptr<Object> o);
 
@@ -49,6 +54,8 @@ struct VM {
 
     std::shared_ptr<Error> run();
 };
+
+//std::shared_ptr<VM> new_vm_with_globals_store(std::shared_ptr<Bytecode>&& bytecode, std::vector<std::shared_ptr<Object>> s);
 
 std::shared_ptr<Boolean> native_bool_to_boolean_object(bool input);
 
