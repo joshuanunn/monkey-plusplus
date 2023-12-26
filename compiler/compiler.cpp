@@ -166,6 +166,16 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
     } else if (auto sl = std::dynamic_pointer_cast<StringLiteral>(node)) {
         auto str = std::make_shared<String>(String{sl->value});
         emit(OpType::OpConstant, std::vector<int>{add_constant(str)});
+    // Array Literal
+    } else if (auto a = std::dynamic_pointer_cast<ArrayLiteral>(node)) {
+        for (auto const& el: a->elements) {
+            err = compile(el);
+            if (is_error(err)) {
+                return err;
+            }
+        }
+
+        emit(OpType::OpArray, std::vector<int>{(int) a->elements.size()});
     }
 
     return nullptr;

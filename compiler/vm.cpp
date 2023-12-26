@@ -165,6 +165,16 @@ std::shared_ptr<Error> VM::execute_minus_operator() {
     return push(std::make_shared<Integer>(Integer(-value)));
 }
 
+std::shared_ptr<Object> VM::build_array(int start_index, int end_index) {    
+    auto array = std::make_shared<Array>(Array{});
+
+    for (int i = start_index; i < end_index; i++) {
+        array->elements.push_back(stack[i]);
+    }
+
+    return array;
+}
+
 std::shared_ptr<Error> VM::run() {
     for (int ip = 0; ip < instructions.size(); ip++) {
         auto op = static_cast<OpType>(instructions.at(ip));
@@ -239,6 +249,17 @@ std::shared_ptr<Error> VM::run() {
             ip += 2;
 
             auto err = push(globals[global_index]);
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpArray) {
+            auto num_elements = read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
+            ip += 2;
+
+            auto array = build_array(sp - num_elements, sp);
+            sp -= num_elements;
+
+            auto err = push(array);
             if (err) {
                 return err;
             }

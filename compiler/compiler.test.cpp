@@ -364,3 +364,55 @@ TEST_CASE("Test String Expressions") {
         REQUIRE(test_string_constants(tt_expected_constants, bytecode->constants));
     }
 }
+
+TEST_CASE("Test Array Literals") {
+    std::vector<std::tuple<std::string, std::vector<int>, std::vector<Instructions>>> tests = {
+            std::make_tuple("[]", std::vector<int>{},
+                std::vector<Instructions>{
+                    make(OpType::OpArray, std::vector<int>{0}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple("[1, 2, 3]", std::vector<int>{1, 2, 3},
+                std::vector<Instructions>{
+                    make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpConstant, std::vector<int>{1}),
+                    make(OpType::OpConstant, std::vector<int>{2}),
+                    make(OpType::OpArray, std::vector<int>{3}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+            std::make_tuple("[1 + 2, 3 - 4, 5 * 6]", std::vector<int>{1, 2, 3, 4, 5, 6},
+                std::vector<Instructions>{
+                    make(OpType::OpConstant, std::vector<int>{0}),
+                    make(OpType::OpConstant, std::vector<int>{1}),
+                    make(OpType::OpAdd, std::vector<int>{}),
+                    make(OpType::OpConstant, std::vector<int>{2}),
+                    make(OpType::OpConstant, std::vector<int>{3}),
+                    make(OpType::OpSub, std::vector<int>{}),
+                    make(OpType::OpConstant, std::vector<int>{4}),
+                    make(OpType::OpConstant, std::vector<int>{5}),
+                    make(OpType::OpMul, std::vector<int>{}),
+                    make(OpType::OpArray, std::vector<int>{3}),
+                    make(OpType::OpPop, std::vector<int>{}),
+            }),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected_constants, tt_expected_instructions] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto bytecode = compiler->bytecode();
+
+        REQUIRE(test_instructions(tt_expected_instructions, bytecode->instructions));
+
+        REQUIRE(test_integer_constants(tt_expected_constants, bytecode->constants));
+    }
+}

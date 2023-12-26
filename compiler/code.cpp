@@ -41,6 +41,8 @@ std::map<OpType, std::shared_ptr<Definition>> definitions = {
                 Definition{"OpSetGlobal", std::vector<int>{2}})},
         {OpType::OpGetGlobal, std::make_shared<Definition>(
                 Definition{"OpGetGlobal", std::vector<int>{2}})},
+        {OpType::OpArray, std::make_shared<Definition>(
+                Definition{"OpArray", std::vector<int>{2}})},
 };
 
 std::tuple<std::shared_ptr<Definition>, bool> lookup(const OpType& op) {
