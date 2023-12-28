@@ -21,7 +21,7 @@ VM::VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>,
 
 std::shared_ptr<Error> VM::push(std::shared_ptr<Object> o) {
     if (sp >= STACKSIZE) {
-        return std::make_shared<Error>(Error("stack overflow"));
+        return new_error("stack overflow");
     }
 
     // Push object on to top of stack (stack[sp]) and increment stack pointer
@@ -60,7 +60,7 @@ std::shared_ptr<Error> VM::execute_binary_operation(OpType op) {
         return execute_binary_string_operation(op, left_string, right_string);
     }
 
-    return std::make_shared<Error>(Error("unsupported types for binary operation"));
+    return new_error("unsupported types for binary operation");
 }
 
 std::shared_ptr<Error> VM::execute_comparison(OpType op) {
@@ -85,7 +85,7 @@ std::shared_ptr<Error> VM::execute_comparison(OpType op) {
     } else if (op == OpType::OpNotEqual) {
         return push(native_bool_to_boolean_object(right_bool != left_bool));
     } else {
-        return std::make_shared<Error>(Error("unknown operator: " + std::to_string(as_opcode(op))));
+        return new_error("unknown operator: " + std::to_string(as_opcode(op)));
     }
 }
 
@@ -100,7 +100,7 @@ std::shared_ptr<Error> VM::execute_integer_comparison(OpType op, std::shared_ptr
     } else if (op == OpType::OpGreaterThan) {
         return push(native_bool_to_boolean_object(left_value > right_value));
     } else {
-        return std::make_shared<Error>(Error("unknown operator: " + std::to_string(as_opcode(op))));
+        return new_error("unknown operator: " + std::to_string(as_opcode(op)));
     }
 }
 
@@ -119,7 +119,7 @@ std::shared_ptr<Error> VM::execute_binary_integer_operation(OpType op, std::shar
     } else if (op == OpType::OpDiv) {
         result = left_value / right_value;
     } else {
-        return std::make_shared<Error>(Error("unknown integer operator: " + std::to_string(as_opcode(op))));
+        return new_error("unknown integer operator: " + std::to_string(as_opcode(op)));
     }
 
     // Push result back onto stack
@@ -128,7 +128,7 @@ std::shared_ptr<Error> VM::execute_binary_integer_operation(OpType op, std::shar
 
 std::shared_ptr<Error> VM::execute_binary_string_operation(OpType op, std::shared_ptr<String> left, std::shared_ptr<String> right) {
     if (op != OpType::OpAdd) {
-        return std::make_shared<Error>(Error("unknown string operator: " + std::to_string(as_opcode(op))));
+        return new_error("unknown string operator: " + std::to_string(as_opcode(op)));
     }
 
     auto left_value = left->value;
@@ -158,7 +158,7 @@ std::shared_ptr<Error> VM::execute_minus_operator() {
     // Cast to Integer and extract current value
     auto integer_obj = std::dynamic_pointer_cast<Integer>(operand);
     if (!integer_obj) {
-        return std::make_shared<Error>(Error("unsupported type for negation"));
+        return new_error("unsupported type for negation");
     }
     auto value = integer_obj->value;
 
@@ -184,7 +184,7 @@ std::tuple<std::shared_ptr<Object>, std::shared_ptr<Error>> VM::build_hash(int s
 
         auto hash_key = std::dynamic_pointer_cast<Hashable>(key);
         if (!hash_key) {
-            return std::make_tuple(nullptr, std::make_shared<Error>(Error("unusable as hash key.")));
+            return std::make_tuple(nullptr, new_error("unusable as hash key."));
         }
 
         auto hashed = hash_key->hash_key();

@@ -612,3 +612,7 @@ std::string objecttype_literal(ObjectType t) {
     }
     return objecttype_literals[t];
 }
+
+std::shared_ptr<Error> new_error(std::string message) {
+    return std::make_shared<Error>(Error{std::move(message)});
+}
