@@ -1,2 +1,11 @@
 *.o
 monkey
+asttest
+codetest
+compilertest
+lexertest
+objecttest
+parsertest
+symboltabletest
+tokentest
+vmtest
