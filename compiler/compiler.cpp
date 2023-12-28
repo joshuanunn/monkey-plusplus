@@ -65,7 +65,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         } else if (ie->op == "!=") {
             emit(OpType::OpNotEqual);
         } else {
-            return std::make_shared<Error>(Error("unknown operator " + ie->op));
+            return new_error("unknown operator " + ie->op);
         }
     // Integer
     } else if (auto il = std::dynamic_pointer_cast<IntegerLiteral>(node)) {
@@ -92,7 +92,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         } else if (pe->op == "-") {
             emit(OpType::OpMinus);
         } else {
-            return std::make_shared<Error>(Error("unknown operator " + ie->op));
+            return new_error("unknown operator " + ie->op);
         }
     // If Expression
     } else if (auto i = std::dynamic_pointer_cast<IfExpression>(node)) {
@@ -159,7 +159,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
     } else if (auto id = std::dynamic_pointer_cast<Identifier>(node)) {
         auto [symbol, ok] = symbol_table->resolve(id->value);
         if (!ok) {
-            return std::make_shared<Error>(Error("undefined variable " + id->value));
+            return new_error("undefined variable " + id->value);
         }
         emit(OpType::OpGetGlobal, std::vector<int>{symbol.index});
     // String Literal
