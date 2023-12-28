@@ -192,6 +192,19 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         int key_value_count = hl->pairs.size() * 2;
 
         emit(OpType::OpHash, std::vector<int>{key_value_count});
+    // Index Expression
+    } else if (auto ix = std::dynamic_pointer_cast<IndexExpression>(node)) {
+        err = compile(ix->left);
+        if (is_error(err)) {
+            return err;
+        }
+
+        err = compile(ix->index);
+        if (is_error(err)) {
+            return err;
+        }
+
+        emit(OpType::OpIndex, std::vector<int>{});
     }
 
     return nullptr;

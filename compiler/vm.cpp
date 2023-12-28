@@ -165,6 +165,49 @@ std::shared_ptr<Error> VM::execute_minus_operator() {
     return push(std::make_shared<Integer>(Integer(-value)));
 }
 
+std::shared_ptr<Error> VM::execute_index_expression(std::shared_ptr<Object> left, std::shared_ptr<Object> index) {
+    // Try Array indexing (expecting Array and Integer index) and Hash indexing
+    if (left->type() == ObjectType::ARRAY_OBJ && index->type() == ObjectType::INTEGER_OBJ) {
+        return execute_array_index(left, index);
+    } else if (left->type() == ObjectType::HASH_OBJ) {
+        return execute_hash_index(left, index);
+    } else {
+        return new_error("index operator not supported: " + objecttype_literal(left->type()));
+    }
+}
+
+std::shared_ptr<Error> VM::execute_array_index(std::shared_ptr<Object> array, std::shared_ptr<Object> index) {
+    auto array_obj = std::dynamic_pointer_cast<Array>(array);
+    auto i = std::dynamic_pointer_cast<Integer>(index)->value;
+
+    auto max = (int) array_obj->elements.size() - 1;
+
+    if (i < 0 || i > max) {
+        return push(get_null_ref());
+    }
+
+    return push(array_obj->elements.at(i));
+}
+
+std::shared_ptr<Error> VM::execute_hash_index(std::shared_ptr<Object> hash, std::shared_ptr<Object> index) {
+    auto hash_obj = std::dynamic_pointer_cast<Hash>(hash);
+
+    auto key = std::dynamic_pointer_cast<Hashable>(index);
+    if (!key) {
+        return new_error("unusable as hash key: " + objecttype_literal(index->type()));
+    }
+
+    auto contains = hash_obj->pairs.find(key->hash_key());
+
+    if (contains == hash_obj->pairs.end()) {
+        return push(get_null_ref());
+    }
+
+    auto pair = hash_obj->pairs[key->hash_key()];
+
+    return push(pair.value);
+}
+
 std::shared_ptr<Object> VM::build_array(int start_index, int end_index) {    
     auto array = std::make_shared<Array>(Array{});
 
@@ -293,6 +336,14 @@ std::shared_ptr<Error> VM::run() {
             sp -= num_elements;
 
             err = push(hash);
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpIndex) {
+            auto index = pop();
+            auto left = pop();
+
+            auto err = execute_index_expression(left, index);
             if (err) {
                 return err;
             }

@@ -33,7 +33,8 @@ enum class OpType : Opcode {
     OpSetGlobal,
     OpGetGlobal,
     OpArray,
-    OpHash
+    OpHash,
+    OpIndex
 };
 
 struct Definition {

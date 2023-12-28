@@ -45,6 +45,8 @@ std::map<OpType, std::shared_ptr<Definition>> definitions = {
                 Definition{"OpArray", std::vector<int>{2}})},
         {OpType::OpHash, std::make_shared<Definition>(
                 Definition{"OpHash", std::vector<int>{2}})},
+        {OpType::OpIndex, std::make_shared<Definition>(
+                Definition{"OpIndex", std::vector<int>{}})},
 };
 
 std::tuple<std::shared_ptr<Definition>, bool> lookup(const OpType& op) {

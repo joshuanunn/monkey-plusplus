@@ -58,6 +58,12 @@ struct VM {
 
     std::shared_ptr<Error> execute_minus_operator();
 
+    std::shared_ptr<Error> execute_index_expression(std::shared_ptr<Object> left, std::shared_ptr<Object> index);
+
+    std::shared_ptr<Error> execute_array_index(std::shared_ptr<Object> array, std::shared_ptr<Object> index);
+
+    std::shared_ptr<Error> execute_hash_index(std::shared_ptr<Object> hash, std::shared_ptr<Object> index);
+
     std::shared_ptr<Error> run();
 };
 

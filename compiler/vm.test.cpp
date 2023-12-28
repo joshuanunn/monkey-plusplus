@@ -461,3 +461,73 @@ TEST_CASE("Test Hash Literals") {
         REQUIRE(test_int_hash_object(tt_expected, stack_elem));
     }
 }
+
+TEST_CASE("Test Index Expressions Returning Integers") {
+    std::vector<std::tuple<std::string, int>> tests = {
+        std::make_tuple("[1, 2, 3][1]", 2),
+        std::make_tuple("[1, 2, 3][0 + 2]", 3),
+        std::make_tuple("[[1, 1, 1]][0][0]", 1),
+        std::make_tuple("{1: 1, 2: 2}[1]", 1),
+        std::make_tuple("{1: 1, 2: 2}[2]", 2),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}
+
+TEST_CASE("Test Index Expressions Returning Null") {
+    std::vector<std::string> tests = {
+        "[][0]",
+        "[1, 2, 3][99]",
+        "[1][-1]",
+        "{1: 1}[0]",
+        "{}[0]",
+    };
+
+    for (const auto &tt_input: tests) {
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_null_object(stack_elem));
+    }
+}
