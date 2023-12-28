@@ -774,6 +774,10 @@ ArrayLiteral& ArrayLiteral::operator=(ArrayLiteral&& other) noexcept {
     return *this;
 }
 
+bool comp_hashliteral::operator()(std::shared_ptr<Expression> key1, std::shared_ptr<Expression> key2) const {
+    return key1->string() < key2->string();
+}
+
 std::string HashLiteral::token_literal() const {
     return token.literal;
 }
