@@ -101,6 +101,40 @@ bool test_int_array_object(std::vector<int> expected, std::shared_ptr<Object> ac
     return true;
 }
 
+bool test_int_hash_object(std::map<HashKey, int> expected, std::shared_ptr<Object> actual) {
+    auto hash_obj = std::dynamic_pointer_cast<Hash>(actual);
+    if (!hash_obj) {
+        std::cerr << "object is not Hash." << std::endl;
+        return false;
+    }
+
+    if (hash_obj->pairs.size() != expected.size()) {
+        std::cerr << "hash has wrong number of pairs. want=" << expected.size() << ", got=" << hash_obj->pairs.size() << std::endl;
+        return false;
+    }
+
+    for (auto const& kv: expected) {
+        auto [expected_key, expected_value] = kv;
+
+        auto contains = hash_obj->pairs.find(expected_key);
+
+        if (contains == hash_obj->pairs.end()) {
+            std::cerr << "no pair for given key in pairs" << std::endl;
+            return false;
+        }
+
+        auto pair = hash_obj->pairs[expected_key];
+
+        auto ok = test_integer_object(expected_value, pair.value);
+        if (!ok) {
+            std::cerr << "test_integer_object failed." << std::endl;
+            return false;
+        }
+    }
+
+    return true;
+}
+
 TEST_CASE("Test Integer Arithmetic") {
     std::vector<std::tuple<std::string, int>> tests = {
             std::make_tuple("1", 1),
@@ -376,5 +410,54 @@ TEST_CASE("Test Array Literals") {
         auto stack_elem = vm.last_popped_stack_elem();
 
         REQUIRE(test_int_array_object(tt_expected, stack_elem));
+    }
+}
+
+TEST_CASE("Test Hash Literals") {
+    std::vector<std::tuple<std::string, std::map<HashKey, int>>> tests = {
+        std::make_tuple(
+            "{}",
+            std::map<HashKey, int>{}
+        ),
+        std::make_tuple(
+            "{1: 2, 2: 3}",
+            std::map<HashKey, int>{
+                {Integer{1}.hash_key(), 2},
+                {Integer{2}.hash_key(), 3}
+            }
+        ),
+        std::make_tuple(
+            "{1 + 1: 2 * 2, 3 + 3: 4 * 4}",
+            std::map<HashKey, int>{
+                {Integer{2}.hash_key(), 4},
+                {Integer{6}.hash_key(), 16}
+            }
+        ),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_int_hash_object(tt_expected, stack_elem));
     }
 }

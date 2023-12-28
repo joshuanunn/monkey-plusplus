@@ -175,6 +175,25 @@ std::shared_ptr<Object> VM::build_array(int start_index, int end_index) {
     return array;
 }
 
+std::tuple<std::shared_ptr<Object>, std::shared_ptr<Error>> VM::build_hash(int start_index, int end_index) {
+    std::map<HashKey, HashPair> hashed_pairs;
+
+    for (int i = start_index; i < end_index; i+=2) {
+        auto key = stack[i];
+        auto value = stack[i+1];
+
+        auto hash_key = std::dynamic_pointer_cast<Hashable>(key);
+        if (!hash_key) {
+            return std::make_tuple(nullptr, std::make_shared<Error>(Error("unusable as hash key.")));
+        }
+
+        auto hashed = hash_key->hash_key();
+        hashed_pairs[hashed] = HashPair{key, value};
+    }
+
+    return std::make_tuple(std::make_shared<Hash>(Hash{hashed_pairs}), nullptr);
+}
+
 std::shared_ptr<Error> VM::run() {
     for (int ip = 0; ip < instructions.size(); ip++) {
         auto op = static_cast<OpType>(instructions.at(ip));
@@ -260,6 +279,20 @@ std::shared_ptr<Error> VM::run() {
             sp -= num_elements;
 
             auto err = push(array);
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpHash) {
+            auto num_elements = read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
+            ip += 2;
+
+            auto [hash, err] = build_hash(sp - num_elements, sp);
+            if (err) {
+                return err;
+            }
+            sp -= num_elements;
+
+            err = push(hash);
             if (err) {
                 return err;
             }

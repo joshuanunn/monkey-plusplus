@@ -42,6 +42,8 @@ struct VM {
 
     std::shared_ptr<Object> build_array(int start_index, int end_index);
 
+    std::tuple<std::shared_ptr<Object>, std::shared_ptr<Error>> build_hash(int start_index, int end_index);
+
     std::shared_ptr<Error> execute_binary_operation(OpType op);
 
     std::shared_ptr<Error> execute_comparison(OpType op);
