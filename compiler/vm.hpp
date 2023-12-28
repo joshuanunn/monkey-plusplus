@@ -48,11 +48,11 @@ struct VM {
 
     std::shared_ptr<Error> execute_comparison(OpType op);
 
-    std::shared_ptr<Error> execute_integer_comparison(OpType op, std::shared_ptr<Integer> left, std::shared_ptr<Integer> right);
+    std::shared_ptr<Error> execute_integer_comparison(OpType op, std::shared_ptr<Object> left, std::shared_ptr<Object> right);
 
-    std::shared_ptr<Error> execute_binary_integer_operation(OpType op, std::shared_ptr<Integer> left, std::shared_ptr<Integer> right);
+    std::shared_ptr<Error> execute_binary_integer_operation(OpType op, std::shared_ptr<Object> left, std::shared_ptr<Object> right);
 
-    std::shared_ptr<Error> execute_binary_string_operation(OpType op, std::shared_ptr<String> left, std::shared_ptr<String> right);
+    std::shared_ptr<Error> execute_binary_string_operation(OpType op, std::shared_ptr<Object> left, std::shared_ptr<Object> right);
 
     std::shared_ptr<Error> execute_bang_operator();
 

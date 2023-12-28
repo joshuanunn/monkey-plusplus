@@ -44,23 +44,17 @@ std::shared_ptr<Error> VM::execute_binary_operation(OpType op) {
     auto right = pop();
     auto left = pop();
 
-    // Cast to Integer objects and only proceed if both objects are Integers
-    auto left_integer = std::dynamic_pointer_cast<Integer>(left);
-    auto right_integer = std::dynamic_pointer_cast<Integer>(right);
+    auto left_type = left->type();
+    auto right_type = right->type();
 
-    if (left_integer && right_integer) {
-        return execute_binary_integer_operation(op, left_integer, right_integer);
+    if (left_type == ObjectType::INTEGER_OBJ && right_type == ObjectType::INTEGER_OBJ) {
+        return execute_binary_integer_operation(op, left, right);
+    } else if (left_type == ObjectType::STRING_OBJ && right_type == ObjectType::STRING_OBJ) {
+        return execute_binary_string_operation(op, left, right);
+    } else {
+        return new_error("unsupported types for binary operation: " +
+            objecttype_literal(left->type()) + " " + objecttype_literal(right->type()));
     }
-
-    // Cast to String objects and only proceed if both objects are Strings
-    auto left_string = std::dynamic_pointer_cast<String>(left);
-    auto right_string = std::dynamic_pointer_cast<String>(right);
-
-    if (left_string && right_string) {
-        return execute_binary_string_operation(op, left_string, right_string);
-    }
-
-    return new_error("unsupported types for binary operation");
 }
 
 std::shared_ptr<Error> VM::execute_comparison(OpType op) {
@@ -68,12 +62,9 @@ std::shared_ptr<Error> VM::execute_comparison(OpType op) {
     auto right = pop();
     auto left = pop();
 
-    // Try to cast to Integers and defer to execute_integer_comparison if both Integers
-    auto left_integer = std::dynamic_pointer_cast<Integer>(left);
-    auto right_integer = std::dynamic_pointer_cast<Integer>(right);
-
-    if (left_integer && right_integer) {
-        return execute_integer_comparison(op, left_integer, right_integer);
+    // Defer to execute_integer_comparison if both operands are Integers
+    if (left->type() == ObjectType::INTEGER_OBJ && right->type() == ObjectType::INTEGER_OBJ) {
+        return execute_integer_comparison(op, left, right);
     }
 
     // Otherwise cast to Boolean and compare pointers of global True/False Objects
@@ -89,9 +80,9 @@ std::shared_ptr<Error> VM::execute_comparison(OpType op) {
     }
 }
 
-std::shared_ptr<Error> VM::execute_integer_comparison(OpType op, std::shared_ptr<Integer> left, std::shared_ptr<Integer> right) {
-    auto left_value = left->value;
-    auto right_value = right->value;
+std::shared_ptr<Error> VM::execute_integer_comparison(OpType op, std::shared_ptr<Object> left, std::shared_ptr<Object> right) {
+    auto left_value = std::dynamic_pointer_cast<Integer>(left)->value;
+    auto right_value = std::dynamic_pointer_cast<Integer>(right)->value;
 
     if (op == OpType::OpEqual) {
         return push(native_bool_to_boolean_object(right_value == left_value));
@@ -104,9 +95,9 @@ std::shared_ptr<Error> VM::execute_integer_comparison(OpType op, std::shared_ptr
     }
 }
 
-std::shared_ptr<Error> VM::execute_binary_integer_operation(OpType op, std::shared_ptr<Integer> left, std::shared_ptr<Integer> right) {
-    auto left_value = left->value;
-    auto right_value = right->value;
+std::shared_ptr<Error> VM::execute_binary_integer_operation(OpType op, std::shared_ptr<Object> left, std::shared_ptr<Object> right) {
+    auto left_value = std::dynamic_pointer_cast<Integer>(left)->value;
+    auto right_value = std::dynamic_pointer_cast<Integer>(right)->value;
 
     int result;
 
@@ -126,13 +117,13 @@ std::shared_ptr<Error> VM::execute_binary_integer_operation(OpType op, std::shar
     return push(std::make_shared<Integer>(Integer(result)));
 }
 
-std::shared_ptr<Error> VM::execute_binary_string_operation(OpType op, std::shared_ptr<String> left, std::shared_ptr<String> right) {
+std::shared_ptr<Error> VM::execute_binary_string_operation(OpType op, std::shared_ptr<Object> left, std::shared_ptr<Object> right) {
     if (op != OpType::OpAdd) {
         return new_error("unknown string operator: " + std::to_string(as_opcode(op)));
     }
 
-    auto left_value = left->value;
-    auto right_value = right->value;
+    auto left_value = std::dynamic_pointer_cast<String>(left)->value;
+    auto right_value = std::dynamic_pointer_cast<String>(right)->value;
 
     // Push result back onto stack
     return push(std::make_shared<String>(String(left_value + right_value)));
@@ -155,12 +146,11 @@ std::shared_ptr<Error> VM::execute_bang_operator() {
 std::shared_ptr<Error> VM::execute_minus_operator() {
     auto operand = pop();
 
-    // Cast to Integer and extract current value
-    auto integer_obj = std::dynamic_pointer_cast<Integer>(operand);
-    if (!integer_obj) {
-        return new_error("unsupported type for negation");
+    if (operand->type() != ObjectType::INTEGER_OBJ) {
+        return new_error("unsupported type for negation: " + objecttype_literal(operand->type()));
     }
-    auto value = integer_obj->value;
+
+    auto value = std::dynamic_pointer_cast<Integer>(operand)->value;
 
     return push(std::make_shared<Integer>(Integer(-value)));
 }
