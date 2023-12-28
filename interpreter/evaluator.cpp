@@ -126,10 +126,6 @@ bool is_truthy(const std::shared_ptr<Object> &obj) {
     }
 }
 
-std::shared_ptr<Error> new_error(std::string message) {
-    return std::make_shared<Error>(Error{std::move(message)});
-}
-
 bool is_error(std::shared_ptr<Object> obj) {
     if (obj) {
         return obj->type() == ObjectType::ERROR_OBJ;

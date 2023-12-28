@@ -13,8 +13,6 @@ std::shared_ptr<Object> eval_if_expression(const std::shared_ptr<IfExpression> &
 
 bool is_truthy(const std::shared_ptr<Object> &obj);
 
-std::shared_ptr<Error> new_error(std::string message);
-
 bool is_error(std::shared_ptr<Object> obj);
 
 std::shared_ptr<Object> eval_program(const std::shared_ptr<Program> &program, const std::shared_ptr<Environment> &env);
