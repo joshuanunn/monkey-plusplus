@@ -304,4 +304,6 @@ std::shared_ptr<Null> get_null_ref();
 
 std::shared_ptr<Error> new_error(std::string message);
 
+bool is_error(const std::shared_ptr<Object>& obj);
+
 #endif //MONKEY_PLUSPLUS_OBJECT_HPP

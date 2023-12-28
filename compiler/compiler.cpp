@@ -289,10 +289,3 @@ void Compiler::change_operand(int op_pos, int operand) {
 
     replace_instruction(op_pos, new_instruction);
 }
-
-bool is_error(const std::shared_ptr<Object>& obj) {
-    if (obj) {
-        return obj->type() == ObjectType::ERROR_OBJ;
-    }
-    return false;
-}

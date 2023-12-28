@@ -616,3 +616,10 @@ std::string objecttype_literal(ObjectType t) {
 std::shared_ptr<Error> new_error(std::string message) {
     return std::make_shared<Error>(Error{std::move(message)});
 }
+
+bool is_error(const std::shared_ptr<Object>& obj) {
+    if (obj) {
+        return obj->type() == ObjectType::ERROR_OBJ;
+    }
+    return false;
+}

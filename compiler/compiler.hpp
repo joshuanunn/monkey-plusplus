@@ -76,7 +76,4 @@ std::shared_ptr<Compiler> new_compiler();
 std::shared_ptr<Compiler> new_compiler_with_state(
     std::shared_ptr<SymbolTable> s, std::vector<std::shared_ptr<Object>> constants);
 
-// TODO: this is copied from interpreter/evaluator, if linked at some point then can remove
-bool is_error(const std::shared_ptr<Object>& obj);
-
 #endif //MONKEY_PLUSPLUS_COMPILER_HPP

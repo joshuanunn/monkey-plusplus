@@ -126,13 +126,6 @@ bool is_truthy(const std::shared_ptr<Object> &obj) {
     }
 }
 
-bool is_error(std::shared_ptr<Object> obj) {
-    if (obj) {
-        return obj->type() == ObjectType::ERROR_OBJ;
-    }
-    return false;
-}
-
 std::shared_ptr<Object> eval_program(const std::shared_ptr<Program> &program, const std::shared_ptr<Environment> &env) {
     std::shared_ptr<Object> result;
 
