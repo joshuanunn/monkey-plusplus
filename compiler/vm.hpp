@@ -1,7 +1,9 @@
 #ifndef MONKEY_PLUSPLUS_VM_HPP
 #define MONKEY_PLUSPLUS_VM_HPP
 
+#include <exception>
 #include <iostream>
+
 #include "code.hpp"
 #include "compiler.hpp"
 #include "object.hpp"

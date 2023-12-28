@@ -21,7 +21,8 @@ VM::VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>,
 
 std::shared_ptr<Error> VM::push(std::shared_ptr<Object> o) {
     if (sp >= STACKSIZE) {
-        return new_error("stack overflow");
+        std::cerr << ("fatal error: stack overflow") << std::endl;
+        throw std::exception();
     }
 
     // Push object on to top of stack (stack[sp]) and increment stack pointer
