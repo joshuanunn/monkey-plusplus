@@ -2,8 +2,12 @@
 #define MONKEY_PLUSPLUS_CODE_HPP
 
 #include <cstdint>
+#include <exception>
+#include <iomanip>
+#include <iostream>
 #include <map>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <vector>
 
@@ -66,6 +70,8 @@ constexpr std::enable_if_t<std::is_enum<Enumeration>::value,
 }
 
 std::string fmt_instruction(std::shared_ptr<Definition> def, std::vector<int> operands);
+
+Instructions make(OpType op);
 
 Instructions make(OpType op, std::vector<int> operands);
 

@@ -18,7 +18,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         if (is_error(err)) {
             return err;
         }
-        emit(OpType::OpPop, std::vector<int>{});
+        emit(OpType::OpPop);
     // Infix Expression
     } else if (auto ie = std::dynamic_pointer_cast<InfixExpression>(node)) {
         // Initial catch for less-than operator, so code can be reordered to greater-than
@@ -33,7 +33,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
                 return err;
             }
             // Emit greater-than instruction, as operands have been read in reverse
-            emit(OpType::OpGreaterThan, std::vector<int>{});
+            emit(OpType::OpGreaterThan);
             return nullptr;
         }
 
@@ -51,19 +51,19 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
 
         // Extract operator
         if (ie->op == "+") {
-            emit(OpType::OpAdd, std::vector<int>{});
+            emit(OpType::OpAdd);
         } else if (ie->op == "-") {
-            emit(OpType::OpSub, std::vector<int>{});
+            emit(OpType::OpSub);
         } else if (ie->op == "*") {
-            emit(OpType::OpMul, std::vector<int>{});
+            emit(OpType::OpMul);
         } else if (ie->op == "/") {
-            emit(OpType::OpDiv, std::vector<int>{});
+            emit(OpType::OpDiv);
         } else if (ie->op == ">") {
-            emit(OpType::OpGreaterThan, std::vector<int>{});
+            emit(OpType::OpGreaterThan);
         } else if (ie->op == "==") {
-            emit(OpType::OpEqual, std::vector<int>{});
+            emit(OpType::OpEqual);
         } else if (ie->op == "!=") {
-            emit(OpType::OpNotEqual, std::vector<int>{});
+            emit(OpType::OpNotEqual);
         } else {
             return std::make_shared<Error>(Error("unknown operator " + ie->op));
         }
@@ -75,9 +75,9 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
     // Boolean
     } else if (auto bl = std::dynamic_pointer_cast<BooleanLiteral>(node)) {
         if (bl->value) {
-            emit(OpType::OpTrue, std::vector<int>{});
+            emit(OpType::OpTrue);
         } else {
-            emit(OpType::OpFalse, std::vector<int>{});
+            emit(OpType::OpFalse);
         }
     // Prefix Expression
     } else if (auto pe = std::dynamic_pointer_cast<PrefixExpression>(node)) {
@@ -88,9 +88,9 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         }
 
         if (pe->op == "!") {
-            emit(OpType::OpBang, std::vector<int>{});
+            emit(OpType::OpBang);
         } else if (pe->op == "-") {
-            emit(OpType::OpMinus, std::vector<int>{});
+            emit(OpType::OpMinus);
         } else {
             return std::make_shared<Error>(Error("unknown operator " + ie->op));
         }
@@ -123,7 +123,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
 
         // If no alternative, emit a OpNull instruction, else compile alternative
         if (!i->alternative) {
-            emit(OpType::OpNull, std::vector<int>{});
+            emit(OpType::OpNull);
         } else {
             err = compile(i->alternative);
             if (is_error(err)) {
@@ -204,7 +204,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
             return err;
         }
 
-        emit(OpType::OpIndex, std::vector<int>{});
+        emit(OpType::OpIndex);
     }
 
     return nullptr;
@@ -231,6 +231,15 @@ std::shared_ptr<Bytecode> Compiler::bytecode() {
 int Compiler::add_constant(std::shared_ptr<Object> obj) {
     constants.push_back(obj);
     return static_cast<int>(constants.size()) - 1;
+}
+
+int Compiler::emit(OpType op) {
+    auto ins = make(op);
+    auto pos = add_instruction(ins);
+
+    set_last_instruction(op, pos);
+
+    return pos;
 }
 
 int Compiler::emit(OpType op, std::vector<int> operands) {

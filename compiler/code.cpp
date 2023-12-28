@@ -1,7 +1,4 @@
-#include <numeric>
 #include "code.hpp"
-#include <iomanip>
-#include <iostream>
 
 // Initialise global Definitions
 std::map<OpType, std::shared_ptr<Definition>> definitions = {
@@ -102,6 +99,25 @@ std::ostream& operator<<(std::ostream& out, const Instructions& ins) {
         i += (1 + read);
     }
     return out;
+}
+
+Instructions make(OpType op) {
+    auto [def, ok] = lookup(op);
+    if (!ok) {
+        return std::vector<uint8_t>{};
+    }
+
+    int instruction_len = std::accumulate(def->operand_widths.begin(), def->operand_widths.end(), 1);
+
+    // Ensure that instruction length is correct (should have no additional operands)
+    if (instruction_len != 1) {
+        std::cerr << "fatal error: unexpectedly received operands for an " << def->name << " instruction." << std::endl;
+        throw std::exception();
+    }
+
+    std::vector<uint8_t> instruction = {as_opcode(op)};
+
+    return instruction;
 }
 
 Instructions make(OpType op, std::vector<int> operands) {

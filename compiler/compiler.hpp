@@ -52,6 +52,8 @@ struct Compiler {
 
     int add_constant(std::shared_ptr<Object> obj);
 
+    int emit(OpType op);
+
     int emit(OpType op, std::vector<int> operands);
 
     int add_instruction(Instructions ins);
