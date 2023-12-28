@@ -361,9 +361,9 @@ std::shared_ptr<Boolean> native_bool_to_boolean_object(bool input) {
 }
 
 bool is_truthy(std::shared_ptr<Object> obj) {
-    if (auto b = std::dynamic_pointer_cast<Boolean>(obj)) {
-        return b->value;
-    } else if (auto n = std::dynamic_pointer_cast<Null>(obj)) {
+    if (obj->type() == ObjectType::BOOLEAN_OBJ) {
+        return std::dynamic_pointer_cast<Boolean>(obj)->value;
+    } else if (obj == get_null_ref()) {
         return false;
     }
 
