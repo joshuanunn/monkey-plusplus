@@ -264,6 +264,11 @@ struct ArrayLiteral : public Expression {
     std::shared_ptr<Node> clone() const override;
 };
 
+// Custom comparator for HashLiteral to order keys by Expression string representation
+struct comp_hashliteral {
+    bool operator()(std::shared_ptr<Expression> key1, std::shared_ptr<Expression> key2) const;
+};
+
 struct HashLiteral : public Expression {
     explicit HashLiteral(const Token& t);
 
@@ -277,7 +282,7 @@ struct HashLiteral : public Expression {
 
     Token token;
 
-    std::map<std::shared_ptr<Expression>,std::shared_ptr<Expression>> pairs;
+    std::map<std::shared_ptr<Expression>, std::shared_ptr<Expression>, comp_hashliteral> pairs;
 
     std::string token_literal() const override;
 

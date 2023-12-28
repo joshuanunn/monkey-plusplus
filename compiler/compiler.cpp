@@ -176,6 +176,22 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         }
 
         emit(OpType::OpArray, std::vector<int>{(int) a->elements.size()});
+    // Hash Literal
+    } else if (auto hl = std::dynamic_pointer_cast<HashLiteral>(node)) {
+        for (auto const& kv: hl->pairs) {
+            err = compile(kv.first);
+            if (is_error(err)) {
+                return err;
+            }
+            err = compile(kv.second);
+            if (is_error(err)) {
+                return err;
+            }
+        }
+
+        int key_value_count = hl->pairs.size() * 2;
+
+        emit(OpType::OpHash, std::vector<int>{key_value_count});
     }
 
     return nullptr;
