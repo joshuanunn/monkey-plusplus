@@ -1,15 +1,29 @@
 #include "vm.hpp"
 
-VM::VM(std::shared_ptr<Bytecode>&& bytecode) : stack{}, globals{} {
-    instructions = std::move(bytecode->instructions);
+VM::VM(std::shared_ptr<Bytecode>&& bytecode) : frames{}, stack{}, globals{} {
+    // Create a main frame to contain the bytecode instructions
+    auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions));
+    auto main_frame = new_frame(main_fn);
+
+    // Place main frame at first frame index and set frames_index at one above this
+    frames[0] = main_frame;
+    frames_index = 1;
+
     constants = std::move(bytecode->constants);
 
     // Stack pointer starts at 0
     sp = 0;
 }
 
-VM::VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>, GLOBALSSIZE> s) : stack{}, globals{} {
-    instructions = std::move(bytecode->instructions);
+VM::VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>, GLOBALSSIZE> s) : frames{}, stack{}, globals{} {
+    // Create a main frame to contain the bytecode instructions
+    auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions));
+    auto main_frame = new_frame(main_fn);
+
+    // Place main frame at first frame index and set frames_index at one above this
+    frames[0] = main_frame;
+    frames_index = 1;
+
     constants = std::move(bytecode->constants);
 
     // Copy globals from provided source to destination
@@ -17,6 +31,22 @@ VM::VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>,
 
     // Stack pointer starts at 0
     sp = 0;
+}
+
+std::shared_ptr<Frame> VM::current_frame() {
+    return frames[frames_index-1];
+}
+
+void VM::push_frame(std::shared_ptr<Frame> f) {
+    // TODO: check that frames_index does not excced MAXFRAMES
+
+    // Push frame on to top of stack frame (frames[frames_index]) and increment stack frame pointer
+    frames[frames_index++] = f;
+}
+
+std::shared_ptr<Frame> VM::pop_frame() {
+    // Pop frame on top of stack frame (frames[frames_index-1]) and decrement stack frame pointer
+    return frames[--frames_index];
 }
 
 std::shared_ptr<Error> VM::push(std::shared_ptr<Object> o) {
@@ -229,11 +259,21 @@ std::tuple<std::shared_ptr<Object>, std::shared_ptr<Error>> VM::build_hash(int s
 }
 
 std::shared_ptr<Error> VM::run() {
-    for (int ip = 0; ip < instructions.size(); ip++) {
-        auto op = static_cast<OpType>(instructions.at(ip));
+    int ip;
+    Instructions ins;
+    OpType op;
+
+    while (current_frame()->ip < static_cast<int>(current_frame()->instructions().size())-1) {
+        // Increment instruction pointer within current stack frame
+        ip = ++(current_frame()->ip);
+
+        // Fetch current instruction within current stack frame
+        ins = current_frame()->instructions();
+        op = static_cast<OpType>(ins.at(ip));
+
         if (op == OpType::OpConstant) {
-            auto const_index = read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
-            ip += 2;
+            auto const_index = read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            current_frame()->ip += 2;
 
             // Add constant to VM constants
             push(constants.at(const_index));
@@ -273,41 +313,41 @@ std::shared_ptr<Error> VM::run() {
             }
         } else if (op == OpType::OpJumpNotTruthy) {
             // Read jump target into pos
-            auto pos = (int) read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
+            auto pos = (int) read_uint_16(ins.at(ip+1), ins.at(ip+2));
             // Skip two bytes of operand associated with conditional jump
-            ip += 2;
+            current_frame()->ip += 2;
             // Pop stack top (condition). If not truthy then jump to target, else execute consequence
             auto condition = pop();
             if (!is_truthy(condition)) {
                 // Set instruction pointer to (jump target - 1), as ip is incremented on next iteration
-                ip = pos - 1;
+                current_frame()->ip = pos - 1;
             }
         } else if (op == OpType::OpJump) {
             // Read jump target into pos
-            auto pos = (int) read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
+            auto pos = (int) read_uint_16(ins.at(ip+1), ins.at(ip+2));
             // Set instruction pointer to (jump target - 1), as ip is incremented on next iteration
-            ip = pos - 1;
+            current_frame()->ip = pos - 1;
         } else if (op == OpType::OpNull) {
             auto err = push(get_null_ref());
             if (err) {
                 return err;
             }
         } else if (op == OpType::OpSetGlobal) {
-            auto global_index = read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
-            ip += 2;
+            auto global_index = read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            current_frame()->ip += 2;
 
             globals[global_index] = pop();
         } else if (op == OpType::OpGetGlobal) {
-            auto global_index = read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
-            ip += 2;
+            auto global_index = read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            current_frame()->ip += 2;
 
             auto err = push(globals[global_index]);
             if (err) {
                 return err;
             }
         } else if (op == OpType::OpArray) {
-            auto num_elements = read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
-            ip += 2;
+            auto num_elements = read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            current_frame()->ip += 2;
 
             auto array = build_array(sp - num_elements, sp);
             sp -= num_elements;
@@ -317,8 +357,8 @@ std::shared_ptr<Error> VM::run() {
                 return err;
             }
         } else if (op == OpType::OpHash) {
-            auto num_elements = read_uint_16(instructions.at(ip+1), instructions.at(ip+2));
-            ip += 2;
+            auto num_elements = read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            current_frame()->ip += 2;
 
             auto [hash, err] = build_hash(sp - num_elements, sp);
             if (err) {

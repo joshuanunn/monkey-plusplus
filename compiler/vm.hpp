@@ -6,8 +6,10 @@
 
 #include "code.hpp"
 #include "compiler.hpp"
+#include "frame.hpp"
 #include "object.hpp"
 
+constexpr int MAXFRAMES = 1024;
 constexpr int STACKSIZE = 2048;
 constexpr int GLOBALSSIZE = 65536;
 
@@ -26,15 +28,23 @@ struct VM {
 
     explicit VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>, GLOBALSSIZE> s);
 
-    std::vector<std::shared_ptr<Object>> constants;
+    std::array<std::shared_ptr<Frame>, MAXFRAMES> frames;
 
-    Instructions instructions;
+    int frames_index;
+
+    std::vector<std::shared_ptr<Object>> constants;
 
     std::array<std::shared_ptr<Object>, STACKSIZE> stack;
 
     int sp; // Always points to the next value. Top of stack is stack[sp-1]
 
     std::array<std::shared_ptr<Object>, GLOBALSSIZE> globals;
+
+    std::shared_ptr<Frame> current_frame();
+
+    void push_frame(std::shared_ptr<Frame> f);
+
+    std::shared_ptr<Frame> pop_frame();
 
     std::shared_ptr<Error> push(std::shared_ptr<Object> o);
 
