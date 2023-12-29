@@ -563,6 +563,43 @@ std::shared_ptr<Object> String::clone() const {
     return std::make_shared<String>(String{*this});
 }
 
+CompiledFunction::CompiledFunction(const Instructions& instructions) : instructions{instructions} {}
+
+CompiledFunction::CompiledFunction(const CompiledFunction& other) : instructions{other.instructions} {}
+
+CompiledFunction::CompiledFunction(CompiledFunction&& other) noexcept {
+    instructions.swap(other.instructions);
+}
+
+CompiledFunction& CompiledFunction::operator=(const CompiledFunction& other) {
+    if (this == &other) return *this;
+
+    instructions = other.instructions;
+
+    return *this;
+}
+
+CompiledFunction& CompiledFunction::operator=(CompiledFunction&& other) noexcept {
+    if (this == &other) return *this;
+
+    instructions.swap(other.instructions);
+
+    return *this;
+}
+
+ObjectType CompiledFunction::type() const {
+    return ObjectType::COMPILED_FUNCTION_OBJ;
+}
+
+std::string CompiledFunction::inspect() const {
+    auto address = (unsigned long long)(void**) this;
+    return "CompiledFunction[" + std::to_string(address) + "]";
+}
+
+std::shared_ptr<Object> CompiledFunction::clone() const {
+    return std::make_shared<CompiledFunction>(CompiledFunction{*this});
+}
+
 // Hashing algorithm using a 64-bit FNV-1a hash in line with that used in Go (hash/fnv)
 // C++ source adapted (under MIT License) from: https://github.com/SRombauts/cpp-algorithms
 HashKey String::hash_key() const {
@@ -601,6 +638,7 @@ std::map<ObjectType, std::string> objecttype_literals = {
         {ObjectType::BUILTIN_OBJ,"BUILTIN"},
         {ObjectType::ARRAY_OBJ,"ARRAY"},
         {ObjectType::HASH_OBJ,"HASH"},
+        {ObjectType::COMPILED_FUNCTION_OBJ,"COMPILED_FUNCTION"},
 };
 
 std::string objecttype_literal(ObjectType t) {

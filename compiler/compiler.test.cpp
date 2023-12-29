@@ -90,6 +90,22 @@ bool test_string_constants(const std::vector<std::string>& expected, const std::
     return true;
 }
 
+bool test_function_constants(const std::vector<Instructions>& expected, const std::shared_ptr<Object>& actual) {
+    auto compiledfunction_obj = std::dynamic_pointer_cast<CompiledFunction>(actual);
+    if (!compiledfunction_obj) {
+        std::cerr << "constant is not a function." << std::endl;
+        return false;
+    }
+
+    auto ok = test_instructions(expected, compiledfunction_obj->instructions);
+    if (!ok) {
+        std::cerr << "constant test_instructions failed." << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 TEST_CASE("Test Integer Arithmetic") {
     std::vector<std::tuple<std::string, std::vector<int>, std::vector<Instructions>>> tests = {
         std::make_tuple("1 + 2", std::vector<int>{1, 2}, std::vector<Instructions>{
@@ -517,4 +533,209 @@ TEST_CASE("Test Index Expressions") {
 
         REQUIRE(test_integer_constants(tt_expected_constants, bytecode->constants));
     }
+}
+
+TEST_CASE("Test Compiler Scopes") {
+    EmittedInstruction last;
+    EmittedInstruction previous;
+
+    auto compiler = new_compiler();
+
+    if (compiler->scope_index != 0) {
+        std::cerr << "scope_index wrong. got=" << compiler->scope_index << ", want=" << 0 << std::endl;
+    }
+    REQUIRE(compiler->scope_index == 0);
+
+    compiler->emit(OpType::OpMul);
+
+    compiler->enter_scope();
+
+    if (compiler->scope_index != 1) {
+        std::cerr << "scope_index wrong. got=" << compiler->scope_index << ", want=" << 1 << std::endl;
+    }
+    REQUIRE(compiler->scope_index == 1);
+
+    compiler->emit(OpType::OpSub);
+
+    if (compiler->scopes.at(compiler->scope_index).instructions.size() != 1) {
+        std::cerr << "instructions length wrong. got="
+            << compiler->scopes.at(compiler->scope_index).instructions.size() << std::endl;
+    }
+    REQUIRE(compiler->scopes.at(compiler->scope_index).instructions.size() == 1);
+
+    last = compiler->scopes.at(compiler->scope_index).last_instruction;
+    if (last.opcode != OpType::OpSub) {
+        std::cerr << "last_instruction.opcode wrong. got=" << std::to_string(as_opcode(last.opcode))
+            << ", want=" << std::to_string(as_opcode(OpType::OpSub)) << std::endl;
+    }
+    REQUIRE(last.opcode == OpType::OpSub);
+
+    compiler->leave_scope();
+
+    if (compiler->scope_index != 0) {
+        std::cerr << "scope_index wrong. got=" << compiler->scope_index << ", want=" << 0 << std::endl;
+    }
+    REQUIRE(compiler->scope_index == 0);
+
+    compiler->emit(OpType::OpAdd);
+
+    if (compiler->scopes.at(compiler->scope_index).instructions.size() != 2) {
+        std::cerr << "instructions length wrong. got="
+            << compiler->scopes.at(compiler->scope_index).instructions.size() << std::endl;
+    }
+    REQUIRE(compiler->scopes.at(compiler->scope_index).instructions.size() == 2);
+
+    last = compiler->scopes.at(compiler->scope_index).last_instruction;
+    if (last.opcode != OpType::OpAdd) {
+        std::cerr << "last_instruction.opcode wrong. got=" << std::to_string(as_opcode(last.opcode))
+            << ", want=" << std::to_string(as_opcode(OpType::OpAdd)) << std::endl;
+    }
+    REQUIRE(last.opcode == OpType::OpAdd);
+
+    previous = compiler->scopes.at(compiler->scope_index).previous_instruction;
+    if (previous.opcode != OpType::OpMul) {
+        std::cerr << "previous_instruction.opcode wrong. got=" << std::to_string(as_opcode(previous.opcode))
+            << ", want=" << std::to_string(as_opcode(OpType::OpMul)) << std::endl;
+    }
+    REQUIRE(previous.opcode == OpType::OpMul);
+}
+
+TEST_CASE("Test Function With Return") {
+    std::string input = "fn() { return 5 + 10 }";
+    std::vector<int> expected_integer_constants = std::vector<int>{5, 10};
+    std::vector<Instructions> expected_fn_instructions = {
+        make(OpType::OpConstant, std::vector<int>{0}),
+        make(OpType::OpConstant, std::vector<int>{1}),
+        make(OpType::OpAdd),
+        make(OpType::OpReturnValue),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, std::vector<int>{2}),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test integer constants
+    auto int_constants = std::vector<std::shared_ptr<Object>>(bytecode->constants.begin(), bytecode->constants.end() - 1);
+    REQUIRE(test_integer_constants(expected_integer_constants, int_constants));
+
+    // Test compiled function constants
+    auto fn_constants = bytecode->constants.back();
+    REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
+}
+
+TEST_CASE("Test Function With No Return") {
+    std::string input = "fn() { 5 + 10 }";
+    std::vector<int> expected_integer_constants = std::vector<int>{5, 10};
+    std::vector<Instructions> expected_fn_instructions = {
+        make(OpType::OpConstant, std::vector<int>{0}),
+        make(OpType::OpConstant, std::vector<int>{1}),
+        make(OpType::OpAdd),
+        make(OpType::OpReturnValue),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, std::vector<int>{2}),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test integer constants
+    auto int_constants = std::vector<std::shared_ptr<Object>>(bytecode->constants.begin(), bytecode->constants.end() - 1);
+    REQUIRE(test_integer_constants(expected_integer_constants, int_constants));
+
+    // Test compiled function constants
+    auto fn_constants = bytecode->constants.back();
+    REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
+}
+
+TEST_CASE("Test Function With No Return And Two Expression Statements") {
+    std::string input = "fn() { 1; 2 }";
+    std::vector<int> expected_integer_constants = std::vector<int>{1, 2};
+    std::vector<Instructions> expected_fn_instructions = {
+        make(OpType::OpConstant, std::vector<int>{0}),
+        make(OpType::OpPop),
+        make(OpType::OpConstant, std::vector<int>{1}),
+        make(OpType::OpReturnValue),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, std::vector<int>{2}),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test integer constants
+    auto int_constants = std::vector<std::shared_ptr<Object>>(bytecode->constants.begin(), bytecode->constants.end() - 1);
+    REQUIRE(test_integer_constants(expected_integer_constants, int_constants));
+
+    // Test compiled function constants
+    auto fn_constants = bytecode->constants.back();
+    REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
+}
+
+TEST_CASE("Test Function With No Return Value") {
+    std::string input = "fn() { }";
+    std::vector<Instructions> expected_fn_instructions = {
+        make(OpType::OpReturn),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, std::vector<int>{0}),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test compiled function constants
+    auto fn_constants = bytecode->constants.back();
+    REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
 }

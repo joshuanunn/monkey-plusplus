@@ -110,7 +110,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         }
 
         // Remove last pop instruction to keep last expression result on the stack
-        if (last_instruction_is_pop()) {
+        if (last_instruction_is(OpType::OpPop)) {
             remove_last_pop();
         }
 
@@ -118,7 +118,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         auto jump_pos = emit(OpType::OpJump, std::vector<int>{9999});
 
         // Update placeholder value of conditional jump instruction to actual value
-        auto after_consequence_pos = (int) instructions.size();
+        auto after_consequence_pos = (int) scopes.at(scope_index).instructions.size();
         change_operand(jump_not_truthy_pos, after_consequence_pos);
 
         // If no alternative, emit a OpNull instruction, else compile alternative
@@ -131,13 +131,13 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
             }
 
             // Remove last pop instruction to keep last expression result on the stack
-            if (last_instruction_is_pop()) {
+            if (last_instruction_is(OpType::OpPop)) {
                 remove_last_pop();
             }
         }
 
         // Update placeholder value of jump instruction to actual value
-        auto after_alternative_pos = (int) instructions.size();
+        auto after_alternative_pos = (int) scopes.at(scope_index).instructions.size();
         change_operand(jump_pos, after_alternative_pos);
     // Block Statement
     } else if (auto b = std::dynamic_pointer_cast<BlockStatement>(node)) {
@@ -205,13 +205,52 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         }
 
         emit(OpType::OpIndex);
+    // Function Literals
+    } else if (auto f = std::dynamic_pointer_cast<FunctionLiteral>(node)) {
+        // Enter new scope to compile the function
+        enter_scope();
+
+        err = compile(f->body);
+        if (is_error(err)) {
+            return err;
+        }
+
+        // Replace any trailing OpPop instructions in a Functional Literal with OpReturnValue
+        if (last_instruction_is(OpType::OpPop)) {
+            replace_last_pop_with_return();
+        }
+
+        // Append OpReturn instruction where no trailing OpReturnValue (i.e. empty function body)
+        if (!last_instruction_is(OpType::OpReturnValue)) {
+            emit(OpType::OpReturn);
+        }
+
+        // Take the compiled instructions, leave scope, embed into a CompiledFunction and emit
+        auto instructions = leave_scope();
+        auto compiled_fn = CompiledFunction(instructions).clone();
+        emit(OpType::OpConstant, std::vector<int>{add_constant(compiled_fn)});
+    // Return Statement
+    } else if (auto r = std::dynamic_pointer_cast<ReturnStatement>(node)) {
+        err = compile(r->return_value);
+        if (is_error(err)) {
+            return err;
+        }
+
+        emit(OpType::OpReturnValue);
     }
 
     return nullptr;
 }
 
 std::shared_ptr<Compiler> new_compiler() {
-    return std::make_shared<Compiler>(Compiler{symbol_table: new_symbol_table()});
+    auto main_scope = CompilationScope{};
+
+    return std::make_shared<Compiler>(
+        Compiler{
+            symbol_table: new_symbol_table(),
+            scopes: std::vector<CompilationScope>{main_scope},
+            scope_index: 0
+        });
 }
 
 std::shared_ptr<Compiler> new_compiler_with_state(
@@ -225,7 +264,9 @@ std::shared_ptr<Compiler> new_compiler_with_state(
 }
 
 std::shared_ptr<Bytecode> Compiler::bytecode() {
-    return std::make_shared<Bytecode>(Bytecode{instructions, constants});
+    // Return bytecode for current scope
+    return std::make_shared<Bytecode>(
+        Bytecode{scopes.at(scope_index).instructions, constants});
 }
 
 int Compiler::add_constant(std::shared_ptr<Object> obj) {
@@ -252,40 +293,69 @@ int Compiler::emit(OpType op, std::vector<int> operands) {
 }
 
 int Compiler::add_instruction(Instructions ins) {
-    auto pos_new_instruction = static_cast<int>(instructions.size());
-    for (const auto& i: ins) {
-        instructions.push_back(i);
-    }
+    auto pos_new_instruction = static_cast<int>(scopes.at(scope_index).instructions.size());
+
+    // Append new Instructions to end of instructions in current scope
+    scopes.at(scope_index).instructions.insert(
+        scopes.at(scope_index).instructions.end(), ins.begin(), ins.end());
+
     return pos_new_instruction;
 }
 
 void Compiler::set_last_instruction(OpType op, int pos) {
-    auto previous = last_instruction;
+    auto previous = scopes.at(scope_index).last_instruction;
     auto last = EmittedInstruction{op, pos};
 
-    previous_instruction = previous;
-    last_instruction = last;
+    scopes.at(scope_index).previous_instruction = previous;
+    scopes.at(scope_index).last_instruction = last;
 }
 
-bool Compiler::last_instruction_is_pop() const {
-    return last_instruction.opcode == OpType::OpPop;
+bool Compiler::last_instruction_is(OpType op) const {
+    if (scopes.at(scope_index).instructions.empty()) {
+        return false;
+    }
+
+    return scopes.at(scope_index).last_instruction.opcode == op;
 }
 
 void Compiler::remove_last_pop() {
     // Remove last instruction (OpPop) from instructions
-    instructions.pop_back();
-    last_instruction = previous_instruction;
+    scopes.at(scope_index).instructions.pop_back();
+    scopes.at(scope_index).last_instruction = scopes.at(scope_index).previous_instruction;
+}
+
+void Compiler::replace_last_pop_with_return() {
+    // Replace last instruction (OpPop) in instructions with an OpReturnValue
+    auto last_pos = scopes.at(scope_index).last_instruction.position;
+    replace_instruction(last_pos, make(OpType::OpReturnValue));
+
+    // Correct last_instruction
+    scopes.at(scope_index).last_instruction.opcode = OpType::OpReturnValue;
 }
 
 void Compiler::replace_instruction(int pos, Instructions new_instruction) {
     for (int i = 0; i < new_instruction.size(); i++) {
-        instructions.at(pos + i) = new_instruction.at(i);
+        scopes.at(scope_index).instructions.at(pos + i) = new_instruction.at(i);
     }
 }
 
 void Compiler::change_operand(int op_pos, int operand) {
-    auto op = OpType(instructions.at(op_pos));
+    auto op = OpType(scopes.at(scope_index).instructions.at(op_pos));
     auto new_instruction = make(op, std::vector<int>{operand});
 
     replace_instruction(op_pos, new_instruction);
+}
+
+void Compiler::enter_scope() {
+    scopes.push_back(CompilationScope{});
+    scope_index++;
+}
+
+Instructions Compiler::leave_scope() {
+    auto instructions = scopes.at(scope_index).instructions;
+
+    scopes.pop_back();
+    scope_index--;
+
+    return instructions;
 }

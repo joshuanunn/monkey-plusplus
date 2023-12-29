@@ -6,7 +6,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "ast.hpp"
+#include "code.hpp"
 
 enum class ObjectType {
     INTEGER_OBJ,
@@ -18,7 +20,8 @@ enum class ObjectType {
     STRING_OBJ,
     BUILTIN_OBJ,
     ARRAY_OBJ,
-    HASH_OBJ
+    HASH_OBJ,
+    COMPILED_FUNCTION_OBJ
 };
 
 std::string objecttype_literal(ObjectType);
@@ -298,6 +301,26 @@ struct Null : public Object {
     std::shared_ptr<Object> clone() const override;
 
     std::string inspect() const override;
+};
+
+struct CompiledFunction : public Object {
+    CompiledFunction(const Instructions& instructions);
+
+    CompiledFunction(const CompiledFunction& other);
+
+    CompiledFunction(CompiledFunction&& other) noexcept;
+
+    CompiledFunction& operator=(const CompiledFunction& other);
+
+    CompiledFunction& operator=(CompiledFunction&& other) noexcept;
+
+    Instructions instructions;
+
+    ObjectType type() const override;
+
+    std::string inspect() const override;
+
+    std::shared_ptr<Object> clone() const override;
 };
 
 std::shared_ptr<Null> get_null_ref();

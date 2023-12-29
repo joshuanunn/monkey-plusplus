@@ -27,6 +27,12 @@ struct EmittedInstruction {
     int position;
 };
 
+struct CompilationScope {
+    Instructions instructions;
+    EmittedInstruction last_instruction;
+    EmittedInstruction previous_instruction;
+};
+
 struct Compiler {
     Compiler() = default;
 
@@ -38,15 +44,13 @@ struct Compiler {
 
     Compiler& operator=(Compiler&& other) noexcept = default;
 
-    Instructions instructions;
-
     std::vector<std::shared_ptr<Object>> constants;
 
-    EmittedInstruction last_instruction;
-
-    EmittedInstruction previous_instruction;
-
     std::shared_ptr<SymbolTable> symbol_table;
+
+    std::vector<CompilationScope> scopes;
+
+    int scope_index;
 
     std::shared_ptr<Error> compile(std::shared_ptr<Node> node);
 
@@ -60,13 +64,19 @@ struct Compiler {
 
     void set_last_instruction(OpType op, int pos);
 
-    bool last_instruction_is_pop() const;
+    bool last_instruction_is(OpType op) const;
 
     void remove_last_pop();
+
+    void replace_last_pop_with_return();
 
     void replace_instruction(int pos, Instructions new_instruction);
 
     void change_operand(int op_pos, int operand);
+
+    void enter_scope();
+
+    Instructions leave_scope();
 
     std::shared_ptr<Bytecode> bytecode();
 };
