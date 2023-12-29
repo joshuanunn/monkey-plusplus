@@ -655,3 +655,39 @@ noReturnTwo();
         REQUIRE(test_null_object(stack_elem));
     }
 }
+
+TEST_CASE("Test First Class Functions") {
+    std::vector<std::tuple<std::string, int>> tests = {
+        std::make_tuple(R"(
+let returnsOne = fn() { 1; };
+let returnsOneReturner = fn() { returnsOne; };
+returnsOneReturner()();
+)",     1),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}
