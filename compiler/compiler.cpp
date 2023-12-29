@@ -263,9 +263,15 @@ std::shared_ptr<Compiler> new_compiler() {
 
 std::shared_ptr<Compiler> new_compiler_with_state(
     std::shared_ptr<SymbolTable> s, std::vector<std::shared_ptr<Object>> constants) {
-    auto compiler = std::make_shared<Compiler>(Compiler{
-        constants: constants,
-        symbol_table: s
+
+    auto main_scope = CompilationScope{};
+
+    auto compiler = std::make_shared<Compiler>(
+        Compiler{
+            constants: constants,
+            symbol_table: s,
+            scopes: std::vector<CompilationScope>{main_scope},
+            scope_index: 0
     });
 
     return compiler;
