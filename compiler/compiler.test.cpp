@@ -111,37 +111,37 @@ TEST_CASE("Test Integer Arithmetic") {
         std::make_tuple("1 + 2", std::vector<int>{1, 2}, std::vector<Instructions>{
             make(OpType::OpConstant, std::vector<int>{0}),
             make(OpType::OpConstant, std::vector<int>{1}),
-            make(OpType::OpAdd, std::vector<int>{}),
-            make(OpType::OpPop, std::vector<int>{}),
+            make(OpType::OpAdd),
+            make(OpType::OpPop),
         }),
         std::make_tuple("1; 2", std::vector<int>{1, 2}, std::vector<Instructions>{
             make(OpType::OpConstant, std::vector<int>{0}),
-            make(OpType::OpPop, std::vector<int>{}),
+            make(OpType::OpPop),
             make(OpType::OpConstant, std::vector<int>{1}),
-            make(OpType::OpPop, std::vector<int>{}),
+            make(OpType::OpPop),
         }),
         std::make_tuple("1 - 2", std::vector<int>{1, 2}, std::vector<Instructions>{
                 make(OpType::OpConstant, std::vector<int>{0}),
                 make(OpType::OpConstant, std::vector<int>{1}),
-                make(OpType::OpSub, std::vector<int>{}),
-                make(OpType::OpPop, std::vector<int>{}),
+                make(OpType::OpSub),
+                make(OpType::OpPop),
         }),
         std::make_tuple("1 * 2", std::vector<int>{1, 2}, std::vector<Instructions>{
                 make(OpType::OpConstant, std::vector<int>{0}),
                 make(OpType::OpConstant, std::vector<int>{1}),
-                make(OpType::OpMul, std::vector<int>{}),
-                make(OpType::OpPop, std::vector<int>{}),
+                make(OpType::OpMul),
+                make(OpType::OpPop),
         }),
         std::make_tuple("2 / 1", std::vector<int>{2, 1}, std::vector<Instructions>{
                 make(OpType::OpConstant, std::vector<int>{0}),
                 make(OpType::OpConstant, std::vector<int>{1}),
-                make(OpType::OpDiv, std::vector<int>{}),
-                make(OpType::OpPop, std::vector<int>{}),
+                make(OpType::OpDiv),
+                make(OpType::OpPop),
         }),
         std::make_tuple("-1", std::vector<int>{1}, std::vector<Instructions>{
                 make(OpType::OpConstant, std::vector<int>{0}),
-                make(OpType::OpMinus, std::vector<int>{}),
-                make(OpType::OpPop, std::vector<int>{}),
+                make(OpType::OpMinus),
+                make(OpType::OpPop),
         }),
     };
 
@@ -169,53 +169,53 @@ TEST_CASE("Test Integer Arithmetic") {
 TEST_CASE("Test Boolean Expressions") {
     std::vector<std::tuple<std::string, std::vector<int>, std::vector<Instructions>>> tests = {
             std::make_tuple("true", std::vector<int>{}, std::vector<Instructions>{
-                    make(OpType::OpTrue, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpTrue),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("false", std::vector<int>{}, std::vector<Instructions>{
-                    make(OpType::OpFalse, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpFalse),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("1 > 2", std::vector<int>{1, 2}, std::vector<Instructions>{
                     make(OpType::OpConstant, std::vector<int>{0}),
                     make(OpType::OpConstant, std::vector<int>{1}),
-                    make(OpType::OpGreaterThan, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpGreaterThan),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("1 < 2", std::vector<int>{2, 1}, std::vector<Instructions>{
                     make(OpType::OpConstant, std::vector<int>{0}),
                     make(OpType::OpConstant, std::vector<int>{1}),
-                    make(OpType::OpGreaterThan, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpGreaterThan),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("1 == 2", std::vector<int>{1, 2}, std::vector<Instructions>{
                     make(OpType::OpConstant, std::vector<int>{0}),
                     make(OpType::OpConstant, std::vector<int>{1}),
-                    make(OpType::OpEqual, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpEqual),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("1 != 2", std::vector<int>{1, 2}, std::vector<Instructions>{
                     make(OpType::OpConstant, std::vector<int>{0}),
                     make(OpType::OpConstant, std::vector<int>{1}),
-                    make(OpType::OpNotEqual, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpNotEqual),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("true == false", std::vector<int>{}, std::vector<Instructions>{
-                    make(OpType::OpTrue, std::vector<int>{}),
-                    make(OpType::OpFalse, std::vector<int>{}),
-                    make(OpType::OpEqual, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpTrue),
+                    make(OpType::OpFalse),
+                    make(OpType::OpEqual),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("true != false", std::vector<int>{}, std::vector<Instructions>{
-                    make(OpType::OpTrue, std::vector<int>{}),
-                    make(OpType::OpFalse, std::vector<int>{}),
-                    make(OpType::OpNotEqual, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpTrue),
+                    make(OpType::OpFalse),
+                    make(OpType::OpNotEqual),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("!true", std::vector<int>{}, std::vector<Instructions>{
-                    make(OpType::OpTrue, std::vector<int>{}),
-                    make(OpType::OpBang, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpTrue),
+                    make(OpType::OpBang),
+                    make(OpType::OpPop),
             }),
     };
 
@@ -243,24 +243,24 @@ TEST_CASE("Test Boolean Expressions") {
 TEST_CASE("Test Conditionals") {
     std::vector<std::tuple<std::string, std::vector<int>, std::vector<Instructions>>> tests = {
             std::make_tuple("if (true) { 10 }; 3333;", std::vector<int>{10, 3333}, std::vector<Instructions>{
-                    make(OpType::OpTrue, std::vector<int>{}),
+                    make(OpType::OpTrue),
                     make(OpType::OpJumpNotTruthy, std::vector<int>{10}),
                     make(OpType::OpConstant, std::vector<int>{0}),
                     make(OpType::OpJump, std::vector<int>{11}),
-                    make(OpType::OpNull, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpNull),
+                    make(OpType::OpPop),
                     make(OpType::OpConstant, std::vector<int>{1}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("if (true) { 10 } else { 20 }; 3333;", std::vector<int>{10, 20, 3333}, std::vector<Instructions>{
-                    make(OpType::OpTrue, std::vector<int>{}),
+                    make(OpType::OpTrue),
                     make(OpType::OpJumpNotTruthy, std::vector<int>{10}),
                     make(OpType::OpConstant, std::vector<int>{0}),
                     make(OpType::OpJump, std::vector<int>{13}),
                     make(OpType::OpConstant, std::vector<int>{1}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
                     make(OpType::OpConstant, std::vector<int>{2}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
     };
 
@@ -303,7 +303,7 @@ one;
                     make(OpType::OpConstant, std::vector<int>{0}),
                     make(OpType::OpSetGlobal, std::vector<int>{0}),
                     make(OpType::OpGetGlobal, std::vector<int>{0}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
             std::make_tuple(R"(
 let one = 1;
@@ -315,7 +315,7 @@ two;
                     make(OpType::OpGetGlobal, std::vector<int>{0}),
                     make(OpType::OpSetGlobal, std::vector<int>{1}),
                     make(OpType::OpGetGlobal, std::vector<int>{1}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
     };
 
@@ -347,7 +347,7 @@ TEST_CASE("Test String Expressions") {
                 std::vector<std::string>{"monkey"},
                 std::vector<Instructions>{
                     make(OpType::OpConstant, std::vector<int>{0}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
             std::make_tuple(
                 R"("mon" + "key")",
@@ -355,8 +355,8 @@ TEST_CASE("Test String Expressions") {
                 std::vector<Instructions>{
                     make(OpType::OpConstant, std::vector<int>{0}),
                     make(OpType::OpConstant, std::vector<int>{1}),
-                    make(OpType::OpAdd, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpAdd),
+                    make(OpType::OpPop),
             }),
     };
 
@@ -386,7 +386,7 @@ TEST_CASE("Test Array Literals") {
             std::make_tuple("[]", std::vector<int>{},
                 std::vector<Instructions>{
                     make(OpType::OpArray, std::vector<int>{0}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("[1, 2, 3]", std::vector<int>{1, 2, 3},
                 std::vector<Instructions>{
@@ -394,21 +394,21 @@ TEST_CASE("Test Array Literals") {
                     make(OpType::OpConstant, std::vector<int>{1}),
                     make(OpType::OpConstant, std::vector<int>{2}),
                     make(OpType::OpArray, std::vector<int>{3}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("[1 + 2, 3 - 4, 5 * 6]", std::vector<int>{1, 2, 3, 4, 5, 6},
                 std::vector<Instructions>{
                     make(OpType::OpConstant, std::vector<int>{0}),
                     make(OpType::OpConstant, std::vector<int>{1}),
-                    make(OpType::OpAdd, std::vector<int>{}),
+                    make(OpType::OpAdd),
                     make(OpType::OpConstant, std::vector<int>{2}),
                     make(OpType::OpConstant, std::vector<int>{3}),
-                    make(OpType::OpSub, std::vector<int>{}),
+                    make(OpType::OpSub),
                     make(OpType::OpConstant, std::vector<int>{4}),
                     make(OpType::OpConstant, std::vector<int>{5}),
-                    make(OpType::OpMul, std::vector<int>{}),
+                    make(OpType::OpMul),
                     make(OpType::OpArray, std::vector<int>{3}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
     };
 
@@ -438,7 +438,7 @@ TEST_CASE("Test Hash Literals") {
             std::make_tuple("{}", std::vector<int>{},
                 std::vector<Instructions>{
                     make(OpType::OpHash, std::vector<int>{0}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("{1: 2, 3: 4, 5: 6}", std::vector<int>{1, 2, 3, 4, 5, 6},
                 std::vector<Instructions>{
@@ -449,20 +449,20 @@ TEST_CASE("Test Hash Literals") {
                     make(OpType::OpConstant, std::vector<int>{4}),
                     make(OpType::OpConstant, std::vector<int>{5}),
                     make(OpType::OpHash, std::vector<int>{6}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("{1: 2 + 3, 4: 5 * 6}", std::vector<int>{1, 2, 3, 4, 5, 6},
                 std::vector<Instructions>{
                     make(OpType::OpConstant, std::vector<int>{0}),
                     make(OpType::OpConstant, std::vector<int>{1}),
                     make(OpType::OpConstant, std::vector<int>{2}),
-                    make(OpType::OpAdd, std::vector<int>{}),
+                    make(OpType::OpAdd),
                     make(OpType::OpConstant, std::vector<int>{3}),
                     make(OpType::OpConstant, std::vector<int>{4}),
                     make(OpType::OpConstant, std::vector<int>{5}),
-                    make(OpType::OpMul, std::vector<int>{}),
+                    make(OpType::OpMul),
                     make(OpType::OpHash, std::vector<int>{4}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpPop),
             }),
     };
 
@@ -497,9 +497,9 @@ TEST_CASE("Test Index Expressions") {
                     make(OpType::OpArray, std::vector<int>{3}),
                     make(OpType::OpConstant, std::vector<int>{3}),
                     make(OpType::OpConstant, std::vector<int>{4}),
-                    make(OpType::OpAdd, std::vector<int>{}),
-                    make(OpType::OpIndex, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpAdd),
+                    make(OpType::OpIndex),
+                    make(OpType::OpPop),
             }),
             std::make_tuple("{1: 2}[2 - 1]", std::vector<int>{1, 2, 2, 1},
                 std::vector<Instructions>{
@@ -508,9 +508,9 @@ TEST_CASE("Test Index Expressions") {
                     make(OpType::OpHash, std::vector<int>{2}),
                     make(OpType::OpConstant, std::vector<int>{2}),
                     make(OpType::OpConstant, std::vector<int>{3}),
-                    make(OpType::OpSub, std::vector<int>{}),
-                    make(OpType::OpIndex, std::vector<int>{}),
-                    make(OpType::OpPop, std::vector<int>{}),
+                    make(OpType::OpSub),
+                    make(OpType::OpIndex),
+                    make(OpType::OpPop),
             }),
     };
 

@@ -38,7 +38,7 @@ TEST_CASE("Test Make") {
 
 TEST_CASE("Test Instructions String") {
     std::vector<Instructions> instructions = std::vector<Instructions>{
-        make(OpType::OpAdd, std::vector<int>{}),
+        make(OpType::OpAdd),
         make(OpType::OpConstant, std::vector<int>{2}),
         make(OpType::OpConstant, std::vector<int>{65535}),
     };
