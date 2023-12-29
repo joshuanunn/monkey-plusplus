@@ -616,3 +616,42 @@ earlyExit();
         REQUIRE(test_integer_object(tt_expected, stack_elem));
     }
 }
+
+TEST_CASE("Test Functions Without Return Value") {
+    std::vector<std::string> tests = {
+        R"(
+let noReturn = fn() { };
+noReturn();
+)",
+        R"(
+let noReturn = fn() { };
+let noReturnTwo = fn() { noReturn(); };
+noReturn();
+noReturnTwo();
+)",
+    };
+
+        for (const auto &tt_input: tests) {
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_null_object(stack_elem));
+    }
+}

@@ -396,6 +396,14 @@ std::shared_ptr<Error> VM::run() {
             if (err) {
                 return err;
             }
+        } else if (op == OpType::OpReturn) {
+            pop_frame();
+            pop();
+
+            auto err = push(get_null_ref());
+            if (err) {
+                return err;
+            }
         }
     }
 
