@@ -237,6 +237,14 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         }
 
         emit(OpType::OpReturnValue);
+    // Call Expression
+    } else if (auto c = std::dynamic_pointer_cast<CallExpression>(node)) {
+        err = compile(c->function);
+        if (is_error(err)) {
+            return err;
+        }
+
+        emit(OpType::OpCall);
     }
 
     return nullptr;
