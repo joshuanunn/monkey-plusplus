@@ -531,3 +531,88 @@ TEST_CASE("Test Index Expressions Returning Null") {
         REQUIRE(test_null_object(stack_elem));
     }
 }
+
+TEST_CASE("Test Calling Functions Without Arguments") {
+    std::vector<std::tuple<std::string, int>> tests = {
+        std::make_tuple(R"(
+let fivePlusTen = fn() { 5 + 10; };
+fivePlusTen();
+)",     15),
+        std::make_tuple(R"(
+let one = fn() { 1; };
+let two = fn() { 2; };
+one() + two()
+)",     3),
+        std::make_tuple(R"(
+let a = fn() { 1 };
+let b = fn() { a() + 1 };
+let c = fn() { b() + 1 };
+c();
+)",     3),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}
+
+TEST_CASE("Test Functions With Return Statement") {
+    std::vector<std::tuple<std::string, int>> tests = {
+        std::make_tuple(R"(
+let earlyExit = fn() { return 99; 100; };
+earlyExit();
+)",     99),
+        std::make_tuple(R"(
+let earlyExit = fn() { return 99; return 100; };
+earlyExit();
+)",     99),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}

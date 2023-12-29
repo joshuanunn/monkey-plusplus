@@ -378,6 +378,24 @@ std::shared_ptr<Error> VM::run() {
             if (err) {
                 return err;
             }
+        } else if (op == OpType::OpCall) {
+            auto fn = std::dynamic_pointer_cast<CompiledFunction>(stack[sp-1]);
+            if (!fn) {
+                return new_error("calling non-function");
+            }
+
+            auto frame = new_frame(fn);
+            push_frame(frame);
+        } else if (op == OpType::OpReturnValue) {
+            auto return_value = pop();
+
+            pop_frame();
+            pop();
+
+            auto err = push(return_value);
+            if (err) {
+                return err;
+            }
         }
     }
 
