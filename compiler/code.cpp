@@ -126,7 +126,7 @@ Instructions make(OpType op) {
     return instruction;
 }
 
-Instructions make(OpType op, std::vector<int> operands) {
+Instructions make(OpType op, int operand) {
     auto [def, ok] = lookup(op);
     if (!ok) {
         return std::vector<uint8_t>{};
@@ -139,18 +139,14 @@ Instructions make(OpType op, std::vector<int> operands) {
 
     int offset = 1;
 
-    for (int i = 0; i < operands.size(); i++) {
-        auto o = operands.at(i);
-        auto width = def->operand_widths.at(i);
+    auto width = def->operand_widths.at(0);
 
-        switch (width) {
-            case 2:
-                // Store 16-bit instruction as 2 bytes (big endian byte order)
-                instruction[offset] = static_cast<uint16_t>(o) >> 8;
-                instruction[offset + 1] = static_cast<uint16_t>(o) & 0xFF;
-                break;
-        }
-        offset += width;
+    switch (width) {
+        case 2:
+        // Store 16-bit instruction as 2 bytes (big endian byte order)
+        instruction[offset] = static_cast<uint16_t>(operand) >> 8;
+        instruction[offset + 1] = static_cast<uint16_t>(operand) & 0xFF;
+        break;
     }
 
     return instruction;

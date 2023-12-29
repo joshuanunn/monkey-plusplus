@@ -71,7 +71,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
     } else if (auto il = std::dynamic_pointer_cast<IntegerLiteral>(node)) {
         auto integer = std::make_shared<Integer>(Integer{il->value});
         auto position = add_constant(integer);
-        emit(OpType::OpConstant, std::vector<int>{position});
+        emit(OpType::OpConstant, position);
     // Boolean
     } else if (auto bl = std::dynamic_pointer_cast<BooleanLiteral>(node)) {
         if (bl->value) {
@@ -102,7 +102,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         }
 
         // Emit conditional jump instruction with placeholder value (replaced below)
-        auto jump_not_truthy_pos = emit(OpType::OpJumpNotTruthy, std::vector<int>{9999});
+        auto jump_not_truthy_pos = emit(OpType::OpJumpNotTruthy, 9999);
 
         err = compile(i->consequence);
         if (is_error(err)) {
@@ -115,7 +115,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         }
 
         // Emit jump instruction with placeholder value (replaced below)
-        auto jump_pos = emit(OpType::OpJump, std::vector<int>{9999});
+        auto jump_pos = emit(OpType::OpJump, 9999);
 
         // Update placeholder value of conditional jump instruction to actual value
         auto after_consequence_pos = (int) scopes.at(scope_index).instructions.size();
@@ -154,18 +154,18 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
             return err;
         }
         auto symbol = symbol_table->define(l->name->value);
-        emit(OpType::OpSetGlobal, std::vector<int>{symbol.index});
+        emit(OpType::OpSetGlobal, symbol.index);
     // Identifier
     } else if (auto id = std::dynamic_pointer_cast<Identifier>(node)) {
         auto [symbol, ok] = symbol_table->resolve(id->value);
         if (!ok) {
             return new_error("undefined variable " + id->value);
         }
-        emit(OpType::OpGetGlobal, std::vector<int>{symbol.index});
+        emit(OpType::OpGetGlobal, symbol.index);
     // String Literal
     } else if (auto sl = std::dynamic_pointer_cast<StringLiteral>(node)) {
         auto str = std::make_shared<String>(String{sl->value});
-        emit(OpType::OpConstant, std::vector<int>{add_constant(str)});
+        emit(OpType::OpConstant, add_constant(str));
     // Array Literal
     } else if (auto a = std::dynamic_pointer_cast<ArrayLiteral>(node)) {
         for (auto const& el: a->elements) {
@@ -175,7 +175,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
             }
         }
 
-        emit(OpType::OpArray, std::vector<int>{(int) a->elements.size()});
+        emit(OpType::OpArray, (int) a->elements.size());
     // Hash Literal
     } else if (auto hl = std::dynamic_pointer_cast<HashLiteral>(node)) {
         for (auto const& kv: hl->pairs) {
@@ -191,7 +191,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
 
         int key_value_count = hl->pairs.size() * 2;
 
-        emit(OpType::OpHash, std::vector<int>{key_value_count});
+        emit(OpType::OpHash, key_value_count);
     // Index Expression
     } else if (auto ix = std::dynamic_pointer_cast<IndexExpression>(node)) {
         err = compile(ix->left);
@@ -228,7 +228,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         // Take the compiled instructions, leave scope, embed into a CompiledFunction and emit
         auto instructions = leave_scope();
         auto compiled_fn = CompiledFunction(instructions).clone();
-        emit(OpType::OpConstant, std::vector<int>{add_constant(compiled_fn)});
+        emit(OpType::OpConstant, add_constant(compiled_fn));
     // Return Statement
     } else if (auto r = std::dynamic_pointer_cast<ReturnStatement>(node)) {
         err = compile(r->return_value);
@@ -283,8 +283,8 @@ int Compiler::emit(OpType op) {
     return pos;
 }
 
-int Compiler::emit(OpType op, std::vector<int> operands) {
-    auto ins = make(op, operands);
+int Compiler::emit(OpType op, int operand) {
+    auto ins = make(op, operand);
     auto pos = add_instruction(ins);
 
     set_last_instruction(op, pos);
@@ -339,9 +339,9 @@ void Compiler::replace_instruction(int pos, Instructions new_instruction) {
     }
 }
 
-void Compiler::change_operand(int op_pos, int operand) {
+void Compiler::change_operand(int op_pos, int first_operand) {
     auto op = OpType(scopes.at(scope_index).instructions.at(op_pos));
-    auto new_instruction = make(op, std::vector<int>{operand});
+    auto new_instruction = make(op, first_operand);
 
     replace_instruction(op_pos, new_instruction);
 }

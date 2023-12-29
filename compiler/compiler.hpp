@@ -58,7 +58,7 @@ struct Compiler {
 
     int emit(OpType op);
 
-    int emit(OpType op, std::vector<int> operands);
+    int emit(OpType op, int operand);
 
     int add_instruction(Instructions ins);
 

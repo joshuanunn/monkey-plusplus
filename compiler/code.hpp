@@ -76,7 +76,7 @@ std::string fmt_instruction(std::shared_ptr<Definition> def, std::vector<int> op
 
 Instructions make(OpType op);
 
-Instructions make(OpType op, std::vector<int> operands);
+Instructions make(OpType op, int operand);
 
 uint16_t read_uint_16(uint8_t hi, uint8_t lo);
 

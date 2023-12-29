@@ -7,40 +7,49 @@
 
 #include "code.hpp"
 
-TEST_CASE("Test Make") {
-    std::vector<std::tuple<OpType, std::vector<int>, std::vector<Opcode>>> tests = {
-            std::make_tuple(OpType::OpConstant, std::vector<int>{65534},
-                            std::vector<Opcode>{as_opcode(OpType::OpConstant), 255, 254}),
-            std::make_tuple(OpType::OpAdd, std::vector<int>{},
-                            std::vector<Opcode>{as_opcode(OpType::OpAdd)}),
-    };
+TEST_CASE("Test Make With Operand") {
+    auto instruction = make(OpType::OpConstant, 65534);
+    auto tt_expected = std::vector<Opcode>{as_opcode(OpType::OpConstant), 255, 254};
 
-    for (const auto &tt: tests) {
-        const auto [tt_op, tt_operands, tt_expected] = tt;
+    if (instruction.size() != tt_expected.size()) {
+        std::cerr << "instruction has wrong length. want=" << tt_expected.size() << ", got=" << instruction.size()
+                    << std::endl;
+    }
+    REQUIRE(instruction.size() == tt_expected.size());
 
-        auto instruction = make(tt_op, tt_operands);
-
-        if (instruction.size() != tt_expected.size()) {
-            std::cerr << "instruction has wrong length. want=" << tt_expected.size() << ", got=" << instruction.size()
-                      << std::endl;
+    for (int i = 0; i < tt_expected.size(); i++) {
+        if (instruction.at(i) != tt_expected.at(i)) {
+            std::cerr << "wrong byte at pos " << i << ". want=" << tt_expected.at(i) << ", got="
+                        << instruction.at(i) << std::endl;
         }
-        REQUIRE(instruction.size() == tt_expected.size());
+        REQUIRE(instruction.at(i) == tt_expected.at(i));
+    }
+}
 
-        for (int i = 0; i < tt_expected.size(); i++) {
-            if (instruction.at(i) != tt_expected.at(i)) {
-                std::cerr << "wrong byte at pos " << i << ". want=" << tt_expected.at(i) << ", got="
-                          << instruction.at(i) << std::endl;
-            }
-            REQUIRE(instruction.at(i) == tt_expected.at(i));
+TEST_CASE("Test Make No Operands") {
+    auto instruction = make(OpType::OpAdd);
+    auto tt_expected = std::vector<Opcode>{as_opcode(OpType::OpAdd)};
+
+    if (instruction.size() != tt_expected.size()) {
+        std::cerr << "instruction has wrong length. want=" << tt_expected.size() << ", got=" << instruction.size()
+                    << std::endl;
+    }
+    REQUIRE(instruction.size() == tt_expected.size());
+
+    for (int i = 0; i < tt_expected.size(); i++) {
+        if (instruction.at(i) != tt_expected.at(i)) {
+            std::cerr << "wrong byte at pos " << i << ". want=" << tt_expected.at(i) << ", got="
+                        << instruction.at(i) << std::endl;
         }
+        REQUIRE(instruction.at(i) == tt_expected.at(i));
     }
 }
 
 TEST_CASE("Test Instructions String") {
     std::vector<Instructions> instructions = std::vector<Instructions>{
         make(OpType::OpAdd),
-        make(OpType::OpConstant, std::vector<int>{2}),
-        make(OpType::OpConstant, std::vector<int>{65535}),
+        make(OpType::OpConstant, 2),
+        make(OpType::OpConstant, 65535),
     };
 
     std::string expected = R"(0000 OpAdd
@@ -63,14 +72,14 @@ TEST_CASE("Test Instructions String") {
 }
 
 TEST_CASE("Test Read Operands") {
-    std::vector<std::tuple<OpType, std::vector<int>, int>> tests = {
-            std::make_tuple(OpType::OpConstant, std::vector<int>{65535}, 2),
+    std::vector<std::tuple<OpType, int, int>> tests = {
+            std::make_tuple(OpType::OpConstant, 65535, 2),
     };
 
     for (const auto &tt: tests) {
-        const auto [tt_op, tt_operands, tt_bytes_read] = tt;
+        const auto [tt_op, tt_operand, tt_bytes_read] = tt;
 
-        auto instruction = make(tt_op, tt_operands);
+        auto instruction = make(tt_op, tt_operand);
 
         auto[def, ok] = lookup(tt_op);
         if (!ok) {
@@ -86,13 +95,9 @@ TEST_CASE("Test Read Operands") {
         }
         REQUIRE(n == tt_bytes_read);
 
-        int i = 0;
-        for (const auto& want: tt_operands) {
-            if (operands_read.at(i) != want) {
-                std::cerr << "operand wrong. want=" << want << ", got=" << operands_read.at(i) << std::endl;
-            }
-            REQUIRE(operands_read.at(i) == want);
-            i++;
+        if (operands_read.at(0) != tt_operand) {
+            std::cerr << "operand wrong. want=" << tt_operand << ", got=" << operands_read.at(0) << std::endl;
         }
+        REQUIRE(operands_read.at(0) == tt_operand);
     }
 }
