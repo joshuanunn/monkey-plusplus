@@ -272,7 +272,7 @@ std::shared_ptr<Error> VM::run() {
         op = static_cast<OpType>(ins.at(ip));
 
         if (op == OpType::OpConstant) {
-            auto const_index = read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            auto const_index = read_uint_16(ins, ip+1);
             current_frame()->ip += 2;
 
             // Add constant to VM constants
@@ -313,7 +313,7 @@ std::shared_ptr<Error> VM::run() {
             }
         } else if (op == OpType::OpJumpNotTruthy) {
             // Read jump target into pos
-            auto pos = (int) read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            auto pos = read_uint_16(ins, ip+1);
             // Skip two bytes of operand associated with conditional jump
             current_frame()->ip += 2;
             // Pop stack top (condition). If not truthy then jump to target, else execute consequence
@@ -324,7 +324,7 @@ std::shared_ptr<Error> VM::run() {
             }
         } else if (op == OpType::OpJump) {
             // Read jump target into pos
-            auto pos = (int) read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            auto pos = read_uint_16(ins, ip+1);
             // Set instruction pointer to (jump target - 1), as ip is incremented on next iteration
             current_frame()->ip = pos - 1;
         } else if (op == OpType::OpNull) {
@@ -333,12 +333,12 @@ std::shared_ptr<Error> VM::run() {
                 return err;
             }
         } else if (op == OpType::OpSetGlobal) {
-            auto global_index = read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            auto global_index = read_uint_16(ins, ip+1);
             current_frame()->ip += 2;
 
             globals[global_index] = pop();
         } else if (op == OpType::OpGetGlobal) {
-            auto global_index = read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            auto global_index = read_uint_16(ins, ip+1);
             current_frame()->ip += 2;
 
             auto err = push(globals[global_index]);
@@ -346,7 +346,7 @@ std::shared_ptr<Error> VM::run() {
                 return err;
             }
         } else if (op == OpType::OpArray) {
-            auto num_elements = read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            auto num_elements = read_uint_16(ins, ip+1);
             current_frame()->ip += 2;
 
             auto array = build_array(sp - num_elements, sp);
@@ -357,7 +357,7 @@ std::shared_ptr<Error> VM::run() {
                 return err;
             }
         } else if (op == OpType::OpHash) {
-            auto num_elements = read_uint_16(ins.at(ip+1), ins.at(ip+2));
+            auto num_elements = read_uint_16(ins, ip+1);
             current_frame()->ip += 2;
 
             auto [hash, err] = build_hash(sp - num_elements, sp);
