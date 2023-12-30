@@ -563,15 +563,18 @@ std::shared_ptr<Object> String::clone() const {
     return std::make_shared<String>(String{*this});
 }
 
-CompiledFunction::CompiledFunction(const Instructions& instructions, int num_locals) :
-    instructions(instructions), num_locals(num_locals) {}
+CompiledFunction::CompiledFunction(const Instructions& instructions) : instructions(instructions) {
+    num_locals = 0;
+    num_parameters = 0;
+}
 
 CompiledFunction::CompiledFunction(const CompiledFunction& other) :
-    instructions{other.instructions}, num_locals{other.num_locals} {}
+    instructions{other.instructions}, num_locals{other.num_locals}, num_parameters{other.num_parameters} {}
 
 CompiledFunction::CompiledFunction(CompiledFunction&& other) noexcept {
     instructions.swap(other.instructions);
     num_locals = other.num_locals;
+    num_parameters = other.num_parameters;
 }
 
 CompiledFunction& CompiledFunction::operator=(const CompiledFunction& other) {
@@ -579,6 +582,7 @@ CompiledFunction& CompiledFunction::operator=(const CompiledFunction& other) {
 
     instructions = other.instructions;
     num_locals = other.num_locals;
+    num_parameters = other.num_parameters;
 
     return *this;
 }
@@ -588,6 +592,7 @@ CompiledFunction& CompiledFunction::operator=(CompiledFunction&& other) noexcept
 
     instructions.swap(other.instructions);
     num_locals = other.num_locals;
+    num_parameters = other.num_parameters;
 
     return *this;
 }

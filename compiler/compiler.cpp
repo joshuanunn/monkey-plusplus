@@ -244,8 +244,10 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         // Take the compiled instructions, leave scope, embed into a CompiledFunction and emit
         auto instructions = leave_scope();
 
-        auto compiled_fn = std::make_shared<CompiledFunction>(
-            CompiledFunction(instructions, num_locals));
+        auto compiled_fn = std::make_shared<CompiledFunction>(CompiledFunction(instructions));
+        compiled_fn->num_locals = num_locals;
+        compiled_fn->num_parameters = f->parameters.size();
+
         emit(OpType::OpConstant, add_constant(compiled_fn));
     // Return Statement
     } else if (auto r = std::dynamic_pointer_cast<ReturnStatement>(node)) {

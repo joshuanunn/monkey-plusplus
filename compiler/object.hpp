@@ -304,7 +304,7 @@ struct Null : public Object {
 };
 
 struct CompiledFunction : public Object {
-    CompiledFunction(const Instructions& instructions, int num_locals);
+    CompiledFunction(const Instructions& instructions);
 
     CompiledFunction(const CompiledFunction& other);
 
@@ -317,6 +317,8 @@ struct CompiledFunction : public Object {
     Instructions instructions;
 
     int num_locals;
+
+    int num_parameters;
 
     ObjectType type() const override;
 

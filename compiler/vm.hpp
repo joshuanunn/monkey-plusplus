@@ -52,6 +52,8 @@ struct VM {
 
     std::shared_ptr<Object> last_popped_stack_elem();
 
+    std::shared_ptr<Error> call_function(int num_args);
+
     std::shared_ptr<Object> build_array(int start_index, int end_index);
 
     std::tuple<std::shared_ptr<Object>, std::shared_ptr<Error>> build_hash(int start_index, int end_index);

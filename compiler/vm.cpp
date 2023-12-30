@@ -1,8 +1,8 @@
 #include "vm.hpp"
 
 VM::VM(std::shared_ptr<Bytecode>&& bytecode) : frames{}, stack{}, globals{} {
-    // Create a main frame to contain the bytecode instructions (with zero local bindings)
-    auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions, 0));
+    // Create a main frame to contain the bytecode instructions
+    auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions));
     auto main_frame = new_frame(main_fn, 0);
 
     // Place main frame at first frame index and set frames_index at one above this
@@ -16,8 +16,8 @@ VM::VM(std::shared_ptr<Bytecode>&& bytecode) : frames{}, stack{}, globals{} {
 }
 
 VM::VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>, GLOBALSSIZE> s) : frames{}, stack{}, globals{} {
-    // Create a main frame to contain the bytecode instructions (with zero local bindings)
-    auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions, 0));
+    // Create a main frame to contain the bytecode instructions
+    auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions));
     auto main_frame = new_frame(main_fn, 0);
 
     // Place main frame at first frame index and set frames_index at one above this
@@ -68,6 +68,27 @@ std::shared_ptr<Object> VM::pop() {
 
 std::shared_ptr<Object> VM::last_popped_stack_elem() {
     return stack[sp];
+}
+
+std::shared_ptr<Error> VM::call_function(int num_args) {
+    auto fn = std::dynamic_pointer_cast<CompiledFunction>(stack[sp - 1 - num_args]);
+    if (!fn) {
+        return new_error("calling non-function");
+    }
+
+    if (num_args != fn->num_parameters) {
+        return new_error("wrong number of arguments: want=" + std::to_string(fn->num_parameters) +
+            ", got=" + std::to_string(num_args));
+    }
+
+    // Create a new frame, set base pointer to current stack pointer, and push frame onto stack
+    auto frame = new_frame(fn, sp - num_args);
+    push_frame(frame);
+
+    // Allocate space for local bindings underneath frame, by incrementing stack pointer
+    sp = frame->base_pointer + fn->num_locals;
+
+    return nullptr;
 }
 
 std::shared_ptr<Error> VM::execute_binary_operation(OpType op) {
@@ -379,17 +400,13 @@ std::shared_ptr<Error> VM::run() {
                 return err;
             }
         } else if (op == OpType::OpCall) {
-            auto fn = std::dynamic_pointer_cast<CompiledFunction>(stack[sp-1]);
-            if (!fn) {
-                return new_error("calling non-function");
+            auto num_args = read_uint_8(ins, ip+1);
+            current_frame()->ip += 1;
+
+            auto err = call_function(num_args);
+            if (err) {
+                return err;
             }
-
-            // Create a new frame, set base pointer to current stack pointer, and push frame onto stack
-            auto frame = new_frame(fn, sp);
-            push_frame(frame);
-
-            // Allocate space for local bindings underneath frame, by incrementing stack pointer
-            sp = frame->base_pointer + fn->num_locals;
         } else if (op == OpType::OpReturnValue) {
             auto return_value = pop();
 
