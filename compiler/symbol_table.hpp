@@ -7,6 +7,7 @@
 #include <string>
 
 enum class SymbolScope {
+    LocalScope,
     GlobalScope
 };
 
@@ -35,6 +36,8 @@ struct SymbolTable {
 
     SymbolTable& operator=(SymbolTable&& other) noexcept = delete;
 
+    std::shared_ptr<SymbolTable> outer;
+
     std::map<std::string, Symbol> store;
 
     int num_definitions;
@@ -45,5 +48,7 @@ struct SymbolTable {
 };
 
 std::shared_ptr<SymbolTable> new_symbol_table();
+
+std::shared_ptr<SymbolTable> new_enclosed_symbol_table(std::shared_ptr<SymbolTable> outer);
 
 #endif //MONKEY_PLUSPLUS_SYMBOL_TABLE_HPP
