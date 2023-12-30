@@ -593,7 +593,14 @@ ObjectType CompiledFunction::type() const {
 
 std::string CompiledFunction::inspect() const {
     auto address = (unsigned long long)(void**) this;
-    return "CompiledFunction[" + std::to_string(address) + "]";
+
+    // Convert address to string with hex representation
+    // C++ source adapted (under CC BY-SA 2.5 license) from: https://stackoverflow.com/questions/5100718
+    std::stringstream stream;
+    stream << "0x" << std::setfill ('0') << std::setw(sizeof(address)*2)
+           << std::hex << address;
+
+    return "CompiledFunction[" + stream.str() + "]";
 }
 
 std::shared_ptr<Object> CompiledFunction::clone() const {
