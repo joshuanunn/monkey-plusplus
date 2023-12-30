@@ -2,57 +2,53 @@
 
 // Initialise global Definitions
 std::map<OpType, std::shared_ptr<Definition>> definitions = {
-        {OpType::OpConstant, std::make_shared<Definition>(
-                Definition{"OpConstant", std::vector<int>{2}})},
-        {OpType::OpAdd, std::make_shared<Definition>(
-                Definition{"OpAdd", std::vector<int>{}})},
-        {OpType::OpSub, std::make_shared<Definition>(
-                Definition{"OpSub", std::vector<int>{}})},
-        {OpType::OpMul, std::make_shared<Definition>(
-                Definition{"OpMul", std::vector<int>{}})},
-        {OpType::OpDiv, std::make_shared<Definition>(
-                Definition{"OpDiv", std::vector<int>{}})},
-        {OpType::OpPop, std::make_shared<Definition>(
-                Definition{"OpPop", std::vector<int>{}})},
-        {OpType::OpTrue, std::make_shared<Definition>(
-                Definition{"OpTrue", std::vector<int>{}})},
-        {OpType::OpFalse, std::make_shared<Definition>(
-                Definition{"OpFalse", std::vector<int>{}})},
-        {OpType::OpEqual, std::make_shared<Definition>(
-                Definition{"OpEqual", std::vector<int>{}})},
-        {OpType::OpNotEqual, std::make_shared<Definition>(
-                Definition{"OpNotEqual", std::vector<int>{}})},
-        {OpType::OpGreaterThan, std::make_shared<Definition>(
-                Definition{"OpGreaterThan", std::vector<int>{}})},
-        {OpType::OpMinus, std::make_shared<Definition>(
-                Definition{"OpMinus", std::vector<int>{}})},
-        {OpType::OpBang, std::make_shared<Definition>(
-                Definition{"OpBang", std::vector<int>{}})},
-        {OpType::OpJumpNotTruthy, std::make_shared<Definition>(
-                Definition{"OpJumpNotTruthy", std::vector<int>{2}})},
-        {OpType::OpJump, std::make_shared<Definition>(
-                Definition{"OpJump", std::vector<int>{2}})},
-        {OpType::OpNull, std::make_shared<Definition>(
-                Definition{"OpNull", std::vector<int>{}})},
-        {OpType::OpSetGlobal, std::make_shared<Definition>(
-                Definition{"OpSetGlobal", std::vector<int>{2}})},
-        {OpType::OpGetGlobal, std::make_shared<Definition>(
-                Definition{"OpGetGlobal", std::vector<int>{2}})},
-        {OpType::OpArray, std::make_shared<Definition>(
-                Definition{"OpArray", std::vector<int>{2}})},
-        {OpType::OpHash, std::make_shared<Definition>(
-                Definition{"OpHash", std::vector<int>{2}})},
-        {OpType::OpIndex, std::make_shared<Definition>(
-                Definition{"OpIndex", std::vector<int>{}})},
-        {OpType::OpCall, std::make_shared<Definition>(
-                Definition{"OpCall", std::vector<int>{}})},
-        {OpType::OpReturnValue, std::make_shared<Definition>(
-                Definition{"OpReturnValue", std::vector<int>{}})},
-        {OpType::OpReturn, std::make_shared<Definition>(
-                Definition{"OpReturn", std::vector<int>{}})},
+    {OpType::OpConstant, new_definition("OpConstant", 2)},
+    {OpType::OpAdd, new_definition("OpAdd")},
+    {OpType::OpSub, new_definition("OpSub")},
+    {OpType::OpMul, new_definition("OpMul")},
+    {OpType::OpDiv, new_definition("OpDiv")},
+    {OpType::OpPop, new_definition("OpPop")},
+    {OpType::OpTrue, new_definition("OpTrue")},
+    {OpType::OpFalse, new_definition("OpFalse")},
+    {OpType::OpEqual, new_definition("OpEqual")},
+    {OpType::OpNotEqual, new_definition("OpNotEqual")},
+    {OpType::OpGreaterThan, new_definition("OpGreaterThan")},
+    {OpType::OpMinus, new_definition("OpMinus")},
+    {OpType::OpBang, new_definition("OpBang")},
+    {OpType::OpJumpNotTruthy, new_definition("OpJumpNotTruthy", 2)},
+    {OpType::OpJump, new_definition("OpJump", 2)},
+    {OpType::OpNull, new_definition("OpNull")},
+    {OpType::OpSetGlobal, new_definition("OpSetGlobal", 2)},
+    {OpType::OpGetGlobal, new_definition("OpGetGlobal", 2)},
+    {OpType::OpArray, new_definition("OpArray", 2)},
+    {OpType::OpHash, new_definition("OpHash", 2)},
+    {OpType::OpIndex, new_definition("OpIndex")},
+    {OpType::OpCall, new_definition("OpCall")},
+    {OpType::OpReturnValue, new_definition("OpReturnValue")},
+    {OpType::OpReturn, new_definition("OpReturn")},
 };
 
-std::tuple<std::shared_ptr<Definition>, bool> lookup(const OpType& op) {
+Definition::Definition(std::string name) : name{name}, operand_widths{} {}
+
+std::shared_ptr<Definition> new_definition(std::string name) {
+    return std::make_shared<Definition>(Definition(name));
+}
+
+std::shared_ptr<Definition> new_definition(std::string name, int operand_width) {
+    auto definition = std::make_shared<Definition>(Definition{name});
+    definition->operand_widths.push_back(operand_width);
+    return std::move(definition);
+}
+
+std::shared_ptr<Definition> new_definition(std::string name, int first_operand_width, int second_operand_width) {
+    auto definition = std::make_shared<Definition>(Definition{name});
+    definition->operand_widths.push_back(first_operand_width);
+    definition->operand_widths.push_back(second_operand_width);
+    return std::move(definition);
+}
+
+std::tuple<std::shared_ptr<Definition>, bool> lookup(const OpType &op)
+{
     auto contains = definitions.find(op);
 
     // If OpType is not defined, then return false to indicate "not ok"

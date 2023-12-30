@@ -45,7 +45,9 @@ enum class OpType : Opcode {
 };
 
 struct Definition {
-    Definition() = default;
+    Definition() = delete;
+
+    Definition(std::string name);
 
     Definition(const Definition& other) = default;
 
@@ -61,6 +63,12 @@ struct Definition {
 };
 
 extern std::map<OpType, std::shared_ptr<Definition>> definitions;
+
+std::shared_ptr<Definition> new_definition(std::string name);
+
+std::shared_ptr<Definition> new_definition(std::string name, int operand_width);
+
+std::shared_ptr<Definition> new_definition(std::string name, int first_operand_width, int second_operand_width);
 
 std::tuple<std::shared_ptr<Definition>, bool> lookup(const OpType& op);
 
