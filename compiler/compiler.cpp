@@ -233,9 +233,14 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
             emit(OpType::OpReturn);
         }
 
+        // Make a note of the number of local bindings defined within scope
+        auto num_locals = symbol_table->num_definitions;
+
         // Take the compiled instructions, leave scope, embed into a CompiledFunction and emit
         auto instructions = leave_scope();
-        auto compiled_fn = CompiledFunction(instructions).clone();
+
+        auto compiled_fn = std::make_shared<CompiledFunction>(
+            CompiledFunction(instructions, num_locals));
         emit(OpType::OpConstant, add_constant(compiled_fn));
     // Return Statement
     } else if (auto r = std::dynamic_pointer_cast<ReturnStatement>(node)) {

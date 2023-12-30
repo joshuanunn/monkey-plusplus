@@ -663,6 +663,74 @@ let returnsOne = fn() { 1; };
 let returnsOneReturner = fn() { returnsOne; };
 returnsOneReturner()();
 )",     1),
+        std::make_tuple(R"(
+let returnsOneReturner = fn() {
+    let returnsOne = fn() { 1; };
+    returnsOne;
+};
+returnsOneReturner()();
+)",     1),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}
+
+TEST_CASE("Test Calling Functions With Bindings") {
+    std::vector<std::tuple<std::string, int>> tests = {
+        std::make_tuple(R"(
+let one = fn() { let one = 1; one };
+one();
+)",     1),
+        std::make_tuple(R"(
+let oneAndTwo = fn() { let one = 1; let two = 2; one + two; };
+oneAndTwo();
+)",     3),
+        std::make_tuple(R"(
+let oneAndTwo = fn() { let one = 1; let two = 2; one + two; };
+let threeAndFour = fn() { let three = 3; let four = 4; three + four; };
+oneAndTwo() + threeAndFour();
+)",     10),
+        std::make_tuple(R"(
+let firstFoobar = fn() { let foobar = 50; foobar; };
+let secondFoobar = fn() { let foobar = 100; foobar; };
+firstFoobar() + secondFoobar();
+)",     150),
+        std::make_tuple(R"(
+let globalSeed = 50;
+let minusOne = fn() {
+    let num = 1;
+    globalSeed - num;
+}
+let minusTwo = fn() {
+    let num = 2;
+    globalSeed - num;
+}
+minusOne() + minusTwo();
+)",     97),
     };
 
     for (const auto &tt: tests) {

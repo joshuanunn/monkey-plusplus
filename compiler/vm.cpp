@@ -1,9 +1,9 @@
 #include "vm.hpp"
 
 VM::VM(std::shared_ptr<Bytecode>&& bytecode) : frames{}, stack{}, globals{} {
-    // Create a main frame to contain the bytecode instructions
-    auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions));
-    auto main_frame = new_frame(main_fn);
+    // Create a main frame to contain the bytecode instructions (with zero local bindings)
+    auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions, 0));
+    auto main_frame = new_frame(main_fn, 0);
 
     // Place main frame at first frame index and set frames_index at one above this
     frames[0] = main_frame;
@@ -16,9 +16,9 @@ VM::VM(std::shared_ptr<Bytecode>&& bytecode) : frames{}, stack{}, globals{} {
 }
 
 VM::VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>, GLOBALSSIZE> s) : frames{}, stack{}, globals{} {
-    // Create a main frame to contain the bytecode instructions
-    auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions));
-    auto main_frame = new_frame(main_fn);
+    // Create a main frame to contain the bytecode instructions (with zero local bindings)
+    auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions, 0));
+    auto main_frame = new_frame(main_fn, 0);
 
     // Place main frame at first frame index and set frames_index at one above this
     frames[0] = main_frame;
@@ -384,23 +384,48 @@ std::shared_ptr<Error> VM::run() {
                 return new_error("calling non-function");
             }
 
-            auto frame = new_frame(fn);
+            // Create a new frame, set base pointer to current stack pointer, and push frame onto stack
+            auto frame = new_frame(fn, sp);
             push_frame(frame);
+
+            // Allocate space for local bindings underneath frame, by incrementing stack pointer
+            sp = frame->base_pointer + fn->num_locals;
         } else if (op == OpType::OpReturnValue) {
             auto return_value = pop();
 
-            pop_frame();
-            pop();
+            // Pop frame by resetting stack pointer to original value before entering frame
+            auto frame = pop_frame();
+            sp = frame->base_pointer - 1; // The -1 effectively pops the function off the stack
 
             auto err = push(return_value);
             if (err) {
                 return err;
             }
         } else if (op == OpType::OpReturn) {
-            pop_frame();
-            pop();
+            // Pop frame by resetting stack pointer to original value before entering frame
+            auto frame = pop_frame();
+            sp = frame->base_pointer - 1; // The -1 effectively pops the function off the stack
 
             auto err = push(get_null_ref());
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpSetLocal) {
+            auto local_index = read_uint_8(ins, ip+1);
+            current_frame()->ip += 1;
+
+            auto frame = current_frame();
+
+            // Store local bindings directly on the stack in the void underneath the current stack frame
+            stack[frame->base_pointer + local_index] = pop();
+        } else if (op == OpType::OpGetLocal) {
+            auto local_index = read_uint_8(ins, ip+1);
+            current_frame()->ip += 1;
+
+            auto frame = current_frame();
+
+            // Retrieve local binding directly from the stack underneath the current stack frame
+            auto err = push(stack[frame->base_pointer + local_index]);
             if (err) {
                 return err;
             }

@@ -5,15 +5,27 @@
 #include "object.hpp"
 
 struct Frame {
-    Frame(std::shared_ptr<CompiledFunction> fn, int ip);
+    Frame() = delete;
+
+    Frame(const Frame& other) = default;
+
+    Frame(Frame&& other) noexcept = default;
+
+    Frame& operator=(const Frame& other) = default;
+
+    Frame& operator=(Frame&& other) noexcept = default;
+
+    Frame(std::shared_ptr<CompiledFunction> fn, int ip, int base_pointer);
 
     std::shared_ptr<CompiledFunction> fn;
 
     int ip;
 
+    int base_pointer;
+
     Instructions instructions();
 };
 
-std::shared_ptr<Frame> new_frame(std::shared_ptr<CompiledFunction> fn);
+std::shared_ptr<Frame> new_frame(std::shared_ptr<CompiledFunction> fn, int base_pointer);
 
 #endif //MONKEY_PLUSPLUS_FRAME_HPP
