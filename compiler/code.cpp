@@ -23,7 +23,7 @@ std::map<OpType, std::shared_ptr<Definition>> definitions = {
     {OpType::OpArray, new_definition("OpArray", 2)},
     {OpType::OpHash, new_definition("OpHash", 2)},
     {OpType::OpIndex, new_definition("OpIndex")},
-    {OpType::OpCall, new_definition("OpCall")},
+    {OpType::OpCall, new_definition("OpCall", 1)},
     {OpType::OpReturnValue, new_definition("OpReturnValue")},
     {OpType::OpReturn, new_definition("OpReturn")},
     {OpType::OpSetLocal, new_definition("OpSetLocal", 1)},

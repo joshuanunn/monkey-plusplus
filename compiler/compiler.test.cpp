@@ -766,7 +766,7 @@ TEST_CASE("Test Function Calls") {
     };
     std::vector<Instructions> expected_instructions = {
         make(OpType::OpConstant, 1), // The compiled function
-        make(OpType::OpCall),
+        make(OpType::OpCall, 0),
         make(OpType::OpPop),
     };
 
@@ -807,7 +807,7 @@ noArg();
         make(OpType::OpConstant, 1), // The compiled function
         make(OpType::OpSetGlobal, 0),
         make(OpType::OpGetGlobal, 0),
-        make(OpType::OpCall),
+        make(OpType::OpCall, 0),
         make(OpType::OpPop),
     };
 
@@ -961,4 +961,94 @@ fn() {
     // Test compiled function constants
     auto fn_constants = bytecode->constants.back();
     REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
+}
+
+TEST_CASE("Test Function Calls With One Argument") {
+    std::string input = R"(
+let oneArg = fn(a) { a };
+oneArg(24);
+)";
+    std::vector<int> expected_integer_constants = std::vector<int>{24};
+    std::vector<Instructions> expected_fn_instructions = {
+        make(OpType::OpGetLocal, 0),
+        make(OpType::OpReturnValue),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, 0),
+        make(OpType::OpSetGlobal, 0),
+        make(OpType::OpGetGlobal, 0),
+        make(OpType::OpConstant, 1),
+        make(OpType::OpCall, 1),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test compiled function constants (first on stack)
+    auto fn_constants = bytecode->constants.front();
+    REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
+
+    // Test integer arguments (second on stack)
+    auto int_constants = std::vector<std::shared_ptr<Object>>(bytecode->constants.begin() + 1, bytecode->constants.end());
+    REQUIRE(test_integer_constants(expected_integer_constants, int_constants));
+}
+
+TEST_CASE("Test Function Calls With Many Arguments") {
+    std::string input = R"(
+let manyArg = fn(a, b, c) { a; b; c };
+manyArg(24, 25, 26);
+)";
+    std::vector<int> expected_integer_constants = std::vector<int>{24, 25, 26};
+    std::vector<Instructions> expected_fn_instructions = {
+        make(OpType::OpGetLocal, 0),
+        make(OpType::OpPop),
+        make(OpType::OpGetLocal, 1),
+        make(OpType::OpPop),
+        make(OpType::OpGetLocal, 2),
+        make(OpType::OpReturnValue),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, 0),
+        make(OpType::OpSetGlobal, 0),
+        make(OpType::OpGetGlobal, 0),
+        make(OpType::OpConstant, 1),
+        make(OpType::OpConstant, 2),
+        make(OpType::OpConstant, 3),
+        make(OpType::OpCall, 3),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test compiled function constants (first on stack)
+    auto fn_constants = bytecode->constants.front();
+    REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
+
+    // Test integer arguments (second on stack)
+    auto int_constants = std::vector<std::shared_ptr<Object>>(bytecode->constants.begin() + 1, bytecode->constants.end());
+    REQUIRE(test_integer_constants(expected_integer_constants, int_constants));
 }

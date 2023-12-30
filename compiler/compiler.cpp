@@ -218,6 +218,11 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         // Enter new scope to compile the function
         enter_scope();
 
+        // Add any function arguments to local bindings
+        for (const auto& p : f->parameters) {
+            symbol_table->define(p->value);
+        }
+
         err = compile(f->body);
         if (is_error(err)) {
             return err;
@@ -257,7 +262,16 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
             return err;
         }
 
-        emit(OpType::OpCall);
+        // Compile each argument after function
+        for (const auto& a: c->arguments) {
+            err = compile(a);
+            if (is_error(err)) {
+                return err;
+            }
+        }
+
+        // Pass number of arguments with OpCall
+        emit(OpType::OpCall, c->arguments.size());
     }
 
     return nullptr;
