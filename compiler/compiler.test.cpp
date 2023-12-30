@@ -546,6 +546,8 @@ TEST_CASE("Test Compiler Scopes") {
     }
     REQUIRE(compiler->scope_index == 0);
 
+    auto global_symbol_table = compiler->symbol_table;
+
     compiler->emit(OpType::OpMul);
 
     compiler->enter_scope();
@@ -570,12 +572,27 @@ TEST_CASE("Test Compiler Scopes") {
     }
     REQUIRE(last.opcode == OpType::OpSub);
 
+    if (compiler->symbol_table->outer != global_symbol_table) {
+        std::cerr << "compiler did not enclose symbol table" << std::endl;    
+    }
+    REQUIRE(compiler->symbol_table->outer == global_symbol_table);
+
     compiler->leave_scope();
 
     if (compiler->scope_index != 0) {
         std::cerr << "scope_index wrong. got=" << compiler->scope_index << ", want=" << 0 << std::endl;
     }
     REQUIRE(compiler->scope_index == 0);
+
+    if (compiler->symbol_table != global_symbol_table) {
+        std::cerr << "compiler did not restore global symbol table" << std::endl;    
+    }
+    REQUIRE(compiler->symbol_table == global_symbol_table);
+
+    if (compiler->symbol_table->outer) {
+        std::cerr << "compiler modified global symbol table incorrectly" << std::endl;    
+    }
+    REQUIRE(!compiler->symbol_table->outer);
 
     compiler->emit(OpType::OpAdd);
 
@@ -791,6 +808,135 @@ noArg();
         make(OpType::OpSetGlobal, 0),
         make(OpType::OpGetGlobal, 0),
         make(OpType::OpCall),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test integer constants
+    auto int_constants = std::vector<std::shared_ptr<Object>>(bytecode->constants.begin(), bytecode->constants.end() - 1);
+    REQUIRE(test_integer_constants(expected_integer_constants, int_constants));
+
+    // Test compiled function constants
+    auto fn_constants = bytecode->constants.back();
+    REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
+}
+
+TEST_CASE("Test Let Statement Scopes 1") {
+    std::string input = R"(
+let num = 55;
+fn() { num };
+)";
+    std::vector<int> expected_integer_constants = std::vector<int>{55};
+    std::vector<Instructions> expected_fn_instructions = {
+        make(OpType::OpGetGlobal, 0),
+        make(OpType::OpReturnValue),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, 0),
+        make(OpType::OpSetGlobal, 0),
+        make(OpType::OpConstant, 1),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test integer constants
+    auto int_constants = std::vector<std::shared_ptr<Object>>(bytecode->constants.begin(), bytecode->constants.end() - 1);
+    REQUIRE(test_integer_constants(expected_integer_constants, int_constants));
+
+    // Test compiled function constants
+    auto fn_constants = bytecode->constants.back();
+    REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
+}
+
+TEST_CASE("Test Let Statement Scopes 2") {
+    std::string input = R"(
+fn() {
+    let num = 55;
+    num;
+}
+)";
+    std::vector<int> expected_integer_constants = std::vector<int>{55};
+    std::vector<Instructions> expected_fn_instructions = {
+        make(OpType::OpConstant, 0),
+        make(OpType::OpSetLocal, 0),
+        make(OpType::OpGetLocal, 0),
+        make(OpType::OpReturnValue),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, 1),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test integer constants
+    auto int_constants = std::vector<std::shared_ptr<Object>>(bytecode->constants.begin(), bytecode->constants.end() - 1);
+    REQUIRE(test_integer_constants(expected_integer_constants, int_constants));
+
+    // Test compiled function constants
+    auto fn_constants = bytecode->constants.back();
+    REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
+}
+
+TEST_CASE("Test Let Statement Scopes 3") {
+    std::string input = R"(
+fn() {
+    let a = 55;
+    let b = 77;
+    a + b;
+}
+)";
+    std::vector<int> expected_integer_constants = std::vector<int>{55, 77};
+    std::vector<Instructions> expected_fn_instructions = {
+        make(OpType::OpConstant, 0),
+        make(OpType::OpSetLocal, 0),
+        make(OpType::OpConstant, 1),
+        make(OpType::OpSetLocal, 1),
+        make(OpType::OpGetLocal, 0),
+        make(OpType::OpGetLocal, 1),
+        make(OpType::OpAdd),
+        make(OpType::OpReturnValue),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, 2),
         make(OpType::OpPop),
     };
 

@@ -154,14 +154,22 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
             return err;
         }
         auto symbol = symbol_table->define(l->name->value);
-        emit(OpType::OpSetGlobal, symbol.index);
+        if (symbol.scope == SymbolScope::GlobalScope) {
+            emit(OpType::OpSetGlobal, symbol.index);
+        } else {
+            emit(OpType::OpSetLocal, symbol.index);
+        }
     // Identifier
     } else if (auto id = std::dynamic_pointer_cast<Identifier>(node)) {
         auto [symbol, ok] = symbol_table->resolve(id->value);
         if (!ok) {
             return new_error("undefined variable " + id->value);
         }
-        emit(OpType::OpGetGlobal, symbol.index);
+        if (symbol.scope == SymbolScope::GlobalScope) {
+            emit(OpType::OpGetGlobal, symbol.index);
+        } else {
+            emit(OpType::OpGetLocal, symbol.index);
+        }
     // String Literal
     } else if (auto sl = std::dynamic_pointer_cast<StringLiteral>(node)) {
         auto str = std::make_shared<String>(String{sl->value});
@@ -363,6 +371,9 @@ void Compiler::change_operand(int op_pos, int first_operand) {
 void Compiler::enter_scope() {
     scopes.push_back(CompilationScope{});
     scope_index++;
+
+    // Create new enclosed symbol table when entering new compiler scope
+    symbol_table = new_enclosed_symbol_table(symbol_table);
 }
 
 Instructions Compiler::leave_scope() {
@@ -370,6 +381,9 @@ Instructions Compiler::leave_scope() {
 
     scopes.pop_back();
     scope_index--;
+
+    // When leaving compiler scope, drop current symbol table and reset to existing outer one
+    symbol_table = symbol_table->outer;
 
     return instructions;
 }
