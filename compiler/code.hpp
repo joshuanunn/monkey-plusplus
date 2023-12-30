@@ -41,7 +41,9 @@ enum class OpType : Opcode {
     OpIndex,
     OpCall,
     OpReturnValue,
-    OpReturn
+    OpReturn,
+    OpSetLocal,
+    OpGetLocal
 };
 
 struct Definition {
@@ -86,7 +88,9 @@ Instructions make(OpType op);
 
 Instructions make(OpType op, int operand);
 
-uint16_t read_uint_16(uint8_t hi, uint8_t lo);
+int read_uint_8(Instructions ins, int offset);
+
+int read_uint_16(Instructions ins, int offset);
 
 std::tuple<std::vector<int>, int> read_operands(std::shared_ptr<Definition> def, Instructions ins);
 

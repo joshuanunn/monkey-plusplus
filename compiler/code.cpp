@@ -26,6 +26,8 @@ std::map<OpType, std::shared_ptr<Definition>> definitions = {
     {OpType::OpCall, new_definition("OpCall")},
     {OpType::OpReturnValue, new_definition("OpReturnValue")},
     {OpType::OpReturn, new_definition("OpReturn")},
+    {OpType::OpSetLocal, new_definition("OpSetLocal", 1)},
+    {OpType::OpGetLocal, new_definition("OpGetLocal", 1)},
 };
 
 Definition::Definition(std::string name) : name{name}, operand_widths{} {}
@@ -138,18 +140,29 @@ Instructions make(OpType op, int operand) {
     auto width = def->operand_widths.at(0);
 
     switch (width) {
-        case 2:
         // Store 16-bit instruction as 2 bytes (big endian byte order)
-        instruction[offset] = static_cast<uint16_t>(operand) >> 8;
-        instruction[offset + 1] = static_cast<uint16_t>(operand) & 0xFF;
+        case 2:
+            instruction[offset] = static_cast<uint16_t>(operand) >> 8;
+            instruction[offset + 1] = static_cast<uint16_t>(operand) & 0xFF;
+            break;
+        // Store 8-bit instruction directly in a single byte
+        case 1:
+            instruction[offset] = static_cast<uint8_t>(operand);
         break;
     }
 
     return instruction;
 }
 
-uint16_t read_uint_16(uint8_t hi, uint8_t lo) {
-    return static_cast<uint16_t>(lo) | static_cast<uint16_t>(hi) << 8;
+int read_uint_8(Instructions ins, int offset) {
+    return static_cast<int>(ins[offset]);
+}
+
+int read_uint_16(Instructions ins, int offset) {
+    // Interpret 2 sequential bytes (big endian) as a 16-bit int
+    auto hi = static_cast<uint16_t>(ins[offset]) << 8;
+    auto lo = static_cast<uint16_t>(ins[offset+1]);
+    return static_cast<int>(lo | hi);
 }
 
 std::tuple<std::vector<int>, int> read_operands(std::shared_ptr<Definition> def, Instructions ins) {
@@ -162,9 +175,13 @@ std::tuple<std::vector<int>, int> read_operands(std::shared_ptr<Definition> def,
         auto width = def->operand_widths.at(i);
 
         switch (width) {
+            // Read 2 byte instruction (big endian byte order)
             case 2:
-                // Read 2 byte instruction into a single int (big endian byte order)
-                operands[i] = static_cast<int>(read_uint_16(ins[offset], ins[offset+1]));
+                operands[i] = read_uint_16(ins, offset);
+                break;
+            // Read 1 byte instruction
+            case 1:
+                operands[i] = read_uint_8(ins, offset);
                 break;
         }
         offset += width;

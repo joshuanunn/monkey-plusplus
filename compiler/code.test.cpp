@@ -7,7 +7,7 @@
 
 #include "code.hpp"
 
-TEST_CASE("Test Make With Operand") {
+TEST_CASE("Test Make With Two Byte Operand") {
     auto instruction = make(OpType::OpConstant, 65534);
     auto tt_expected = std::vector<Opcode>{as_opcode(OpType::OpConstant), 255, 254};
 
@@ -19,8 +19,27 @@ TEST_CASE("Test Make With Operand") {
 
     for (int i = 0; i < tt_expected.size(); i++) {
         if (instruction.at(i) != tt_expected.at(i)) {
-            std::cerr << "wrong byte at pos " << i << ". want=" << tt_expected.at(i) << ", got="
-                        << instruction.at(i) << std::endl;
+            std::cerr << "wrong byte at pos " << i << ". want=" << (int) tt_expected.at(i) << ", got="
+                        << (int) instruction.at(i) << std::endl;
+        }
+        REQUIRE(instruction.at(i) == tt_expected.at(i));
+    }
+}
+
+TEST_CASE("Test Make With One Byte Operand") {
+    auto instruction = make(OpType::OpGetLocal, 255);
+    auto tt_expected = std::vector<Opcode>{as_opcode(OpType::OpGetLocal), 255};
+
+    if (instruction.size() != tt_expected.size()) {
+        std::cerr << "instruction has wrong length. want=" << tt_expected.size() << ", got=" << instruction.size()
+                    << std::endl;
+    }
+    REQUIRE(instruction.size() == tt_expected.size());
+
+    for (int i = 0; i < tt_expected.size(); i++) {
+        if (instruction.at(i) != tt_expected.at(i)) {
+            std::cerr << "wrong byte at pos " << i << ". want=" << (int) tt_expected.at(i) << ", got="
+                        << (int) instruction.at(i) << std::endl;
         }
         REQUIRE(instruction.at(i) == tt_expected.at(i));
     }
@@ -48,13 +67,15 @@ TEST_CASE("Test Make No Operands") {
 TEST_CASE("Test Instructions String") {
     std::vector<Instructions> instructions = std::vector<Instructions>{
         make(OpType::OpAdd),
+        make(OpType::OpGetLocal, 1),
         make(OpType::OpConstant, 2),
         make(OpType::OpConstant, 65535),
     };
 
     std::string expected = R"(0000 OpAdd
-0001 OpConstant 2
-0004 OpConstant 65535
+0001 OpGetLocal 1
+0003 OpConstant 2
+0006 OpConstant 65535
 )";
 
     auto concatted = Instructions{};
@@ -73,7 +94,8 @@ TEST_CASE("Test Instructions String") {
 
 TEST_CASE("Test Read Operands") {
     std::vector<std::tuple<OpType, int, int>> tests = {
-            std::make_tuple(OpType::OpConstant, 65535, 2),
+        std::make_tuple(OpType::OpConstant, 65535, 2),
+        std::make_tuple(OpType::OpGetLocal, 255, 1),
     };
 
     for (const auto &tt: tests) {
