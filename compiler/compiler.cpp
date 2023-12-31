@@ -165,11 +165,8 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         if (!ok) {
             return new_error("undefined variable " + id->value);
         }
-        if (symbol.scope == SymbolScope::GlobalScope) {
-            emit(OpType::OpGetGlobal, symbol.index);
-        } else {
-            emit(OpType::OpGetLocal, symbol.index);
-        }
+
+        load_symbol(symbol);
     // String Literal
     } else if (auto sl = std::dynamic_pointer_cast<StringLiteral>(node)) {
         auto str = std::make_shared<String>(String{sl->value});
@@ -282,9 +279,16 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
 std::shared_ptr<Compiler> new_compiler() {
     auto main_scope = CompilationScope{};
 
+    auto symbol_table = new_symbol_table();
+
+    // Define all builtin functions
+    for (int i = 0; i < builtins_names.size(); i++) {
+        symbol_table->define_builtin(i, builtins_names[i]);
+    }
+
     return std::make_shared<Compiler>(
         Compiler{
-            symbol_table: new_symbol_table(),
+            symbol_table: symbol_table,
             scopes: std::vector<CompilationScope>{main_scope},
             scope_index: 0
         });
@@ -407,4 +411,14 @@ Instructions Compiler::leave_scope() {
     symbol_table = symbol_table->outer;
 
     return instructions;
+}
+
+void Compiler::load_symbol(Symbol s) {
+    if (s.scope == SymbolScope::GlobalScope) {
+        emit(OpType::OpGetGlobal, s.index);
+    } else if (s.scope == SymbolScope::LocalScope) {
+        emit(OpType::OpGetLocal, s.index);
+    } else if (s.scope == SymbolScope::BuiltinScope) {
+        emit(OpType::OpGetBuiltin, s.index);
+    }
 }

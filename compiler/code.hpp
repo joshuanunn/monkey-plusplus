@@ -43,7 +43,8 @@ enum class OpType : Opcode {
     OpReturnValue,
     OpReturn,
     OpSetLocal,
-    OpGetLocal
+    OpGetLocal,
+    OpGetBuiltin
 };
 
 struct Definition {

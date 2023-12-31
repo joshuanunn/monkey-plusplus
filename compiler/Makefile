@@ -1,6 +1,6 @@
 CXXFLAGS = -g --std=c++17 -I../include
 
-monkey : ast.o code.o compiler.o frame.o lexer.o object.o parser.o symbol_table.o token.o vm.o repl.o monkey.o
+monkey : ast.o builtins.o code.o compiler.o frame.o lexer.o object.o parser.o symbol_table.o token.o vm.o repl.o monkey.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 asttest : ast.o token.o ast.test.o
@@ -9,7 +9,7 @@ asttest : ast.o token.o ast.test.o
 codetest : code.o code.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-compilertest : ast.o code.o compiler.o lexer.o object.o parser.o symbol_table.o token.o compiler.test.o
+compilertest : ast.o builtins.o code.o compiler.o lexer.o object.o parser.o symbol_table.o token.o compiler.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 lexertest : lexer.o token.o lexer.test.o
@@ -27,7 +27,7 @@ symboltabletest : symbol_table.o symbol_table.test.o
 tokentest : token.o token.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-vmtest : ast.o code.o compiler.o frame.o lexer.o object.o parser.o symbol_table.o token.o vm.o vm.test.o
+vmtest : ast.o builtins.o code.o compiler.o frame.o lexer.o object.o parser.o symbol_table.o token.o vm.o vm.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 test-ast : asttest

@@ -171,3 +171,66 @@ TEST_CASE("Test Resolve Nested Local") {
         REQUIRE(result == sym);
     }
 }
+
+TEST_CASE("Test Define Resolve Builtins") {
+    auto global = new_symbol_table();
+    auto first_local = new_enclosed_symbol_table(global);
+    auto second_local = new_enclosed_symbol_table(first_local);
+
+    std::vector<Symbol> expected = {
+        {Symbol{"a", SymbolScope::BuiltinScope, 0}},
+        {Symbol{"c", SymbolScope::BuiltinScope, 1}},
+        {Symbol{"e", SymbolScope::BuiltinScope, 2}},
+        {Symbol{"f", SymbolScope::BuiltinScope, 3}},
+    };
+
+    global->define_builtin(0, "a");
+    global->define_builtin(1, "c");
+    global->define_builtin(2, "e");
+    global->define_builtin(3, "f");
+
+    // Check builtins are resolvable from global scope
+    for (const Symbol& sym : expected) {
+        auto [result, ok] = global->resolve(sym.name);
+
+        if (!ok) {
+            std::cerr << "name " << sym.name << " not resolvable" << std::endl;
+        }
+        REQUIRE(ok);
+
+        if (result != sym) {
+            std::cerr << "expected " << sym.name << " to resolve to " << sym << ", got=" << result << std::endl;
+        }
+        REQUIRE(result == sym);
+    }
+
+    // Check builtins are resolvable from first nested local scope
+    for (const Symbol& sym : expected) {
+        auto [result, ok] = first_local->resolve(sym.name);
+
+        if (!ok) {
+            std::cerr << "name " << sym.name << " not resolvable" << std::endl;
+        }
+        REQUIRE(ok);
+
+        if (result != sym) {
+            std::cerr << "expected " << sym.name << " to resolve to " << sym << ", got=" << result << std::endl;
+        }
+        REQUIRE(result == sym);
+    }
+
+    // Check builtins are resolvable from second nested local scope
+    for (const Symbol& sym : expected) {
+        auto [result, ok] = second_local->resolve(sym.name);
+
+        if (!ok) {
+            std::cerr << "name " << sym.name << " not resolvable" << std::endl;
+        }
+        REQUIRE(ok);
+
+        if (result != sym) {
+            std::cerr << "expected " << sym.name << " to resolve to " << sym << ", got=" << result << std::endl;
+        }
+        REQUIRE(result == sym);
+    }
+}

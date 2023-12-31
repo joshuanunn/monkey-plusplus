@@ -8,7 +8,8 @@
 
 enum class SymbolScope {
     LocalScope,
-    GlobalScope
+    GlobalScope,
+    BuiltinScope
 };
 
 struct Symbol {
@@ -43,6 +44,8 @@ struct SymbolTable {
     int num_definitions;
 
     Symbol define(std::string name);
+
+    Symbol define_builtin(int index, std::string name);
 
     std::tuple<Symbol, bool> resolve(const std::string& name);
 };

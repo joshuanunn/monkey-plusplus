@@ -2,6 +2,7 @@
 #define MONKEY_PLUSPLUS_COMPILER_HPP
 
 #include "ast.hpp"
+#include "builtins.hpp"
 #include "code.hpp"
 #include "object.hpp"
 #include "symbol_table.hpp"
@@ -77,6 +78,8 @@ struct Compiler {
     void enter_scope();
 
     Instructions leave_scope();
+
+    void load_symbol(Symbol s);
 
     std::shared_ptr<Bytecode> bytecode();
 };

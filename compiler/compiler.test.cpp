@@ -1052,3 +1052,72 @@ manyArg(24, 25, 26);
     auto int_constants = std::vector<std::shared_ptr<Object>>(bytecode->constants.begin() + 1, bytecode->constants.end());
     REQUIRE(test_integer_constants(expected_integer_constants, int_constants));
 }
+
+TEST_CASE("Test Builtins") {
+    std::string input = R"(
+len([]);
+push([], 1);
+)";
+    std::vector<int> expected_integer_constants = std::vector<int>{1};
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpGetBuiltin, 0),
+        make(OpType::OpArray, 0),
+        make(OpType::OpCall, 1),
+        make(OpType::OpPop),
+        make(OpType::OpGetBuiltin, 5),
+        make(OpType::OpArray, 0),
+        make(OpType::OpConstant, 0),
+        make(OpType::OpCall, 2),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test integer arguments (second on stack)
+    auto int_constants = std::vector<std::shared_ptr<Object>>(bytecode->constants);
+    REQUIRE(test_integer_constants(expected_integer_constants, int_constants));
+}
+
+TEST_CASE("Test Builtins Within Functions") {
+    std::string input = "fn() { len([]) }";
+    std::vector<Instructions> expected_fn_instructions = {
+        make(OpType::OpGetBuiltin, 0),
+        make(OpType::OpArray, 0),
+        make(OpType::OpCall, 1),
+        make(OpType::OpReturnValue),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, 0),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test compiled function constants (first on stack)
+    auto fn_constants = bytecode->constants.front();
+    REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
+}

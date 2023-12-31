@@ -15,6 +15,8 @@ std::ostream& operator<<(std::ostream& out, const Symbol& sym) {
         out << "LocalScope";
     } else if (sym.scope == SymbolScope::GlobalScope) {
         out << "GlobalScope";
+    } else if (sym.scope == SymbolScope::BuiltinScope) {
+        out << "BuiltinScope";
     } else {
         out << "UNDEFINED";
     }
@@ -47,6 +49,12 @@ Symbol SymbolTable::define(std::string name) {
 
     store[name] = symbol;
     num_definitions++;
+    return symbol;
+}
+
+Symbol SymbolTable::define_builtin(int index, std::string name) {
+    auto symbol = Symbol{name:name, scope:SymbolScope::BuiltinScope, index:index};
+    store[name] = symbol;
     return symbol;
 }
 
