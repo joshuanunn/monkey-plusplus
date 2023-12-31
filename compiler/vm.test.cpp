@@ -631,7 +631,7 @@ noReturnTwo();
 )",
     };
 
-        for (const auto &tt_input: tests) {
+    for (const auto &tt_input: tests) {
         auto program = parse(tt_input);
 
         auto compiler = new_compiler();
@@ -869,5 +869,146 @@ TEST_CASE("Test Calling Functions With Wrong Arguments") {
             std::cerr << "wrong VM error: want=" << tt_expected << ", got=" << err->message << std::endl;
         }
         REQUIRE(err->message == tt_expected);
+    }
+}
+
+TEST_CASE("Test Builtin Functions Returning Integers") {
+    std::vector<std::tuple<std::string, int>> tests = {
+        std::make_tuple(R"(len(""))", 0),
+        std::make_tuple(R"(len("four"))", 4),
+        std::make_tuple(R"(len("hello world"))", 11),
+        std::make_tuple(R"(len([1, 2, 3]))", 3),
+        std::make_tuple(R"(len([]))", 0),
+        std::make_tuple(R"(first([1, 2, 3]))", 1),
+        std::make_tuple(R"(last([1, 2, 3]))", 3),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}
+
+TEST_CASE("Test Builtin Functions Returning Errors") {
+    std::vector<std::tuple<std::string, std::string>> tests = {
+        std::make_tuple(R"(len(1))", "argument to 'len' not supported, got INTEGER"),
+        std::make_tuple(R"(len("one", "two"))", "wrong number of arguments. got=2, want=1"),
+        std::make_tuple(R"(first(1))", "argument to 'first' must be ARRAY, got INTEGER"),
+        std::make_tuple(R"(last(1))", "argument to 'last' must be ARRAY, got INTEGER"),
+        std::make_tuple(R"(push(1, 1))", "argument to 'push' must be ARRAY, got INTEGER"),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (!err) {
+            std::cerr << "expected VM error but resulted in none." << std::endl;
+        }
+        REQUIRE(err);
+
+        if (err->message != tt_expected) {
+            std::cerr << "wrong VM error: want=" << tt_expected << ", got=" << err->message << std::endl;
+        }
+        REQUIRE(err->message == tt_expected);
+    }
+}
+
+TEST_CASE("Test Builtin Functions Returning Null") {
+    std::vector<std::string> tests = {
+        R"(puts("hello", "world!"))",
+        R"(first([]))",
+        R"(last([]))",
+        R"(rest([]))",
+    };
+
+    for (const auto &tt_input: tests) {
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_null_object(stack_elem));
+    }
+}
+
+TEST_CASE("Test Builtin Functions Returning Arrays") {
+    std::vector<std::tuple<std::string, std::vector<int>>> tests = {
+        std::make_tuple(R"(rest([1, 2, 3]))", std::vector<int>{2, 3}),
+        std::make_tuple(R"(push([], 1))", std::vector<int>{1}),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_int_array_object(tt_expected, stack_elem));
     }
 }

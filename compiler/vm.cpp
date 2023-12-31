@@ -70,23 +70,59 @@ std::shared_ptr<Object> VM::last_popped_stack_elem() {
     return stack[sp];
 }
 
-std::shared_ptr<Error> VM::call_function(int num_args) {
-    auto fn = std::dynamic_pointer_cast<CompiledFunction>(stack[sp - 1 - num_args]);
-    if (!fn) {
-        return new_error("calling non-function");
-    }
+std::shared_ptr<Error> VM::execute_call(int num_args) {
+    auto callee = stack[sp - 1 - num_args];
 
-    if (num_args != fn->num_parameters) {
-        return new_error("wrong number of arguments: want=" + std::to_string(fn->num_parameters) +
-            ", got=" + std::to_string(num_args));
+    if (callee->type() == ObjectType::COMPILED_FUNCTION_OBJ) {
+        return call_function(callee, num_args);
+    } else if (callee->type() == ObjectType::BUILTIN_OBJ) {
+        return call_builtin(callee, num_args);
+    } else {
+        return new_error("calling non-function and non-built-in");
+    }
+}
+
+std::shared_ptr<Error> VM::call_function(std::shared_ptr<Object> fn, int num_args) {
+    auto compiled_fn = std::dynamic_pointer_cast<CompiledFunction>(fn);
+    
+    if (num_args != compiled_fn->num_parameters) {
+        return new_error("wrong number of arguments: want=" +
+        std::to_string(compiled_fn->num_parameters) + ", got=" +
+        std::to_string(num_args));
     }
 
     // Create a new frame, set base pointer to current stack pointer, and push frame onto stack
-    auto frame = new_frame(fn, sp - num_args);
+    auto frame = new_frame(compiled_fn, sp - num_args);
     push_frame(frame);
 
     // Allocate space for local bindings underneath frame, by incrementing stack pointer
-    sp = frame->base_pointer + fn->num_locals;
+    sp = frame->base_pointer + compiled_fn->num_locals;
+
+    return nullptr;
+}
+
+std::shared_ptr<Error> VM::call_builtin(std::shared_ptr<Object> builtin, int num_args) {
+    auto builtin_fn = std::dynamic_pointer_cast<Builtin>(builtin);
+
+    // Copy arguments to the builtin function from the stack
+    auto args = std::vector<std::shared_ptr<Object>>(stack.begin() + sp - num_args, stack.begin() + sp);
+
+    // Pass arguments to builtin function and call
+    auto result = builtin_fn->builtin_function(args);
+
+    // Clean up stack by popping off the builtin function and arguments
+    sp = sp - num_args - 1;
+
+    // If builtin function generates an error, then cast to Error and return
+    if (is_error(result)) {
+        return std::dynamic_pointer_cast<Error>(result);
+    }
+
+    // Otherwise, push the result and return
+    auto err = push(result);
+    if (err) {
+        return err;
+    }
 
     return nullptr;
 }
@@ -250,7 +286,7 @@ std::shared_ptr<Error> VM::execute_hash_index(std::shared_ptr<Object> hash, std:
     return push(pair.value);
 }
 
-std::shared_ptr<Object> VM::build_array(int start_index, int end_index) {    
+std::shared_ptr<Object> VM::build_array(int start_index, int end_index) {
     auto array = std::make_shared<Array>(Array{});
 
     for (int i = start_index; i < end_index; i++) {
@@ -403,7 +439,7 @@ std::shared_ptr<Error> VM::run() {
             auto num_args = read_uint_8(ins, ip+1);
             current_frame()->ip += 1;
 
-            auto err = call_function(num_args);
+            auto err = execute_call(num_args);
             if (err) {
                 return err;
             }
@@ -443,6 +479,16 @@ std::shared_ptr<Error> VM::run() {
 
             // Retrieve local binding directly from the stack underneath the current stack frame
             auto err = push(stack[frame->base_pointer + local_index]);
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpGetBuiltin) {
+            auto builtin_index = read_uint_8(ins, ip+1);
+            current_frame()->ip += 1;
+
+            auto definition = get_builtin_by_index(builtin_index);
+
+            auto err = push(definition);
             if (err) {
                 return err;
             }

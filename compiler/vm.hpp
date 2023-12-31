@@ -52,7 +52,11 @@ struct VM {
 
     std::shared_ptr<Object> last_popped_stack_elem();
 
-    std::shared_ptr<Error> call_function(int num_args);
+    std::shared_ptr<Error> execute_call(int num_args);
+
+    std::shared_ptr<Error> call_function(std::shared_ptr<Object> fn, int num_args);
+
+    std::shared_ptr<Error> call_builtin(std::shared_ptr<Object> builtin, int num_args);
 
     std::shared_ptr<Object> build_array(int start_index, int end_index);
 
