@@ -108,22 +108,28 @@ std::shared_ptr<Object> __puts(std::vector<std::shared_ptr<Object>> args) {
     return get_null_ref();
 }
 
-std::map<std::string, builtin_fn> builtins = {
-        {"len", __len},
-        {"first", __first},
-        {"last", __last},
-        {"rest", __rest},
-        {"push", __push},
-        {"puts", __puts},
-};
+// Initialise all defined builtin function names in an array to fix index ordering
+std::array<std::string, 6> builtins_names = {
+    "len", "puts", "first", "last", "rest", "push"};
 
-std::shared_ptr<Builtin> get_builtin_fn(const std::string &name) {
-    auto fn = builtins.find(name);
+// Store all defined builtin function pointers
+// IMPORTANT: array elements must match ordering in builtins_names
+std::array<builtin_fn, 6> builtins = {
+    __len, __puts, __first, __last, __rest, __push};
+
+std::shared_ptr<Builtin> get_builtin_by_name(const std::string &name) {
+    auto fn = std::find(builtins_names.begin(), builtins_names.end(), name);
 
     // If builtin function is not defined, then return nullptr
-    if (fn == builtins.end()) {
+    if (fn == builtins_names.end()) {
         return nullptr;
     }
 
-    return std::make_shared<Builtin>(Builtin{builtins[name]});
+    auto index = std::distance(builtins_names.begin(), fn);
+
+    return std::make_shared<Builtin>(Builtin{builtins[index]});
+}
+
+std::shared_ptr<Builtin> get_builtin_by_index(int index) {
+    return std::make_shared<Builtin>(Builtin{builtins[index]});
 }

@@ -92,7 +92,7 @@ std::shared_ptr<Object> eval_identifier(const std::shared_ptr<Identifier> &node,
         return val;
     }
 
-    if (auto builtin = get_builtin_fn(node->value)) {
+    if (auto builtin = get_builtin_by_name(node->value)) {
         return builtin;
     }
 
