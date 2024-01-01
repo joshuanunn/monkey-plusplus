@@ -56,7 +56,7 @@ struct VM {
 
     std::shared_ptr<Error> call_closure(std::shared_ptr<Object> cl, int num_args);
 
-    std::shared_ptr<Error> push_closure(int const_index);
+    std::shared_ptr<Error> push_closure(int const_index, int num_free);
 
     std::shared_ptr<Error> call_builtin(std::shared_ptr<Object> builtin, int num_args);
 

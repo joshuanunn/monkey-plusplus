@@ -1012,3 +1012,88 @@ TEST_CASE("Test Builtin Functions Returning Arrays") {
         REQUIRE(test_int_array_object(tt_expected, stack_elem));
     }
 }
+
+TEST_CASE("Test Closures") {
+    std::vector<std::tuple<std::string, int>> tests = {
+        std::make_tuple(R"(
+let newClosure = fn(a) {
+    fn() { a; };
+};
+let closure = newClosure(99);
+closure();
+)",     99),
+        std::make_tuple(R"(
+let newAdder = fn(a, b) {
+    fn(c) { a + b + c };
+};
+let adder = newAdder(1, 2);
+adder(8);
+)",     11),
+        std::make_tuple(R"(
+let newAdder = fn(a, b) {
+    let c = a + b;
+    fn(d) { c + d };
+};
+let adder = newAdder(1, 2);
+adder(8);
+)",     11),
+        std::make_tuple(R"(
+let newAdderOuter = fn(a, b) {
+    let c = a + b;
+    fn(d) {
+        let e = d + c;
+        fn(f) { e + f; };
+    };
+};
+let newAdderInner = newAdderOuter(1, 2);
+let adder = newAdderInner(3);
+adder(8);
+)",     14),
+        std::make_tuple(R"(
+let a = 1;
+let newAdderOuter = fn(b) {
+    fn(c) {
+        fn(d) { a + b + c + d };
+    };
+};
+let newAdderInner = newAdderOuter(2);
+let adder = newAdderInner(3);
+adder(8);
+)",     14),
+        std::make_tuple(R"(
+let newClosure = fn(a, b) {
+    let one = fn() { a; };
+    let two = fn() { b; };
+    fn() { one() + two(); };
+};
+let closure = newClosure(9, 90);
+closure();
+)",     99),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}

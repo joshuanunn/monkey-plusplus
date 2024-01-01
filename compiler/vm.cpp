@@ -103,7 +103,7 @@ std::shared_ptr<Error> VM::call_closure(std::shared_ptr<Object> cl, int num_args
     return nullptr;
 }
 
-std::shared_ptr<Error> VM::push_closure(int const_index) {
+std::shared_ptr<Error> VM::push_closure(int const_index, int num_free) {
     auto constant = constants.at(const_index);
 
     auto function = std::dynamic_pointer_cast<CompiledFunction>(constant);
@@ -111,7 +111,18 @@ std::shared_ptr<Error> VM::push_closure(int const_index) {
         return new_error("not a function" + objecttype_literal(constant->type()));
     }
 
+    // Copy each free variable to free
+    std::vector<std::shared_ptr<Object>> free;
+    for (int i = 0; i < num_free; i++) {
+        free.push_back(stack[sp - num_free + i]);
+    }
+
+    // Clean up stack by popping free variables
+    sp = sp - num_free;
+
+    // Add free variables to closure
     auto closure = std::make_shared<Closure>(Closure(function));
+    closure->free = std::move(free);
     return push(closure);
 }
 
@@ -508,10 +519,20 @@ std::shared_ptr<Error> VM::run() {
             }
         } else if (op == OpType::OpClosure) {
             auto const_index = read_uint_16(ins, ip+1);
-            auto _ = read_uint_8(ins, ip+3);
+            auto num_free = read_uint_8(ins, ip+3);
             current_frame()->ip += 3;
 
-            auto err = push_closure(const_index);
+            auto err = push_closure(const_index, num_free);
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpGetFree) {
+            auto free_index = read_uint_8(ins, ip+1);
+            current_frame()->ip += 1;
+
+            auto current_closure = current_frame()->cl;
+
+            auto err = push(current_closure->free.at(free_index));
             if (err) {
                 return err;
             }
