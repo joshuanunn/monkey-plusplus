@@ -5,11 +5,13 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 enum class SymbolScope {
     LocalScope,
     GlobalScope,
-    BuiltinScope
+    BuiltinScope,
+    FreeScope
 };
 
 struct Symbol {
@@ -43,7 +45,11 @@ struct SymbolTable {
 
     int num_definitions;
 
+    std::vector<Symbol> free_symbols;
+
     Symbol define(std::string name);
+
+    Symbol define_free(Symbol original);
 
     Symbol define_builtin(int index, std::string name);
 

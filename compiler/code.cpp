@@ -30,6 +30,7 @@ std::map<OpType, std::shared_ptr<Definition>> definitions = {
     {OpType::OpGetLocal, new_definition("OpGetLocal", 1)},
     {OpType::OpGetBuiltin, new_definition("OpGetBuiltin", 1)},
     {OpType::OpClosure, new_definition("OpClosure", 2, 1)},
+    {OpType::OpGetFree, new_definition("OpGetFree", 1)},
 };
 
 Definition::Definition(std::string name) : name{name}, operand_widths{} {}

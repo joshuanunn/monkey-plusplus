@@ -17,6 +17,8 @@ std::ostream& operator<<(std::ostream& out, const Symbol& sym) {
         out << "GlobalScope";
     } else if (sym.scope == SymbolScope::BuiltinScope) {
         out << "BuiltinScope";
+    } else if (sym.scope == SymbolScope::FreeScope) {
+        out << "FreeScope";
     } else {
         out << "UNDEFINED";
     }
@@ -52,6 +54,19 @@ Symbol SymbolTable::define(std::string name) {
     return symbol;
 }
 
+Symbol SymbolTable::define_free(Symbol original) {
+    free_symbols.push_back(original);
+
+    auto symbol = Symbol{
+        name: original.name,
+        scope: SymbolScope::FreeScope,
+        index: (int) free_symbols.size() - 1
+    };
+
+    store[original.name] = symbol;
+    return symbol;
+}
+
 Symbol SymbolTable::define_builtin(int index, std::string name) {
     auto symbol = Symbol{name:name, scope:SymbolScope::BuiltinScope, index:index};
     store[name] = symbol;
@@ -59,15 +74,29 @@ Symbol SymbolTable::define_builtin(int index, std::string name) {
 }
 
 std::tuple<Symbol, bool> SymbolTable::resolve(const std::string& name) {
+    // Has name been defined in this scope (i.e. this symbol table)?
     Symbol obj;
-    bool ok;
-
     auto contains = store.find(name);
-    ok = !(contains == store.end());
+    auto ok = !(contains == store.end());
     if (ok) {
         obj = store[name];
-    } else if (!ok && outer) {
-        return outer->resolve(name);
+    }
+
+    // If not then...
+    if (!ok && outer) {
+        auto [o_obj, o_ok] = outer->resolve(name);
+        if (!o_ok) {
+            return std::make_tuple(o_obj, o_ok);
+        }
+
+        // Is the name a global binding or builtin function?
+        if (o_obj.scope == SymbolScope::GlobalScope || o_obj.scope == SymbolScope::BuiltinScope) {
+            return std::make_tuple(o_obj, o_ok);
+        }
+
+        // Otherwise name was defined as a local in an enclosing scope, and is therefore a free variable in this scope
+        auto free = define_free(o_obj);
+        return std::make_tuple(free, true);
     }
 
     return std::make_tuple(obj, ok);

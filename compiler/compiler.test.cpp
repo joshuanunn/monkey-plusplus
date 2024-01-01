@@ -1121,3 +1121,184 @@ TEST_CASE("Test Builtins Within Functions") {
     auto fn_constants = bytecode->constants.front();
     REQUIRE(test_function_constants(expected_fn_instructions, fn_constants));
 }
+
+TEST_CASE("Test Closures") {
+    std::string input = R"(
+fn(a) {
+    fn(b) {
+        a + b
+    }
+}
+)";
+    std::vector<std::vector<Instructions>> expected_fn_constants = {
+        {
+            make(OpType::OpGetFree, 0),
+            make(OpType::OpGetLocal, 0),
+            make(OpType::OpAdd),
+            make(OpType::OpReturnValue),
+        },
+        {
+            make(OpType::OpGetLocal, 0),
+            make(OpType::OpClosure, 0, 1),
+            make(OpType::OpReturnValue),
+        },
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpClosure, 1, 0),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test compiled function constants
+    for (int i = 0; i < expected_fn_constants.size(); i++) {
+        REQUIRE(test_function_constants(expected_fn_constants.at(i), bytecode->constants.at(i)));
+    }
+}
+
+TEST_CASE("Test Closures Deeply Nested") {
+    std::string input = R"(
+fn(a) {
+    fn(b) {
+        fn(c) {
+            a + b + c
+        }
+    }
+}
+)";
+    std::vector<std::vector<Instructions>> expected_fn_constants = {
+        {
+            make(OpType::OpGetFree, 0),
+            make(OpType::OpGetFree, 1),
+            make(OpType::OpAdd),
+            make(OpType::OpGetLocal, 0),
+            make(OpType::OpAdd),
+            make(OpType::OpReturnValue),
+        },
+        {
+            make(OpType::OpGetFree, 0),
+            make(OpType::OpGetLocal, 0),
+            make(OpType::OpClosure, 0, 2),
+            make(OpType::OpReturnValue),
+        },
+        {
+            make(OpType::OpGetLocal, 0),
+            make(OpType::OpClosure, 1, 1),
+            make(OpType::OpReturnValue),
+        },
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpClosure, 2, 0),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test compiled function constants (first on stack)
+    for (int i = 0; i < expected_fn_constants.size(); i++) {
+        REQUIRE(test_function_constants(expected_fn_constants.at(i), bytecode->constants.at(i)));
+    }
+}
+
+TEST_CASE("Test Closures Deeply Nested With Local and Global Bindings") {
+    std::string input = R"(
+let global = 55;
+
+fn() {
+    let a = 66;
+
+    fn() {
+        let b = 77;
+
+        fn() {
+            let c = 88;
+
+            global + a + b + c;
+        }
+    }
+}
+)";
+    std::vector<int> expected_integer_constants = {55, 66, 77, 88};
+    std::vector<std::vector<Instructions>> expected_fn_constants = {
+        {
+            make(OpType::OpConstant, 3),
+            make(OpType::OpSetLocal, 0),
+            make(OpType::OpGetGlobal, 0),
+            make(OpType::OpGetFree, 0),
+            make(OpType::OpAdd),
+            make(OpType::OpGetFree, 1),
+            make(OpType::OpAdd),
+            make(OpType::OpGetLocal, 0),
+            make(OpType::OpAdd),
+            make(OpType::OpReturnValue),
+        },
+        {
+            make(OpType::OpConstant, 2),
+            make(OpType::OpSetLocal, 0),
+            make(OpType::OpGetFree, 0),
+            make(OpType::OpGetLocal, 0),
+            make(OpType::OpClosure, 4, 2),
+            make(OpType::OpReturnValue),
+        },
+        {
+            make(OpType::OpConstant, 1),
+            make(OpType::OpSetLocal, 0),
+            make(OpType::OpGetLocal, 0),
+            make(OpType::OpClosure, 5, 1),
+            make(OpType::OpReturnValue),
+        },
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpConstant, 0),
+        make(OpType::OpSetGlobal, 0),
+        make(OpType::OpClosure, 6, 0),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test integer constants (first 4 on stack)
+    auto first_four = std::vector<std::shared_ptr<Object>>(bytecode->constants.begin(), bytecode->constants.begin() + 4);
+    REQUIRE(test_integer_constants(expected_integer_constants, first_four));
+
+    // Test compiled function constants (last 3 on stack)
+    for (int i = 0; i < expected_fn_constants.size(); i++) {
+        REQUIRE(test_function_constants(expected_fn_constants.at(i), bytecode->constants.at(i + 4)));
+    }
+}

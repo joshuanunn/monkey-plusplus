@@ -234,3 +234,147 @@ TEST_CASE("Test Define Resolve Builtins") {
         REQUIRE(result == sym);
     }
 }
+
+TEST_CASE("Test Resolve Free") {
+    auto global = new_symbol_table();
+    global->define("a");
+    global->define("b");
+
+    auto first_local = new_enclosed_symbol_table(global);
+    first_local->define("c");
+    first_local->define("d");
+    
+    auto second_local = new_enclosed_symbol_table(first_local);
+    second_local->define("e");
+    second_local->define("f");
+
+    std::vector<Symbol> first_local_expected_symbols = {
+        {Symbol{"a", SymbolScope::GlobalScope, 0}},
+        {Symbol{"b", SymbolScope::GlobalScope, 1}},
+        {Symbol{"c", SymbolScope::LocalScope, 0}},
+        {Symbol{"d", SymbolScope::LocalScope, 1}},
+    };
+    std::vector<Symbol> first_local_expected_free_symbols = {};
+
+    std::vector<Symbol> second_local_expected_symbols = {
+        {Symbol{"a", SymbolScope::GlobalScope, 0}},
+        {Symbol{"b", SymbolScope::GlobalScope, 1}},
+        {Symbol{"c", SymbolScope::FreeScope, 0}},
+        {Symbol{"d", SymbolScope::FreeScope, 1}},
+        {Symbol{"e", SymbolScope::LocalScope, 0}},
+        {Symbol{"f", SymbolScope::LocalScope, 1}},
+    };
+    std::vector<Symbol> second_local_expected_free_symbols = {
+        {Symbol{"c", SymbolScope::LocalScope, 0}},
+        {Symbol{"d", SymbolScope::LocalScope, 1}},
+    };
+
+    // Check symbols and free symbols are resolvable from first nested local scope
+    for (const Symbol& sym : first_local_expected_symbols) {
+        auto [result, ok] = first_local->resolve(sym.name);
+
+        if (!ok) {
+            std::cerr << "name " << sym.name << " not resolvable" << std::endl;
+        }
+        REQUIRE(ok);
+
+        if (result != sym) {
+            std::cerr << "expected " << sym.name << " to resolve to " << sym << ", got=" << result << std::endl;
+        }
+        REQUIRE(result == sym);
+    }
+
+    if (first_local->free_symbols.size() != first_local_expected_free_symbols.size()) {
+        std::cerr << "wrong number of free symbols. got=" << first_local->free_symbols.size()
+                  << ", want=" << first_local_expected_free_symbols.size() << std::endl;
+    }
+    REQUIRE(first_local->free_symbols.size() == first_local_expected_free_symbols.size());
+
+    for (int i = 0; i < first_local_expected_free_symbols.size(); i++) {
+        auto sym = first_local_expected_free_symbols.at(i);
+        auto result = first_local->free_symbols.at(i);
+
+        if (result != sym) {
+            std::cerr << "wrong free symbol. got=" << result << ", want="
+                      << sym.name << std::endl;
+        }
+        REQUIRE(result == sym);
+    }
+
+    // Check symbols and free symbols are resolvable from second nested local scope
+    for (const Symbol& sym : second_local_expected_symbols) {
+        auto [result, ok] = second_local->resolve(sym.name);
+
+        if (!ok) {
+            std::cerr << "name " << sym.name << " not resolvable" << std::endl;
+        }
+        REQUIRE(ok);
+
+        if (result != sym) {
+            std::cerr << "expected " << sym.name << " to resolve to " << sym << ", got=" << result << std::endl;
+        }
+        REQUIRE(result == sym);
+    }
+
+    if (second_local->free_symbols.size() != second_local_expected_free_symbols.size()) {
+        std::cerr << "wrong number of free symbols. got=" << second_local->free_symbols.size()
+                  << ", want=" << second_local_expected_free_symbols.size() << std::endl;
+    }
+    REQUIRE(second_local->free_symbols.size() == second_local_expected_free_symbols.size());
+
+    for (int i = 0; i < second_local_expected_free_symbols.size(); i++) {
+        auto sym = second_local_expected_free_symbols.at(i);
+        auto result = second_local->free_symbols.at(i);
+
+        if (result != sym) {
+            std::cerr << "wrong free symbol. got=" << result << ", want="
+                      << sym.name << std::endl;
+        }
+        REQUIRE(result == sym);
+    }
+}
+
+TEST_CASE("Test Resolve Unresolvable Free") {
+    auto global = new_symbol_table();
+    global->define("a");
+
+    auto first_local = new_enclosed_symbol_table(global);
+    first_local->define("c");
+
+    auto second_local = new_enclosed_symbol_table(first_local);
+    second_local->define("e");
+    second_local->define("f");
+
+    std::vector<Symbol> second_local_expected = {
+        {Symbol{"a", SymbolScope::GlobalScope, 0}},
+        {Symbol{"c", SymbolScope::FreeScope, 0}},
+        {Symbol{"e", SymbolScope::LocalScope, 0}},
+        {Symbol{"f", SymbolScope::LocalScope, 1}},
+    };
+
+    std::vector<std::string> second_local_expected_unresolvable = {"b", "d"};
+
+    // Check symbols and free symbols are resolvable from second nested local scope
+    for (const Symbol& sym : second_local_expected) {
+        auto [result, ok] = second_local->resolve(sym.name);
+
+        if (!ok) {
+            std::cerr << "name " << sym.name << " not resolvable" << std::endl;
+        }
+        REQUIRE(ok);
+
+        if (result != sym) {
+            std::cerr << "expected " << sym.name << " to resolve to " << sym << ", got=" << result << std::endl;
+        }
+        REQUIRE(result == sym);
+    }
+
+    for (const auto& name : second_local_expected_unresolvable) {
+        auto [_, ok] = second_local->resolve(name);
+
+        if (ok) {
+            std::cerr << "name " << name << " resolved, but was expected not to" << std::endl;
+        }
+        REQUIRE(!ok);
+    }
+}

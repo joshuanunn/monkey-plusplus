@@ -235,18 +235,23 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
             emit(OpType::OpReturn);
         }
 
-        // Make a note of the number of local bindings defined within scope
+        // Make a note of the free symbols and number of local bindings defined within scope
+        auto free_symbols = symbol_table->free_symbols;
         auto num_locals = symbol_table->num_definitions;
 
         // Take the compiled instructions, leave scope, embed into a CompiledFunction and emit
         auto instructions = leave_scope();
+
+        for (const auto& s: free_symbols) {
+            load_symbol(s);
+        }
 
         auto compiled_fn = std::make_shared<CompiledFunction>(CompiledFunction(instructions));
         compiled_fn->num_locals = num_locals;
         compiled_fn->num_parameters = f->parameters.size();
 
         auto fn_index = add_constant(compiled_fn);
-        emit(OpType::OpClosure, fn_index, 0);
+        emit(OpType::OpClosure, fn_index, free_symbols.size());
     // Return Statement
     } else if (auto r = std::dynamic_pointer_cast<ReturnStatement>(node)) {
         err = compile(r->return_value);
@@ -430,5 +435,7 @@ void Compiler::load_symbol(Symbol s) {
         emit(OpType::OpGetLocal, s.index);
     } else if (s.scope == SymbolScope::BuiltinScope) {
         emit(OpType::OpGetBuiltin, s.index);
+    } else if (s.scope == SymbolScope::FreeScope) {
+        emit(OpType::OpGetFree, s.index);
     }
 }

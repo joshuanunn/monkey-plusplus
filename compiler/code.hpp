@@ -45,7 +45,8 @@ enum class OpType : Opcode {
     OpSetLocal,
     OpGetLocal,
     OpGetBuiltin,
-    OpClosure
+    OpClosure,
+    OpGetFree
 };
 
 struct Definition {
