@@ -16,6 +16,11 @@ void start_repl() {
     std::array<std::shared_ptr<Object>, GLOBALSSIZE> globals;
     auto symbol_table = new_symbol_table();
 
+    // Define all builtin functions
+    for (int i = 0; i < builtins_names.size(); i++) {
+        symbol_table->define_builtin(i, builtins_names[i]);
+    }
+
     while (true) {
         std::cout << PROMPT;
 
