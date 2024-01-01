@@ -35,6 +35,10 @@ void start_repl() {
             continue;
         }
 
+        if (program->statements.empty()) {
+            continue;
+        }
+
         // Initialise new compiler maintaining state from previous iterations
         auto comp = new_compiler_with_state(symbol_table, constants);
         err = comp->compile(program);
