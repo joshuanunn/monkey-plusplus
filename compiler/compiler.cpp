@@ -245,7 +245,8 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         compiled_fn->num_locals = num_locals;
         compiled_fn->num_parameters = f->parameters.size();
 
-        emit(OpType::OpConstant, add_constant(compiled_fn));
+        auto fn_index = add_constant(compiled_fn);
+        emit(OpType::OpClosure, fn_index, 0);
     // Return Statement
     } else if (auto r = std::dynamic_pointer_cast<ReturnStatement>(node)) {
         err = compile(r->return_value);
@@ -332,6 +333,15 @@ int Compiler::emit(OpType op) {
 
 int Compiler::emit(OpType op, int operand) {
     auto ins = make(op, operand);
+    auto pos = add_instruction(ins);
+
+    set_last_instruction(op, pos);
+
+    return pos;
+}
+
+int Compiler::emit(OpType op, int first_operand, int second_operand) {
+    auto ins = make(op, first_operand, second_operand);
     auto pos = add_instruction(ins);
 
     set_last_instruction(op, pos);

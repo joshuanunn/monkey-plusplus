@@ -3,7 +3,8 @@
 VM::VM(std::shared_ptr<Bytecode>&& bytecode) : frames{}, stack{}, globals{} {
     // Create a main frame to contain the bytecode instructions
     auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions));
-    auto main_frame = new_frame(main_fn, 0);
+    auto main_closure = std::make_shared<Closure>(Closure(main_fn));
+    auto main_frame = new_frame(main_closure, 0);
 
     // Place main frame at first frame index and set frames_index at one above this
     frames[0] = main_frame;
@@ -18,7 +19,8 @@ VM::VM(std::shared_ptr<Bytecode>&& bytecode) : frames{}, stack{}, globals{} {
 VM::VM(std::shared_ptr<Bytecode>&& bytecode, std::array<std::shared_ptr<Object>, GLOBALSSIZE> s) : frames{}, stack{}, globals{} {
     // Create a main frame to contain the bytecode instructions
     auto main_fn = std::make_shared<CompiledFunction>(CompiledFunction(bytecode->instructions));
-    auto main_frame = new_frame(main_fn, 0);
+    auto main_closure = std::make_shared<Closure>(Closure(main_fn));
+    auto main_frame = new_frame(main_closure, 0);
 
     // Place main frame at first frame index and set frames_index at one above this
     frames[0] = main_frame;
@@ -73,8 +75,8 @@ std::shared_ptr<Object> VM::last_popped_stack_elem() {
 std::shared_ptr<Error> VM::execute_call(int num_args) {
     auto callee = stack[sp - 1 - num_args];
 
-    if (callee->type() == ObjectType::COMPILED_FUNCTION_OBJ) {
-        return call_function(callee, num_args);
+    if (callee->type() == ObjectType::CLOSURE_OBJ) {
+        return call_closure(callee, num_args);
     } else if (callee->type() == ObjectType::BUILTIN_OBJ) {
         return call_builtin(callee, num_args);
     } else {
@@ -82,23 +84,35 @@ std::shared_ptr<Error> VM::execute_call(int num_args) {
     }
 }
 
-std::shared_ptr<Error> VM::call_function(std::shared_ptr<Object> fn, int num_args) {
-    auto compiled_fn = std::dynamic_pointer_cast<CompiledFunction>(fn);
-    
-    if (num_args != compiled_fn->num_parameters) {
+std::shared_ptr<Error> VM::call_closure(std::shared_ptr<Object> cl, int num_args) {
+    auto closure = std::dynamic_pointer_cast<Closure>(cl);
+
+    if (num_args != closure->fn->num_parameters) {
         return new_error("wrong number of arguments: want=" +
-        std::to_string(compiled_fn->num_parameters) + ", got=" +
+        std::to_string(closure->fn->num_parameters) + ", got=" +
         std::to_string(num_args));
     }
 
     // Create a new frame, set base pointer to current stack pointer, and push frame onto stack
-    auto frame = new_frame(compiled_fn, sp - num_args);
+    auto frame = new_frame(closure, sp - num_args);
     push_frame(frame);
 
     // Allocate space for local bindings underneath frame, by incrementing stack pointer
-    sp = frame->base_pointer + compiled_fn->num_locals;
+    sp = frame->base_pointer + closure->fn->num_locals;
 
     return nullptr;
+}
+
+std::shared_ptr<Error> VM::push_closure(int const_index) {
+    auto constant = constants.at(const_index);
+
+    auto function = std::dynamic_pointer_cast<CompiledFunction>(constant);
+    if (!function) {
+        return new_error("not a function" + objecttype_literal(constant->type()));
+    }
+
+    auto closure = std::make_shared<Closure>(Closure(function));
+    return push(closure);
 }
 
 std::shared_ptr<Error> VM::call_builtin(std::shared_ptr<Object> builtin, int num_args) {
@@ -489,6 +503,15 @@ std::shared_ptr<Error> VM::run() {
             auto definition = get_builtin_by_index(builtin_index);
 
             auto err = push(definition);
+            if (err) {
+                return err;
+            }
+        } else if (op == OpType::OpClosure) {
+            auto const_index = read_uint_16(ins, ip+1);
+            auto _ = read_uint_8(ins, ip+3);
+            current_frame()->ip += 3;
+
+            auto err = push_closure(const_index);
             if (err) {
                 return err;
             }

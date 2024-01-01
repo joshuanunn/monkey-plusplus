@@ -29,6 +29,7 @@ std::map<OpType, std::shared_ptr<Definition>> definitions = {
     {OpType::OpSetLocal, new_definition("OpSetLocal", 1)},
     {OpType::OpGetLocal, new_definition("OpGetLocal", 1)},
     {OpType::OpGetBuiltin, new_definition("OpGetBuiltin", 1)},
+    {OpType::OpClosure, new_definition("OpClosure", 2, 1)},
 };
 
 Definition::Definition(std::string name) : name{name}, operand_widths{} {}
@@ -76,6 +77,9 @@ std::string fmt_instruction(std::shared_ptr<Definition> def, std::vector<int> op
             return def->name;
         case 1:
             return def->name + " " + std::to_string(operands.at(0));
+        case 2:
+            return def->name + " " + std::to_string(operands.at(0)) +
+                             + " " + std::to_string(operands.at(1));
     }
 
     return "ERROR: unhandled operand_count for " + def->name + "\n";
@@ -109,7 +113,8 @@ std::ostream& operator<<(std::ostream& out, const Instructions& ins) {
 Instructions make(OpType op) {
     auto [def, ok] = lookup(op);
     if (!ok) {
-        return std::vector<uint8_t>{};
+        std::cerr << "fatal error: " << def->name << " instruction not defined." << std::endl;
+        throw std::exception();
     }
 
     int instruction_len = std::accumulate(def->operand_widths.begin(), def->operand_widths.end(), 1);
@@ -128,7 +133,8 @@ Instructions make(OpType op) {
 Instructions make(OpType op, int operand) {
     auto [def, ok] = lookup(op);
     if (!ok) {
-        return std::vector<uint8_t>{};
+        std::cerr << "fatal error: " << def->name << " instruction not defined." << std::endl;
+        throw std::exception();
     }
 
     int instruction_len = std::accumulate(def->operand_widths.begin(), def->operand_widths.end(), 1);
@@ -149,7 +155,64 @@ Instructions make(OpType op, int operand) {
         // Store 8-bit instruction directly in a single byte
         case 1:
             instruction[offset] = static_cast<uint8_t>(operand);
-        break;
+            break;
+    }
+
+    return instruction;
+}
+
+Instructions make(OpType op, int first_operand, int second_operand) {
+    auto [def, ok] = lookup(op);
+    if (!ok) {
+        std::cerr << "fatal error: " << def->name << " instruction not defined." << std::endl;
+        throw std::exception();
+    }
+
+    if (def->operand_widths.size() != 2) {
+        std::cerr << "fatal error: unexpectedly received 2 operands for an " << def->name << " instruction." << std::endl;
+        throw std::exception();
+    }
+
+    int instruction_len = std::accumulate(def->operand_widths.begin(), def->operand_widths.end(), 1);
+
+    std::vector<uint8_t> instruction(instruction_len);
+    instruction[0] = as_opcode(op);
+
+    int offset = 1;
+    int width;
+
+    // Process first operand
+    width = def->operand_widths.at(0);
+
+    switch (width) {
+        // Store 16-bit instruction as 2 bytes (big endian byte order)
+        case 2:
+            instruction[offset] = static_cast<uint16_t>(first_operand) >> 8;
+            instruction[offset + 1] = static_cast<uint16_t>(first_operand) & 0xFF;
+            offset += 2;
+            break;
+        // Store 8-bit instruction directly in a single byte
+        case 1:
+            instruction[offset] = static_cast<uint8_t>(first_operand);
+            offset += 1;
+            break;
+    }
+
+    // Process second operand
+    width = def->operand_widths.at(1);
+
+    switch (width) {
+        // Store 16-bit instruction as 2 bytes (big endian byte order)
+        case 2:
+            instruction[offset] = static_cast<uint16_t>(second_operand) >> 8;
+            instruction[offset + 1] = static_cast<uint16_t>(second_operand) & 0xFF;
+            offset += 2;
+            break;
+        // Store 8-bit instruction directly in a single byte
+        case 1:
+            instruction[offset] = static_cast<uint8_t>(second_operand);
+            offset += 1;
+            break;
     }
 
     return instruction;

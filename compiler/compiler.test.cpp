@@ -627,7 +627,7 @@ TEST_CASE("Test Function With Return") {
         make(OpType::OpReturnValue),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 2),
+        make(OpType::OpClosure, 2, 0),
         make(OpType::OpPop),
     };
 
@@ -664,7 +664,7 @@ TEST_CASE("Test Function With No Return") {
         make(OpType::OpReturnValue),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 2),
+        make(OpType::OpClosure, 2, 0),
         make(OpType::OpPop),
     };
 
@@ -701,7 +701,7 @@ TEST_CASE("Test Function With No Return And Two Expression Statements") {
         make(OpType::OpReturnValue),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 2),
+        make(OpType::OpClosure, 2, 0),
         make(OpType::OpPop),
     };
 
@@ -734,7 +734,7 @@ TEST_CASE("Test Function With No Return Value") {
         make(OpType::OpReturn),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 0),
+        make(OpType::OpClosure, 0, 0),
         make(OpType::OpPop),
     };
 
@@ -765,7 +765,7 @@ TEST_CASE("Test Function Calls") {
         make(OpType::OpReturnValue),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 1), // The compiled function
+        make(OpType::OpClosure, 1, 0), // The compiled function
         make(OpType::OpCall, 0),
         make(OpType::OpPop),
     };
@@ -804,7 +804,7 @@ noArg();
         make(OpType::OpReturnValue),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 1), // The compiled function
+        make(OpType::OpClosure, 1, 0), // The compiled function
         make(OpType::OpSetGlobal, 0),
         make(OpType::OpGetGlobal, 0),
         make(OpType::OpCall, 0),
@@ -837,7 +837,7 @@ noArg();
 TEST_CASE("Test Let Statement Scopes 1") {
     std::string input = R"(
 let num = 55;
-fn() { num };
+fn() { num }
 )";
     std::vector<int> expected_integer_constants = std::vector<int>{55};
     std::vector<Instructions> expected_fn_instructions = {
@@ -847,7 +847,7 @@ fn() { num };
     std::vector<Instructions> expected_instructions = {
         make(OpType::OpConstant, 0),
         make(OpType::OpSetGlobal, 0),
-        make(OpType::OpConstant, 1),
+        make(OpType::OpClosure, 1, 0),
         make(OpType::OpPop),
     };
 
@@ -878,7 +878,7 @@ TEST_CASE("Test Let Statement Scopes 2") {
     std::string input = R"(
 fn() {
     let num = 55;
-    num;
+    num
 }
 )";
     std::vector<int> expected_integer_constants = std::vector<int>{55};
@@ -889,7 +889,7 @@ fn() {
         make(OpType::OpReturnValue),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 1),
+        make(OpType::OpClosure, 1, 0),
         make(OpType::OpPop),
     };
 
@@ -921,7 +921,7 @@ TEST_CASE("Test Let Statement Scopes 3") {
 fn() {
     let a = 55;
     let b = 77;
-    a + b;
+    a + b
 }
 )";
     std::vector<int> expected_integer_constants = std::vector<int>{55, 77};
@@ -936,7 +936,7 @@ fn() {
         make(OpType::OpReturnValue),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 2),
+        make(OpType::OpClosure, 2, 0),
         make(OpType::OpPop),
     };
 
@@ -974,7 +974,7 @@ oneArg(24);
         make(OpType::OpReturnValue),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 0),
+        make(OpType::OpClosure, 0, 0),
         make(OpType::OpSetGlobal, 0),
         make(OpType::OpGetGlobal, 0),
         make(OpType::OpConstant, 1),
@@ -1020,7 +1020,7 @@ manyArg(24, 25, 26);
         make(OpType::OpReturnValue),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 0),
+        make(OpType::OpClosure, 0, 0),
         make(OpType::OpSetGlobal, 0),
         make(OpType::OpGetGlobal, 0),
         make(OpType::OpConstant, 1),
@@ -1099,7 +1099,7 @@ TEST_CASE("Test Builtins Within Functions") {
         make(OpType::OpReturnValue),
     };
     std::vector<Instructions> expected_instructions = {
-        make(OpType::OpConstant, 0),
+        make(OpType::OpClosure, 0, 0),
         make(OpType::OpPop),
     };
 

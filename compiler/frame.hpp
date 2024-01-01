@@ -15,9 +15,9 @@ struct Frame {
 
     Frame& operator=(Frame&& other) noexcept = default;
 
-    Frame(std::shared_ptr<CompiledFunction> fn, int ip, int base_pointer);
+    Frame(std::shared_ptr<Closure> cl, int ip, int base_pointer);
 
-    std::shared_ptr<CompiledFunction> fn;
+    std::shared_ptr<Closure> cl;
 
     int ip;
 
@@ -26,6 +26,6 @@ struct Frame {
     Instructions instructions();
 };
 
-std::shared_ptr<Frame> new_frame(std::shared_ptr<CompiledFunction> fn, int base_pointer);
+std::shared_ptr<Frame> new_frame(std::shared_ptr<Closure> cl, int base_pointer);
 
 #endif //MONKEY_PLUSPLUS_FRAME_HPP

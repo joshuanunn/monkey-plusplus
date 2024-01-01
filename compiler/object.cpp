@@ -617,6 +617,66 @@ std::shared_ptr<Object> CompiledFunction::clone() const {
     return std::make_shared<CompiledFunction>(CompiledFunction{*this});
 }
 
+Closure::Closure(std::shared_ptr<CompiledFunction> fn) : fn{fn}, free{} {}
+
+Closure::Closure(const Closure& other) {
+    fn = std::dynamic_pointer_cast<CompiledFunction>(other.fn->clone());
+
+    for (const auto &s: other.free) {
+        free.push_back(s->clone());
+    }
+}
+
+Closure::Closure(Closure&& other) noexcept {
+    fn = std::move(other.fn);
+    other.fn = nullptr;
+
+    free.swap(other.free);
+}
+
+Closure& Closure::operator=(const Closure& other) {
+    if (this == &other) return *this;
+
+    fn = std::dynamic_pointer_cast<CompiledFunction>(other.fn->clone());
+
+    for (const auto &s: other.free) {
+        free.push_back(s->clone());
+    }
+
+    return *this;
+}
+
+Closure& Closure::operator=(Closure&& other) noexcept {
+    if (this == &other) return *this;
+
+    fn = std::move(other.fn);
+    other.fn = nullptr;
+
+    free.swap(other.free);
+
+    return *this;
+}
+
+ObjectType Closure::type() const {
+    return ObjectType::CLOSURE_OBJ;
+}
+
+std::string Closure::inspect() const {
+    auto address = (unsigned long long)(void**) this;
+
+    // Convert address to string with hex representation
+    // C++ source adapted (under CC BY-SA 2.5 license) from: https://stackoverflow.com/questions/5100718
+    std::stringstream stream;
+    stream << "0x" << std::setfill ('0') << std::setw(sizeof(address)*2)
+           << std::hex << address;
+
+    return "Closure[" + stream.str() + "]";
+}
+
+std::shared_ptr<Object> Closure::clone() const {
+    return std::make_shared<Closure>(Closure{*this});
+}
+
 // Hashing algorithm using a 64-bit FNV-1a hash in line with that used in Go (hash/fnv)
 // C++ source adapted (under MIT License) from: https://github.com/SRombauts/cpp-algorithms
 HashKey String::hash_key() const {
@@ -656,6 +716,7 @@ std::map<ObjectType, std::string> objecttype_literals = {
         {ObjectType::ARRAY_OBJ,"ARRAY"},
         {ObjectType::HASH_OBJ,"HASH"},
         {ObjectType::COMPILED_FUNCTION_OBJ,"COMPILED_FUNCTION"},
+        {ObjectType::CLOSURE_OBJ,"CLOSURE"},
 };
 
 std::string objecttype_literal(ObjectType t) {

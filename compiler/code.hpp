@@ -44,7 +44,8 @@ enum class OpType : Opcode {
     OpReturn,
     OpSetLocal,
     OpGetLocal,
-    OpGetBuiltin
+    OpGetBuiltin,
+    OpClosure
 };
 
 struct Definition {
@@ -88,6 +89,8 @@ std::string fmt_instruction(std::shared_ptr<Definition> def, std::vector<int> op
 Instructions make(OpType op);
 
 Instructions make(OpType op, int operand);
+
+Instructions make(OpType op, int first_operand, int second_operand);
 
 int read_uint_8(Instructions ins, int offset);
 

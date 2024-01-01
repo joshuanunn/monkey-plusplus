@@ -21,7 +21,8 @@ enum class ObjectType {
     BUILTIN_OBJ,
     ARRAY_OBJ,
     HASH_OBJ,
-    COMPILED_FUNCTION_OBJ
+    COMPILED_FUNCTION_OBJ,
+    CLOSURE_OBJ
 };
 
 std::string objecttype_literal(ObjectType);
@@ -319,6 +320,30 @@ struct CompiledFunction : public Object {
     int num_locals;
 
     int num_parameters;
+
+    ObjectType type() const override;
+
+    std::string inspect() const override;
+
+    std::shared_ptr<Object> clone() const override;
+};
+
+struct Closure : public Object {
+    Closure() = default;
+
+    Closure(std::shared_ptr<CompiledFunction> fn);
+
+    Closure(const Closure& other);
+
+    Closure(Closure&& other) noexcept;
+
+    Closure& operator=(const Closure& other);
+
+    Closure& operator=(Closure&& other) noexcept;
+
+    std::shared_ptr<CompiledFunction> fn;
+
+    std::vector<std::shared_ptr<Object>> free;
 
     ObjectType type() const override;
 

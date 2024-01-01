@@ -61,6 +61,8 @@ struct Compiler {
 
     int emit(OpType op, int operand);
 
+    int emit(OpType op, int first_operand, int second_operand);
+
     int add_instruction(Instructions ins);
 
     void set_last_instruction(OpType op, int pos);
