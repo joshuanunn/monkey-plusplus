@@ -436,7 +436,7 @@ TEST_CASE("Test Builtin Functions Returning Null") {
 
 TEST_CASE("Test Builtin Function Returning Errors") {
     std::vector<std::tuple<std::string, std::string>> tests = {
-            std::make_tuple("len(1)", "argument to 'len' not supported."),
+            std::make_tuple("len(1)", "argument to 'len' not supported, got INTEGER"),
             std::make_tuple(R"(len("one", "two"))", "wrong number of arguments. got=2, want=1"),
             std::make_tuple(R"(first(1))", "argument to 'first' must be ARRAY, got INTEGER"),
             std::make_tuple(R"(last(1))", "argument to 'last' must be ARRAY, got INTEGER"),

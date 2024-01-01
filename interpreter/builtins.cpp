@@ -11,7 +11,7 @@ std::shared_ptr<Object> __len(std::vector<std::shared_ptr<Object>> args) {
         return std::make_shared<Integer>(str->value.size());
     }
 
-    return new_error("argument to 'len' not supported.");
+    return new_error("argument to 'len' not supported, got " + objecttype_literal(args.at(0)->type()));
 }
 
 std::shared_ptr<Object> __first(std::vector<std::shared_ptr<Object>> args) {
