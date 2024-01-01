@@ -1302,3 +1302,110 @@ fn() {
         REQUIRE(test_function_constants(expected_fn_constants.at(i), bytecode->constants.at(i + 4)));
     }
 }
+
+TEST_CASE("Test Recursive Functions") {
+    std::string input = R"(
+let countDown = fn(x) { countDown(x - 1); };
+countDown(1);
+)";
+    std::vector<int> expected_integer_constants = {1, 1};
+    std::vector<Instructions> expected_fn_constants = {
+        make(OpType::OpCurrentClosure),
+        make(OpType::OpGetLocal, 0),
+        make(OpType::OpConstant, 0),
+        make(OpType::OpSub),
+        make(OpType::OpCall, 1),
+        make(OpType::OpReturnValue),
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpClosure, 1, 0),
+        make(OpType::OpSetGlobal, 0),
+        make(OpType::OpGetGlobal, 0),
+        make(OpType::OpConstant, 2),
+        make(OpType::OpCall, 1),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test integer constants (first and third on stack)
+    std::vector<std::shared_ptr<Object>> actual_integer_constants;
+    actual_integer_constants.push_back(bytecode->constants.at(0));
+    actual_integer_constants.push_back(bytecode->constants.at(2));
+    REQUIRE(test_integer_constants(expected_integer_constants, actual_integer_constants));
+
+    // Test compiled function constants (second on stack)
+    REQUIRE(test_function_constants(expected_fn_constants, bytecode->constants.at(1)));
+}
+
+TEST_CASE("Test Recursive Functions Defined In A Function") {
+    std::string input = R"(
+let wrapper = fn() {
+    let countDown = fn(x) { countDown(x - 1); };
+    countDown(1);
+};
+wrapper();
+)";
+    std::vector<int> expected_integer_constants = {1, 1};
+    std::vector<std::vector<Instructions>> expected_fn_constants = {
+        {
+            make(OpType::OpCurrentClosure),
+            make(OpType::OpGetLocal, 0),
+            make(OpType::OpConstant, 0),
+            make(OpType::OpSub),
+            make(OpType::OpCall, 1),
+            make(OpType::OpReturnValue),
+        },
+        {
+            make(OpType::OpClosure, 1, 0),
+            make(OpType::OpSetLocal, 0),
+            make(OpType::OpGetLocal, 0),
+            make(OpType::OpConstant, 2),
+            make(OpType::OpCall, 1),
+            make(OpType::OpReturnValue),
+        },
+    };
+    std::vector<Instructions> expected_instructions = {
+        make(OpType::OpClosure, 3, 0),
+        make(OpType::OpSetGlobal, 0),
+        make(OpType::OpGetGlobal, 0),
+        make(OpType::OpCall, 0),
+        make(OpType::OpPop),
+    };
+
+    auto program = parse(input);
+
+    auto compiler = new_compiler();
+
+    auto err = compiler->compile(program);
+    if (err) {
+        std::cerr << "compiler error: " << err->message << std::endl;
+    }
+    REQUIRE(!err);
+
+    auto bytecode = compiler->bytecode();
+
+    REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
+
+    // Test integer constants (first and third on stack)
+    std::vector<std::shared_ptr<Object>> actual_integer_constants;
+    actual_integer_constants.push_back(bytecode->constants.at(0));
+    actual_integer_constants.push_back(bytecode->constants.at(2));
+    REQUIRE(test_integer_constants(expected_integer_constants, actual_integer_constants));
+
+    // Test compiled function constants (second and forth on stack)
+    REQUIRE(test_function_constants(expected_fn_constants.at(0), bytecode->constants.at(1)));
+    REQUIRE(test_function_constants(expected_fn_constants.at(1), bytecode->constants.at(3)));
+}

@@ -1292,3 +1292,42 @@ TEST_CASE("Test Parsing Hash Literals With Expressions") {
         REQUIRE(test_infix_expression(value, left_int, op, right_int));
     }
 }
+
+TEST_CASE("Test Function Literal With Name") {
+    std::string input = R"(let myFunction = fn() { };)";
+
+    auto l = Lexer(input);
+    auto p = Parser(std::move(l));
+    auto program = p.parse_program();
+    REQUIRE(test_parser_errors(p));
+
+    if (program->statements.size() != 1) {
+        std::cerr << "program->statements does not contain 1 statements. got=" << program->statements.size() << std::endl;
+    }
+    REQUIRE(program->statements.size() == 1);
+
+    auto stmt = program->statements.at(0);
+
+    // Can now cast Node to a derived LetStatement, as we are confident that it is one
+    auto let_stmt = std::dynamic_pointer_cast<LetStatement>(stmt);
+
+    // Check that we have a Let Statement by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!let_stmt) {
+        std::cerr << "program.statements.at(0) is not a LetStatement." << std::endl;
+    }
+    REQUIRE(let_stmt);
+
+    // Cast statement value to a FunctionLiteral, as this is what we are expecting
+    auto function = std::dynamic_pointer_cast<FunctionLiteral>(let_stmt->value);
+
+    // Check that we have a HashLiteral by checking if the dynamic pointer cast fails (returns nullptr)
+    if (!function) {
+        std::cerr << "stmt->value is not a FunctionLiteral." << std::endl;
+    }
+    REQUIRE(function);
+
+    if (function->name != "myFunction") {
+        std::cerr << "function literal name wrong. want 'myFunction', got='" << function->name << "'" << std::endl;
+    }
+    REQUIRE(function->name == "myFunction");
+}

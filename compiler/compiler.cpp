@@ -149,11 +149,13 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         }
     // Let Statement
     } else if (auto l = std::dynamic_pointer_cast<LetStatement>(node)) {
+        auto symbol = symbol_table->define(l->name->value);
+
         err = compile(l->value);
         if (is_error(err)) {
             return err;
         }
-        auto symbol = symbol_table->define(l->name->value);
+
         if (symbol.scope == SymbolScope::GlobalScope) {
             emit(OpType::OpSetGlobal, symbol.index);
         } else {
@@ -214,6 +216,11 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
     } else if (auto f = std::dynamic_pointer_cast<FunctionLiteral>(node)) {
         // Enter new scope to compile the function
         enter_scope();
+
+        // Add function name to symbol table
+        if (f->name != "") {
+            symbol_table->define_function_name(f->name);
+        }
 
         // Add any function arguments to local bindings
         for (const auto& p : f->parameters) {
@@ -437,5 +444,7 @@ void Compiler::load_symbol(Symbol s) {
         emit(OpType::OpGetBuiltin, s.index);
     } else if (s.scope == SymbolScope::FreeScope) {
         emit(OpType::OpGetFree, s.index);
+    } else if (s.scope == SymbolScope::FunctionScope) {
+        emit(OpType::OpCurrentClosure);
     }
 }

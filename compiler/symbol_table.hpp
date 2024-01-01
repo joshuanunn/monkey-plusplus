@@ -11,7 +11,8 @@ enum class SymbolScope {
     LocalScope,
     GlobalScope,
     BuiltinScope,
-    FreeScope
+    FreeScope,
+    FunctionScope
 };
 
 struct Symbol {
@@ -52,6 +53,8 @@ struct SymbolTable {
     Symbol define_free(Symbol original);
 
     Symbol define_builtin(int index, std::string name);
+
+    Symbol define_function_name(std::string name);
 
     std::tuple<Symbol, bool> resolve(const std::string& name);
 };

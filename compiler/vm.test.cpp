@@ -1097,3 +1097,70 @@ closure();
         REQUIRE(test_integer_object(tt_expected, stack_elem));
     }
 }
+
+TEST_CASE("Test Recursive Functions") {
+    std::vector<std::tuple<std::string, int>> tests = {
+        std::make_tuple(R"(
+let countDown = fn(x) {
+    if (x == 0) {
+        return 0;
+    } else {
+        countDown(x - 1);
+    }
+};
+countDown(1);
+)",     0),
+        std::make_tuple(R"(
+let countDown = fn(x) {
+    if (x == 0) {
+        return 0;
+    } else {
+        countDown(x - 1);
+    }
+};
+let wrapper = fn() {
+    countDown(1);
+};
+wrapper();
+)",     0),
+        std::make_tuple(R"(
+let wrapper = fn() {
+    let countDown = fn(x) {
+        if (x == 0) {
+            return 0;
+        } else {
+            countDown(x - 1);
+        }
+    };
+    countDown(1);
+};
+wrapper();
+)",     0),
+    };
+
+    for (const auto &tt: tests) {
+        const auto [tt_input, tt_expected] = tt;
+
+        auto program = parse(tt_input);
+
+        auto compiler = new_compiler();
+
+        auto err = compiler->compile(program);
+        if (err) {
+            std::cerr << "compiler error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto vm = VM(compiler->bytecode());
+
+        err = vm.run();
+        if (err) {
+            std::cerr << "vm error: " << err->message << std::endl;
+        }
+        REQUIRE(!err);
+
+        auto stack_elem = vm.last_popped_stack_elem();
+
+        REQUIRE(test_integer_object(tt_expected, stack_elem));
+    }
+}

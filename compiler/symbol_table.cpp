@@ -19,6 +19,8 @@ std::ostream& operator<<(std::ostream& out, const Symbol& sym) {
         out << "BuiltinScope";
     } else if (sym.scope == SymbolScope::FreeScope) {
         out << "FreeScope";
+    } else if (sym.scope == SymbolScope::FunctionScope) {
+        out << "FunctionScope";
     } else {
         out << "UNDEFINED";
     }
@@ -69,6 +71,12 @@ Symbol SymbolTable::define_free(Symbol original) {
 
 Symbol SymbolTable::define_builtin(int index, std::string name) {
     auto symbol = Symbol{name:name, scope:SymbolScope::BuiltinScope, index:index};
+    store[name] = symbol;
+    return symbol;
+}
+
+Symbol SymbolTable::define_function_name(std::string name) {
+    auto symbol = Symbol{name:name, scope:SymbolScope::FunctionScope, index:0};
     store[name] = symbol;
     return symbol;
 }

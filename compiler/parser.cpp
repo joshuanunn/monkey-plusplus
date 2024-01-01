@@ -69,6 +69,10 @@ std::shared_ptr<LetStatement> Parser::parse_let_statement() {
 
     stmt->value = parse_expression(Precedence::LOWEST);
 
+    if (auto fl = std::dynamic_pointer_cast<FunctionLiteral>(stmt->value)) {
+        fl->name = stmt->name->value;
+    }
+
     if (peek_token_is(TokenType::SEMICOLON)) {
         next_token();
     }

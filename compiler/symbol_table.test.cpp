@@ -378,3 +378,42 @@ TEST_CASE("Test Resolve Unresolvable Free") {
         REQUIRE(!ok);
     }
 }
+
+TEST_CASE("Test Define And Resolve Function Name") {
+    auto global = new_symbol_table();
+    global->define_function_name("a");
+
+    auto expected = Symbol{"a", SymbolScope::FunctionScope, 0};
+
+    auto [result, ok] = global->resolve(expected.name);
+
+    if (!ok) {
+        std::cerr << "function name " << expected.name << " not resolvable" << std::endl;
+    }
+    REQUIRE(ok);
+
+    if (result != expected) {
+        std::cerr << "expected " << expected.name << " to resolve to " << expected << ", got=" << result << std::endl;
+    }
+    REQUIRE(result == expected);
+}
+
+TEST_CASE("Test Shadowing Function Name") {
+    auto global = new_symbol_table();
+    global->define_function_name("a");
+    global->define("a");
+
+    auto expected = Symbol{"a", SymbolScope::GlobalScope, 0};
+
+    auto [result, ok] = global->resolve(expected.name);
+
+    if (!ok) {
+        std::cerr << "function name " << expected.name << " not resolvable" << std::endl;
+    }
+    REQUIRE(ok);
+
+    if (result != expected) {
+        std::cerr << "expected " << expected.name << " to resolve to " << expected << ", got=" << result << std::endl;
+    }
+    REQUIRE(result == expected);
+}

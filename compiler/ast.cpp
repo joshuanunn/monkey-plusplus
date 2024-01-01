@@ -638,7 +638,13 @@ std::string FunctionLiteral::token_literal() const {
 }
 
 std::string FunctionLiteral::string() const {
-    std::string msg = token.literal + "(";
+    std::string msg = token.literal;
+
+    if (name != "") {
+        msg += "<" + name + ">";
+    }
+
+    msg += "(";
 
     int counter = 0;
 
@@ -662,7 +668,7 @@ std::shared_ptr<Node> FunctionLiteral::clone() const {
 
 FunctionLiteral::FunctionLiteral(const Token& t) : token{t} {}
 
-FunctionLiteral::FunctionLiteral(const FunctionLiteral& other) : token{other.token}, parameters{} {
+FunctionLiteral::FunctionLiteral(const FunctionLiteral& other) : token{other.token}, parameters{}, name{other.name} {
     for (const auto &s: other.parameters) {
         parameters.push_back(std::dynamic_pointer_cast<Identifier>(s->clone()));
     }
@@ -674,10 +680,12 @@ FunctionLiteral::FunctionLiteral(FunctionLiteral&& other) noexcept {
     token = std::move(other.token);
     parameters.swap(other.parameters);
     body = std::move(other.body);
+    name = std::move(other.name);
 
     other.token.type = TokenType::ILLEGAL;
     other.token.literal = "";
     other.body = nullptr;
+    other.name = "";
 }
 
 FunctionLiteral& FunctionLiteral::operator=(const FunctionLiteral& other) {
@@ -690,6 +698,7 @@ FunctionLiteral& FunctionLiteral::operator=(const FunctionLiteral& other) {
     }
 
     body = std::dynamic_pointer_cast<BlockStatement>(other.body->clone());
+    name = other.name;
 
     return *this;
 }
@@ -700,10 +709,12 @@ FunctionLiteral& FunctionLiteral::operator=(FunctionLiteral&& other) noexcept {
     token = std::move(other.token);
     parameters.swap(other.parameters);
     body = std::move(other.body);
+    name = std::move(other.name);
 
     other.token.type = TokenType::ILLEGAL;
     other.token.literal = "";
     other.body = nullptr;
+    other.name = "";
 
     return *this;
 }

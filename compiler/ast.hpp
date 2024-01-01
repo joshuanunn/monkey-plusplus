@@ -235,6 +235,8 @@ struct FunctionLiteral : public Expression {
 
     std::shared_ptr<BlockStatement> body;
 
+    std::string name;
+
     std::string token_literal() const override;
 
     std::string string() const override;

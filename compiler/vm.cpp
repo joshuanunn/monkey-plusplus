@@ -536,6 +536,13 @@ std::shared_ptr<Error> VM::run() {
             if (err) {
                 return err;
             }
+        } else if (op == OpType::OpCurrentClosure) {
+            auto current_closure = current_frame()->cl;
+
+            auto err = push(current_closure);
+            if (err) {
+                return err;
+            }
         }
     }
 
