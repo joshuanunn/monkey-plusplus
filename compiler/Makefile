@@ -1,6 +1,9 @@
-CXXFLAGS = -g --std=c++17 -I../include -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wmissing-declarations -Wold-style-cast -Woverloaded-virtual -Wsign-promo -Wswitch-default -Wundef -Werror -Wno-unused
+CXXFLAGS = -g -O3 --std=c++17 -I../include -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wmissing-declarations -Wold-style-cast -Woverloaded-virtual -Wsign-promo -Wswitch-default -Wundef -Werror -Wno-unused
 
 monkey : ast.o builtins.o code.o compiler.o frame.o lexer.o object.o parser.o symbol_table.o token.o vm.o repl.o monkey.o
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+benchmark : ast.o builtins.o code.o compiler.o frame.o lexer.o object.o parser.o symbol_table.o token.o vm.o benchmark.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
 asttest : ast.o token.o ast.test.o
@@ -30,6 +33,9 @@ tokentest : token.o token.test.o
 vmtest : ast.o builtins.o code.o compiler.o frame.o lexer.o object.o parser.o symbol_table.o token.o vm.o vm.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
+test-benchmark : benchmark
+	./benchmark
+
 test-ast : asttest
 	./asttest
 
@@ -58,4 +64,4 @@ test-vm : vmtest
 	./vmtest
 
 clean :
-	rm -rf *.o asttest codetest compilertest lexertest objecttest parsertest symboltabletest tokentest vmtest monkey
+	rm -rf *.o asttest benchmark codetest compilertest lexertest objecttest parsertest symboltabletest tokentest vmtest monkey
