@@ -1,7 +1,7 @@
 #include "lexer.hpp"
 
 bool is_letter(char ch) {
-    return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_';
+    return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch == '_';
 }
 
 bool is_digit(char ch) {
@@ -21,7 +21,7 @@ Lexer::Lexer(Lexer &&other) noexcept: input(std::move(other.input)), position(ot
 }
 
 void Lexer::read_char() {
-    if (read_position >= input.length()) {
+    if (read_position >= static_cast<int>(input.length())) {
         ch = 0;
     } else {
         ch = input[read_position];
@@ -52,7 +52,7 @@ std::string Lexer::read_number() {
 }
 
 char Lexer::peek_char() {
-    if (read_position >= input.length()) {
+    if (read_position >= static_cast<int>(input.length())) {
         return 0;
     } else {
         return input[read_position];

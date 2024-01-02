@@ -7,6 +7,25 @@
 
 #include "parser.hpp"
 
+// Forward declaration of test helpers
+
+bool test_parser_errors(const Parser &p);
+
+bool test_integer_literal(std::shared_ptr<Expression> il, int value);
+
+bool test_identifier(std::shared_ptr<Expression> exp, std::string value);
+
+bool test_boolean_expression(std::shared_ptr<Expression> exp, bool value);
+
+bool test_literal_expression(std::shared_ptr<Expression> exp, int value);
+
+bool test_literal_expression(std::shared_ptr<Expression> exp, const char *value);
+
+bool test_literal_expression(std::shared_ptr<Expression> exp, std::string value);
+
+bool test_literal_expression(std::shared_ptr<Expression> exp, bool value);
+
+
 template <class T>
 bool test_let_statement(const Node &s, const std::string &name, T value) {
     if (s.token_literal() != "let") {
@@ -796,7 +815,7 @@ TEST_CASE("Test Function Parameter Parsing") {
         }
         REQUIRE(function->parameters.size() == tt_expected.size());
 
-        for (int i = 0; i < tt_expected.size(); i++) {
+        for (int i = 0; i < static_cast<int>(tt_expected.size()); i++) {
             REQUIRE(test_literal_expression(function->parameters.at(i), tt_expected.at(i)));
         }
     }
@@ -889,7 +908,7 @@ TEST_CASE("Test Call Expression Parameter Parsing") {
         }
         REQUIRE(exp->arguments.size() == tt_expected_args.size());
 
-        for (int i = 0; i < tt_expected_args.size(); i++) {
+        for (int i = 0; i < static_cast<int>(tt_expected_args.size()); i++) {
             if (exp->arguments.at(i)->string() != tt_expected_args.at(i)) {
                 std::cerr << "argument " << i << " wrong. want =" << tt_expected_args.at(i) << ", got=" << exp->arguments.at(i)->string() << std::endl;
             }

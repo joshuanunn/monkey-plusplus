@@ -118,7 +118,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         auto jump_pos = emit(OpType::OpJump, 9999);
 
         // Update placeholder value of conditional jump instruction to actual value
-        auto after_consequence_pos = (int) scopes.at(scope_index).instructions.size();
+        auto after_consequence_pos = static_cast<int>(scopes.at(scope_index).instructions.size());
         change_operand(jump_not_truthy_pos, after_consequence_pos);
 
         // If no alternative, emit a OpNull instruction, else compile alternative
@@ -137,7 +137,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
         }
 
         // Update placeholder value of jump instruction to actual value
-        auto after_alternative_pos = (int) scopes.at(scope_index).instructions.size();
+        auto after_alternative_pos = static_cast<int>(scopes.at(scope_index).instructions.size());
         change_operand(jump_pos, after_alternative_pos);
     // Block Statement
     } else if (auto b = std::dynamic_pointer_cast<BlockStatement>(node)) {
@@ -182,7 +182,7 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
             }
         }
 
-        emit(OpType::OpArray, (int) a->elements.size());
+        emit(OpType::OpArray, static_cast<int>(a->elements.size()));
     // Hash Literal
     } else if (auto hl = std::dynamic_pointer_cast<HashLiteral>(node)) {
         for (auto const& kv: hl->pairs) {
@@ -290,35 +290,31 @@ std::shared_ptr<Error> Compiler::compile(std::shared_ptr<Node> node)
 }
 
 std::shared_ptr<Compiler> new_compiler() {
-    auto main_scope = CompilationScope{};
+    auto main_scope = std::vector<CompilationScope>{CompilationScope{}};
 
     auto symbol_table = new_symbol_table();
 
     // Define all builtin functions
-    for (int i = 0; i < builtins_names.size(); i++) {
+    for (int i = 0; i < static_cast<int>(builtins_names.size()); i++) {
         symbol_table->define_builtin(i, builtins_names[i]);
     }
 
-    return std::make_shared<Compiler>(
-        Compiler{
-            symbol_table: symbol_table,
-            scopes: std::vector<CompilationScope>{main_scope},
-            scope_index: 0
-        });
+    auto compiler = std::make_shared<Compiler>(Compiler{});
+    compiler->symbol_table = symbol_table;
+    compiler->scopes = main_scope;
+
+    return compiler;
 }
 
 std::shared_ptr<Compiler> new_compiler_with_state(
     std::shared_ptr<SymbolTable> s, std::vector<std::shared_ptr<Object>> constants) {
 
-    auto main_scope = CompilationScope{};
+    auto main_scope = std::vector<CompilationScope>{CompilationScope{}};
 
-    auto compiler = std::make_shared<Compiler>(
-        Compiler{
-            constants: constants,
-            symbol_table: s,
-            scopes: std::vector<CompilationScope>{main_scope},
-            scope_index: 0
-    });
+    auto compiler = std::make_shared<Compiler>(Compiler{});
+    compiler->constants = constants;
+    compiler->symbol_table = s;
+    compiler->scopes = main_scope;
 
     return compiler;
 }
@@ -403,7 +399,7 @@ void Compiler::replace_last_pop_with_return() {
 }
 
 void Compiler::replace_instruction(int pos, Instructions new_instruction) {
-    for (int i = 0; i < new_instruction.size(); i++) {
+    for (int i = 0; i < static_cast<int>(new_instruction.size()); i++) {
         scopes.at(scope_index).instructions.at(pos + i) = new_instruction.at(i);
     }
 }

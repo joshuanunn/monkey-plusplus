@@ -127,9 +127,9 @@ std::shared_ptr<Builtin> get_builtin_by_name(const std::string &name) {
 
     auto index = std::distance(builtins_names.begin(), fn);
 
-    return std::make_shared<Builtin>(Builtin{builtins[index]});
+    return std::make_shared<Builtin>(Builtin{builtins[static_cast<long unsigned>(index)]});
 }
 
 std::shared_ptr<Builtin> get_builtin_by_index(int index) {
-    return std::make_shared<Builtin>(Builtin{builtins[index]});
+    return std::make_shared<Builtin>(Builtin{builtins[static_cast<long unsigned>(index)]});
 }

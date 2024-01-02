@@ -189,7 +189,7 @@ std::shared_ptr<Error> VM::execute_comparison(OpType op) {
     } else if (op == OpType::OpNotEqual) {
         return push(native_bool_to_boolean_object(right_bool != left_bool));
     } else {
-        return new_error("unknown operator: " + std::to_string(as_opcode(op)));
+        return new_error("unknown operator: " + std::to_string(static_cast<int>(as_opcode(op))));
     }
 }
 
@@ -204,7 +204,7 @@ std::shared_ptr<Error> VM::execute_integer_comparison(OpType op, std::shared_ptr
     } else if (op == OpType::OpGreaterThan) {
         return push(native_bool_to_boolean_object(left_value > right_value));
     } else {
-        return new_error("unknown operator: " + std::to_string(as_opcode(op)));
+        return new_error("unknown operator: " + std::to_string(static_cast<int>(as_opcode(op))));
     }
 }
 
@@ -223,7 +223,7 @@ std::shared_ptr<Error> VM::execute_binary_integer_operation(OpType op, std::shar
     } else if (op == OpType::OpDiv) {
         result = left_value / right_value;
     } else {
-        return new_error("unknown integer operator: " + std::to_string(as_opcode(op)));
+        return new_error("unknown integer operator: " + std::to_string(static_cast<int>(as_opcode(op))));
     }
 
     // Push result back onto stack
@@ -232,7 +232,7 @@ std::shared_ptr<Error> VM::execute_binary_integer_operation(OpType op, std::shar
 
 std::shared_ptr<Error> VM::execute_binary_string_operation(OpType op, std::shared_ptr<Object> left, std::shared_ptr<Object> right) {
     if (op != OpType::OpAdd) {
-        return new_error("unknown string operator: " + std::to_string(as_opcode(op)));
+        return new_error("unknown string operator: " + std::to_string(static_cast<int>(as_opcode(op))));
     }
 
     auto left_value = std::dynamic_pointer_cast<String>(left)->value;
@@ -283,7 +283,7 @@ std::shared_ptr<Error> VM::execute_array_index(std::shared_ptr<Object> array, st
     auto array_obj = std::dynamic_pointer_cast<Array>(array);
     auto i = std::dynamic_pointer_cast<Integer>(index)->value;
 
-    auto max = (int) array_obj->elements.size() - 1;
+    auto max = static_cast<int>(array_obj->elements.size()) - 1;
 
     if (i < 0 || i > max) {
         return push(get_null_ref());

@@ -43,14 +43,14 @@ std::shared_ptr<Definition> new_definition(std::string name) {
 std::shared_ptr<Definition> new_definition(std::string name, int operand_width) {
     auto definition = std::make_shared<Definition>(Definition{name});
     definition->operand_widths.push_back(operand_width);
-    return std::move(definition);
+    return definition;
 }
 
 std::shared_ptr<Definition> new_definition(std::string name, int first_operand_width, int second_operand_width) {
     auto definition = std::make_shared<Definition>(Definition{name});
     definition->operand_widths.push_back(first_operand_width);
     definition->operand_widths.push_back(second_operand_width);
-    return std::move(definition);
+    return definition;
 }
 
 std::tuple<std::shared_ptr<Definition>, bool> lookup(const OpType &op)
@@ -82,9 +82,9 @@ std::string fmt_instruction(std::shared_ptr<Definition> def, std::vector<int> op
         case 2:
             return def->name + " " + std::to_string(operands.at(0)) +
                              + " " + std::to_string(operands.at(1));
+        default:
+            return "ERROR: unhandled operand_count for " + def->name;
     }
-
-    return "ERROR: unhandled operand_count for " + def->name + "\n";
 }
 
 std::ostream& operator<<(std::ostream& out, const Instructions& ins) {
@@ -92,7 +92,7 @@ std::ostream& operator<<(std::ostream& out, const Instructions& ins) {
 
     out.fill('0');
 
-    while (i < ins.size()) {
+    while (i < static_cast<int>(ins.size())) {
         auto[def, ok] = lookup(static_cast<OpType>(ins.at(i)));
         if (!ok) {
             // TODO: if lookup defined a range of error messages, then remove hard-coded message here.
@@ -158,6 +158,8 @@ Instructions make(OpType op, int operand) {
         case 1:
             instruction[offset] = static_cast<uint8_t>(operand);
             break;
+        default:
+            break;
     }
 
     return instruction;
@@ -198,6 +200,8 @@ Instructions make(OpType op, int first_operand, int second_operand) {
             instruction[offset] = static_cast<uint8_t>(first_operand);
             offset += 1;
             break;
+        default:
+            break;
     }
 
     // Process second operand
@@ -214,6 +218,8 @@ Instructions make(OpType op, int first_operand, int second_operand) {
         case 1:
             instruction[offset] = static_cast<uint8_t>(second_operand);
             offset += 1;
+            break;
+        default:
             break;
     }
 
@@ -237,7 +243,7 @@ std::tuple<std::vector<int>, int> read_operands(std::shared_ptr<Definition> def,
 
     int offset = 0;
 
-    for (int i = 0; i < def->operand_widths.size(); i++) {
+    for (int i = 0; i < static_cast<int>(def->operand_widths.size()); i++) {
         auto width = def->operand_widths.at(i);
 
         switch (width) {
@@ -248,6 +254,8 @@ std::tuple<std::vector<int>, int> read_operands(std::shared_ptr<Definition> def,
             // Read 1 byte instruction
             case 1:
                 operands[i] = read_uint_8(ins, offset);
+                break;
+            default:
                 break;
         }
         offset += width;

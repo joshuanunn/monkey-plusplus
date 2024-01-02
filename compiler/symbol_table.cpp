@@ -41,7 +41,9 @@ std::shared_ptr<SymbolTable> new_enclosed_symbol_table(std::shared_ptr<SymbolTab
 }
 
 Symbol SymbolTable::define(std::string name) {
-    auto symbol = Symbol{name:name, index:num_definitions};
+    auto symbol = Symbol{};
+    symbol.name = name;
+    symbol.index = num_definitions;
 
     // If there is no outer SymbolTable set, then its scope is global
     if (!outer) {
@@ -60,9 +62,9 @@ Symbol SymbolTable::define_free(Symbol original) {
     free_symbols.push_back(original);
 
     auto symbol = Symbol{
-        name: original.name,
-        scope: SymbolScope::FreeScope,
-        index: (int) free_symbols.size() - 1
+        original.name,
+        SymbolScope::FreeScope,
+        static_cast<int>(free_symbols.size()) - 1
     };
 
     store[original.name] = symbol;
@@ -70,13 +72,13 @@ Symbol SymbolTable::define_free(Symbol original) {
 }
 
 Symbol SymbolTable::define_builtin(int index, std::string name) {
-    auto symbol = Symbol{name:name, scope:SymbolScope::BuiltinScope, index:index};
+    auto symbol = Symbol{name, SymbolScope::BuiltinScope, index};
     store[name] = symbol;
     return symbol;
 }
 
 Symbol SymbolTable::define_function_name(std::string name) {
-    auto symbol = Symbol{name:name, scope:SymbolScope::FunctionScope, index:0};
+    auto symbol = Symbol{name, SymbolScope::FunctionScope, 0};
     store[name] = symbol;
     return symbol;
 }

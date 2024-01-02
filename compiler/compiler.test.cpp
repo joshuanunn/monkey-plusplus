@@ -8,6 +8,21 @@
 #include "compiler.hpp"
 #include "parser.hpp"
 
+// Forward declaration of test helpers
+
+std::shared_ptr<Program> parse(const std::string& input);
+
+Instructions concat_instructions(const std::vector<Instructions>& s);
+
+bool test_instructions(const std::vector<Instructions>& expected, const Instructions& actual);
+
+bool test_integer_constants(const std::vector<int>& expected, const std::vector<std::shared_ptr<Object>>& actual);
+
+bool test_string_constants(const std::vector<std::string>& expected, const std::vector<std::shared_ptr<Object>>& actual);
+
+bool test_function_constants(const std::vector<Instructions>& expected, const std::shared_ptr<Object>& actual);
+
+
 std::shared_ptr<Program> parse(const std::string& input) {
     auto l = Lexer(input);
     auto p = Parser(std::move(l));
@@ -52,7 +67,7 @@ bool test_integer_constants(const std::vector<int>& expected, const std::vector<
         return false;
     }
 
-    for (int i = 0; i < expected.size(); i++) {
+    for (int i = 0; i < static_cast<int>(expected.size()); i++) {
         auto integer_obj = std::dynamic_pointer_cast<Integer>(actual.at(i));
         if (!integer_obj) {
             std::cerr << "object is not Integer." << std::endl;
@@ -74,7 +89,7 @@ bool test_string_constants(const std::vector<std::string>& expected, const std::
         return false;
     }
 
-    for (int i = 0; i < expected.size(); i++) {
+    for (int i = 0; i < static_cast<int>(expected.size()); i++) {
         auto string_obj = std::dynamic_pointer_cast<String>(actual.at(i));
         if (!string_obj) {
             std::cerr << "object is not String." << std::endl;
@@ -567,8 +582,8 @@ TEST_CASE("Test Compiler Scopes") {
 
     last = compiler->scopes.at(compiler->scope_index).last_instruction;
     if (last.opcode != OpType::OpSub) {
-        std::cerr << "last_instruction.opcode wrong. got=" << std::to_string(as_opcode(last.opcode))
-            << ", want=" << std::to_string(as_opcode(OpType::OpSub)) << std::endl;
+        std::cerr << "last_instruction.opcode wrong. got=" << std::to_string(static_cast<int>(as_opcode(last.opcode)))
+            << ", want=" << std::to_string(static_cast<int>(as_opcode(OpType::OpSub))) << std::endl;
     }
     REQUIRE(last.opcode == OpType::OpSub);
 
@@ -604,15 +619,15 @@ TEST_CASE("Test Compiler Scopes") {
 
     last = compiler->scopes.at(compiler->scope_index).last_instruction;
     if (last.opcode != OpType::OpAdd) {
-        std::cerr << "last_instruction.opcode wrong. got=" << std::to_string(as_opcode(last.opcode))
-            << ", want=" << std::to_string(as_opcode(OpType::OpAdd)) << std::endl;
+        std::cerr << "last_instruction.opcode wrong. got=" << std::to_string(static_cast<int>(as_opcode(last.opcode)))
+            << ", want=" << std::to_string(static_cast<int>(as_opcode(OpType::OpAdd))) << std::endl;
     }
     REQUIRE(last.opcode == OpType::OpAdd);
 
     previous = compiler->scopes.at(compiler->scope_index).previous_instruction;
     if (previous.opcode != OpType::OpMul) {
-        std::cerr << "previous_instruction.opcode wrong. got=" << std::to_string(as_opcode(previous.opcode))
-            << ", want=" << std::to_string(as_opcode(OpType::OpMul)) << std::endl;
+        std::cerr << "previous_instruction.opcode wrong. got=" << std::to_string(static_cast<int>(as_opcode(previous.opcode)))
+            << ", want=" << std::to_string(static_cast<int>(as_opcode(OpType::OpMul))) << std::endl;
     }
     REQUIRE(previous.opcode == OpType::OpMul);
 }
@@ -1163,7 +1178,7 @@ fn(a) {
     REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
 
     // Test compiled function constants
-    for (int i = 0; i < expected_fn_constants.size(); i++) {
+    for (int i = 0; i < static_cast<int>(expected_fn_constants.size()); i++) {
         REQUIRE(test_function_constants(expected_fn_constants.at(i), bytecode->constants.at(i)));
     }
 }
@@ -1219,7 +1234,7 @@ fn(a) {
     REQUIRE(test_instructions(expected_instructions, bytecode->instructions));
 
     // Test compiled function constants (first on stack)
-    for (int i = 0; i < expected_fn_constants.size(); i++) {
+    for (int i = 0; i < static_cast<int>(expected_fn_constants.size()); i++) {
         REQUIRE(test_function_constants(expected_fn_constants.at(i), bytecode->constants.at(i)));
     }
 }
@@ -1298,7 +1313,7 @@ fn() {
     REQUIRE(test_integer_constants(expected_integer_constants, first_four));
 
     // Test compiled function constants (last 3 on stack)
-    for (int i = 0; i < expected_fn_constants.size(); i++) {
+    for (int i = 0; i < static_cast<int>(expected_fn_constants.size()); i++) {
         REQUIRE(test_function_constants(expected_fn_constants.at(i), bytecode->constants.at(i + 4)));
     }
 }

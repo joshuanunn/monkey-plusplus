@@ -17,10 +17,10 @@ TEST_CASE("Test Make With Two Byte Operand") {
     }
     REQUIRE(instruction.size() == tt_expected.size());
 
-    for (int i = 0; i < tt_expected.size(); i++) {
+    for (int i = 0; i < static_cast<int>(tt_expected.size()); i++) {
         if (instruction.at(i) != tt_expected.at(i)) {
-            std::cerr << "wrong byte at pos " << i << ". want=" << (int) tt_expected.at(i) << ", got="
-                        << (int) instruction.at(i) << std::endl;
+            std::cerr << "wrong byte at pos " << i << ". want=" << static_cast<int>(tt_expected.at(i)) << ", got="
+                        << static_cast<int>(instruction.at(i)) << std::endl;
         }
         REQUIRE(instruction.at(i) == tt_expected.at(i));
     }
@@ -36,10 +36,10 @@ TEST_CASE("Test Make With One Byte Operand") {
     }
     REQUIRE(instruction.size() == tt_expected.size());
 
-    for (int i = 0; i < tt_expected.size(); i++) {
+    for (int i = 0; i < static_cast<int>(tt_expected.size()); i++) {
         if (instruction.at(i) != tt_expected.at(i)) {
-            std::cerr << "wrong byte at pos " << i << ". want=" << (int) tt_expected.at(i) << ", got="
-                        << (int) instruction.at(i) << std::endl;
+            std::cerr << "wrong byte at pos " << i << ". want=" << static_cast<int>(tt_expected.at(i)) << ", got="
+                        << static_cast<int>(instruction.at(i)) << std::endl;
         }
         REQUIRE(instruction.at(i) == tt_expected.at(i));
     }
@@ -55,10 +55,10 @@ TEST_CASE("Test Make With Two Byte And One Byte Operand") {
     }
     REQUIRE(instruction.size() == tt_expected.size());
 
-    for (int i = 0; i < tt_expected.size(); i++) {
+    for (int i = 0; i < static_cast<int>(tt_expected.size()); i++) {
         if (instruction.at(i) != tt_expected.at(i)) {
-            std::cerr << "wrong byte at pos " << i << ". want=" << (int) tt_expected.at(i) << ", got="
-                        << (int) instruction.at(i) << std::endl;
+            std::cerr << "wrong byte at pos " << i << ". want=" << static_cast<int>(tt_expected.at(i)) << ", got="
+                        << static_cast<int>(instruction.at(i)) << std::endl;
         }
         REQUIRE(instruction.at(i) == tt_expected.at(i));
     }
@@ -74,7 +74,7 @@ TEST_CASE("Test Make No Operands") {
     }
     REQUIRE(instruction.size() == tt_expected.size());
 
-    for (int i = 0; i < tt_expected.size(); i++) {
+    for (int i = 0; i < static_cast<int>(tt_expected.size()); i++) {
         if (instruction.at(i) != tt_expected.at(i)) {
             std::cerr << "wrong byte at pos " << i << ". want=" << tt_expected.at(i) << ", got="
                         << instruction.at(i) << std::endl;

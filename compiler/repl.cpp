@@ -17,7 +17,7 @@ void start_repl() {
     auto symbol_table = new_symbol_table();
 
     // Define all builtin functions
-    for (int i = 0; i < builtins_names.size(); i++) {
+    for (int i = 0; i < static_cast<int>(builtins_names.size()); i++) {
         symbol_table->define_builtin(i, builtins_names[i]);
     }
 
@@ -51,7 +51,7 @@ void start_repl() {
 
         // Add any new constants from this compilation cycle to global REPL constants
         auto new_constants = code->constants;
-        for (int i = constants.size(); i < new_constants.size(); i++) {
+        for (int i = constants.size(); i < static_cast<int>(new_constants.size()); i++) {
             constants.push_back(new_constants.at(i)->clone());
         }
 

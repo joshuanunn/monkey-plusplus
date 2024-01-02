@@ -602,7 +602,7 @@ ObjectType CompiledFunction::type() const {
 }
 
 std::string CompiledFunction::inspect() const {
-    auto address = (unsigned long long)(void**) this;
+    auto address = reinterpret_cast<unsigned long long>(this);
 
     // Convert address to string with hex representation
     // C++ source adapted (under CC BY-SA 2.5 license) from: https://stackoverflow.com/questions/5100718
@@ -662,7 +662,7 @@ ObjectType Closure::type() const {
 }
 
 std::string Closure::inspect() const {
-    auto address = (unsigned long long)(void**) this;
+    auto address = reinterpret_cast<unsigned long long>(this);
 
     // Convert address to string with hex representation
     // C++ source adapted (under CC BY-SA 2.5 license) from: https://stackoverflow.com/questions/5100718

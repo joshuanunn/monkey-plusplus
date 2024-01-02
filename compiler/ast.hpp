@@ -17,17 +17,17 @@ struct Node {
 };
 
 struct Statement : public Node {
-    std::string token_literal() const override;
+    std::string token_literal() const = 0;
 
-    std::string string() const override;
+    std::string string() const = 0;
 
     virtual std::shared_ptr<Node> clone() const = 0;
 };
 
 struct Expression : public Node {
-    std::string token_literal() const override;
+    std::string token_literal() const = 0;
 
-    std::string string() const override;
+    std::string string() const = 0;
 
     virtual std::shared_ptr<Node> clone() const = 0;
 };

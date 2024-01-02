@@ -1,4 +1,4 @@
-CXXFLAGS = -g --std=c++17 -I../include
+CXXFLAGS = -g --std=c++17 -I../include -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wmissing-declarations -Wold-style-cast -Woverloaded-virtual -Wsign-promo -Wswitch-default -Wundef -Werror -Wno-unused
 
 monkey : ast.o builtins.o code.o compiler.o frame.o lexer.o object.o parser.o symbol_table.o token.o vm.o repl.o monkey.o
 	$(CXX) $(CXXFLAGS) $^ -o $@

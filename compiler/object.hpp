@@ -235,7 +235,7 @@ struct Integer : public Object, Hashable {
 
     std::shared_ptr<Object> clone() const override;
 
-    HashKey hash_key() const;
+    HashKey hash_key() const override;
 };
 
 struct Boolean : public Object, Hashable {
@@ -257,7 +257,7 @@ struct Boolean : public Object, Hashable {
 
     std::shared_ptr<Object> clone() const override;
 
-    HashKey hash_key() const;
+    HashKey hash_key() const override;
 };
 
 std::shared_ptr<Boolean> get_true_ref();
@@ -283,7 +283,7 @@ struct String : public Object, Hashable {
 
     std::shared_ptr<Object> clone() const override;
 
-    HashKey hash_key() const;
+    HashKey hash_key() const override;
 };
 
 struct Null : public Object {

@@ -290,7 +290,7 @@ TEST_CASE("Test Resolve Free") {
     }
     REQUIRE(first_local->free_symbols.size() == first_local_expected_free_symbols.size());
 
-    for (int i = 0; i < first_local_expected_free_symbols.size(); i++) {
+    for (int i = 0; i < static_cast<int>(first_local_expected_free_symbols.size()); i++) {
         auto sym = first_local_expected_free_symbols.at(i);
         auto result = first_local->free_symbols.at(i);
 
@@ -322,7 +322,7 @@ TEST_CASE("Test Resolve Free") {
     }
     REQUIRE(second_local->free_symbols.size() == second_local_expected_free_symbols.size());
 
-    for (int i = 0; i < second_local_expected_free_symbols.size(); i++) {
+    for (int i = 0; i < static_cast<int>(second_local_expected_free_symbols.size()); i++) {
         auto sym = second_local_expected_free_symbols.at(i);
         auto result = second_local->free_symbols.at(i);
 

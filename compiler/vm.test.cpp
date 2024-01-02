@@ -9,6 +9,23 @@
 #include "parser.hpp"
 #include "vm.hpp"
 
+// Forward declaration of test helpers
+
+std::shared_ptr<Program> parse(const std::string& input);
+
+bool test_integer_object(int expected, std::shared_ptr<Object> actual);
+
+bool test_boolean_object(bool expected, std::shared_ptr<Object> actual);
+
+bool test_null_object(std::shared_ptr<Object> actual);
+
+bool test_string_object(std::string expected, std::shared_ptr<Object> actual);
+
+bool test_int_array_object(std::vector<int> expected, std::shared_ptr<Object> actual);
+
+bool test_int_hash_object(std::map<HashKey, int> expected, std::shared_ptr<Object> actual);
+
+
 std::shared_ptr<Program> parse(const std::string& input) {
     auto l = Lexer(input);
     auto p = Parser(std::move(l));
@@ -90,7 +107,7 @@ bool test_int_array_object(std::vector<int> expected, std::shared_ptr<Object> ac
         return false;
     }
 
-    for (int i = 0; i < expected.size(); i++) {
+    for (int i = 0; i < static_cast<int>(expected.size()); i++) {
         auto ok = test_integer_object(expected.at(i), array_obj->elements.at(i));
         if (!ok) {
             std::cerr << "test_integer_object failed." << std::endl;
