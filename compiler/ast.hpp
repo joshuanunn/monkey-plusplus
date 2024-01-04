@@ -185,9 +185,9 @@ struct BlockStatement : public Statement {
 
     std::vector<std::shared_ptr<Node>> statements;
 
-    std::string token_literal() const;
+    std::string token_literal() const override;
 
-    std::string string() const;
+    std::string string() const override;
 
     std::shared_ptr<Node> clone() const override;
 };
