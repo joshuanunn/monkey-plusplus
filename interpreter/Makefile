@@ -3,6 +3,9 @@ CXXFLAGS = -g -O3 --std=c++17 -I../include -pedantic -Wall -Wextra -Wcast-align 
 monkey : lexer.o token.o ast.o parser.o object.o builtins.o evaluator.o repl.o monkey.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
+benchmark : lexer.o token.o ast.o parser.o object.o builtins.o evaluator.o benchmark.o
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
 asttest : ast.o token.o ast.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
@@ -20,6 +23,9 @@ parsertest : lexer.o token.o ast.o parser.o parser.test.o
 
 tokentest : token.o token.test.o
 	$(CXX) $(CXXFLAGS) $^ -o $@
+
+test-benchmark : benchmark
+	./benchmark
 
 test-ast : asttest
 	./asttest
@@ -40,4 +46,4 @@ test-token : tokentest
 	./tokentest
 
 clean :
-	rm -rf *.o asttest evaluatortest lexertest objecttest parsertest tokentest monkey
+	rm -rf *.o asttest benchmark evaluatortest lexertest objecttest parsertest tokentest monkey
