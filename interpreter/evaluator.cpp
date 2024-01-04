@@ -241,7 +241,7 @@ std::shared_ptr<Object> eval_array_index_expression(const std::shared_ptr<Object
     }
 
     auto index_value = idx->value;
-    auto max_value = array_object->elements.size() - 1;
+    auto max_value = static_cast<int>(array_object->elements.size()) - 1;
 
     if (index_value < 0 || index_value > max_value) {
         return get_null_ref();
@@ -375,7 +375,7 @@ std::shared_ptr<Object> apply_function(const std::shared_ptr<Object> &fn, const 
 std::shared_ptr<Environment> extend_function_env(const std::shared_ptr<Function> &fn, const std::vector<std::shared_ptr<Object>> &args) {
     auto env = new_enclosed_environment(*fn->env);
 
-    for (int i = 0; i < fn->parameters.size(); i++) {
+    for (int i = 0; i < static_cast<int>(fn->parameters.size()); i++) {
         env->set(fn->parameters.at(i)->value, args.at(i));
     }
 

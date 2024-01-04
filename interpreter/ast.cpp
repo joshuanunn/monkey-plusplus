@@ -1,21 +1,5 @@
 #include "ast.hpp"
 
-std::string Statement::token_literal() const {
-    return "<Statement base class>";
-}
-
-std::string Statement::string() const {
-    return "<Statement base class>";
-}
-
-std::string Expression::token_literal() const {
-    return "<Expression base class>";
-}
-
-std::string Expression::string() const {
-    return "<Expression base class>";
-}
-
 std::string LetStatement::token_literal() const {
     return token.literal;
 }

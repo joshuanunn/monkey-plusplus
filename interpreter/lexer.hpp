@@ -6,6 +6,8 @@
 
 bool is_letter(char ch);
 
+bool is_digit(char ch);
+
 struct Lexer {
     Lexer() = delete;
 

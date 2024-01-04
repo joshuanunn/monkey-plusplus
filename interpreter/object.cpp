@@ -19,7 +19,7 @@ std::shared_ptr<Boolean> get_false_ref() {
 
 Environment::Environment(const Environment& other) : store{} {
     for (const auto &s: other.store) {
-        store[s.first] = std::move(s.second->clone());
+        store[s.first] = s.second->clone();
     }
 
     if (other.outer) {
@@ -38,7 +38,7 @@ Environment& Environment::operator=(const Environment& other) {
     if (this == &other) return *this;
 
     for (const auto &s: other.store) {
-        store[s.first] = std::move(s.second->clone());
+        store[s.first] = s.second->clone();
     }
 
     if (other.outer) {

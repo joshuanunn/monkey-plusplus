@@ -10,6 +10,17 @@
 #include "object.hpp"
 #include "parser.hpp"
 
+// Forward declaration of test helpers
+
+std::shared_ptr<Object> test_eval (const std::string &input);
+
+bool test_integer_object(std::shared_ptr<Object> obj, int expected);
+
+bool test_boolean_object(std::shared_ptr<Object> obj, bool expected);
+
+bool test_null_object(const std::shared_ptr<Object> &obj);
+
+
 std::shared_ptr<Object> test_eval (const std::string &input) {
     auto l = Lexer(input);
     auto p = Parser(std::move(l));
@@ -413,7 +424,7 @@ TEST_CASE("Test Builtin Functions Returning Arrays") {
         }
         REQUIRE(array->elements.size() == tt_expected.size());
 
-        for (int i = 0; i < tt_expected.size(); i++) {
+        for (int i = 0; i < static_cast<int>(tt_expected.size()); i++) {
             REQUIRE(test_integer_object(array->elements.at(i), tt_expected.at(i)));
         }
     }
@@ -583,7 +594,7 @@ map(a, double);
     }
     REQUIRE(array->elements.size() == expected.size());
 
-    for (int i = 0; i < expected.size(); i++) {
+    for (int i = 0; i < static_cast<int>(expected.size()); i++) {
         REQUIRE(test_integer_object(array->elements.at(i), expected.at(i)));
     }
 }
