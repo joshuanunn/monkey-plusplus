@@ -1,5 +1,18 @@
+# Build artifacts
 *.o
 monkey-compiler
 monkey-interpreter
 benchmark-compiler
 benchmark-interpreter
+
+# Test artifacts
+asttest
+codetest
+compilertest
+evaluatortest
+lexertest
+objecttest
+parsertest
+symboltabletest
+tokentest
+vmtest
