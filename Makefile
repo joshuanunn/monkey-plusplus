@@ -39,7 +39,7 @@ INTERPRETER_OBJ = $(INTERPRETER_SRC:.cpp=.o)
 
 .PHONY: all clean compiler compiler-benchmark interpreter interpreter-benchmark
 
-all: compiler compiler-benchmark interpreter interpreter-benchmark
+all: compiler interpreter
 
 
 compiler : $(COMPILER_EXE)
