@@ -100,12 +100,16 @@ $ make compiler-benchmark
 $ ./benchmark-compiler
 ```
 
-Reference timing information from benchmark runs on a 13th Gen Intel i5-13500H @ 2.06 GHz is provided below for these C++ implementations of the interpreter and compiler, and also equivalent runs from the final Go implementations on the same machine.
+Reference timing information from benchmark runs of `fibonacci(35)` on a 13th Gen Intel i5-13500H @ 2.06 GHz is provided below for the C++ implementations of the interpreter and compiler in this repo, and equivalent runs from the final Go book implementations on the same machine.
 
 | Implementation | Interpreter time (s) | Compiler time (s) |
 | :---: | :---: | :---: |
 | Go (book) | 12.8 | 2.9 |
 | C++ (this repo) | 126.2 | 19.6 |
+
+The C++ implementations of the interpreter are compiler are around 10x and 7x slower respectively than the reference Go implementations. As with the Go implementations, the C++ Monkey compiler in this repo was found to be significantly faster than the Monkey interpreter (around 7x).
+
+It can be seen from profiling that the poor performance of the C++ Monkey implementations appear to be dominated in the reference benchmarks by the memory management of smart pointers. One of the design choices made in these C++ implementations was to make extensive use of C++ smart pointers (mostly `shared_ptr`), which made the management of dynamically allocated memory easier. However, the use of large numbers of smart pointers in this way can add a significant overhead. The reference benchmarks to calculate `fibonacci(35)` really are a worst case here, and `valgrind` shows a total of 1,191,418,117 heap allocations representing  over 61 GB of memory.
 
 ## Testing
 
