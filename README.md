@@ -105,7 +105,7 @@ Reference timing information from benchmark runs on a 13th Gen Intel i5-13500H @
 | Implementation | Interpreter time (s) | Compiler time (s) |
 | :---: | :---: | :---: |
 | Go (book) | 12.8 | 2.9 |
-| C++ (this repo) | 131.4 | 20.2 |
+| C++ (this repo) | 126.2 | 19.6 |
 
 ## Testing
 

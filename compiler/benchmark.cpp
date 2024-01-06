@@ -52,8 +52,9 @@ fibonacci(35);
 
     duration<double, std::milli> benchmark_time = t2 - t1;
 
-    std::cout << "Benchmark time: " << benchmark_time.count() / 1000 << "s" << std::endl;
-
     auto result = machine.last_popped_stack_elem();
+
+    std::cout << "engine=vm, result=" << result->inspect() << ", duration=" << benchmark_time.count() / 1000 << std::endl;
+
     return EXIT_SUCCESS;
 }
