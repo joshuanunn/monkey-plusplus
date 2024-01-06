@@ -1,6 +1,7 @@
-CXXFLAGS =	-O3 --std=c++17 -Wall -Wextra -Werror -pedantic \
-			-Wcast-align -Wcast-qual -Wmissing-declarations \
-			-Wold-style-cast -Woverloaded-virtual -Wsign-promo
+CXXFLAGS = \
+	-O3 --std=c++17 -Wall -Wextra -Werror -pedantic \
+	-Wcast-align -Wcast-qual -Wmissing-declarations \
+	-Wold-style-cast -Woverloaded-virtual -Wsign-promo
 
 COMPILER_EXE = monkey-compiler
 COMPILER_BENCHMARK_EXE = benchmark-compiler
@@ -12,27 +13,27 @@ COMPILER_DIR = ./compiler
 INTERPRETER_DIR = ./interpreter
 
 COMPILER_SRC = \
-				$(COMPILER_DIR)/ast.cpp \
-				$(COMPILER_DIR)/builtins.cpp \
-				$(COMPILER_DIR)/code.cpp \
-				$(COMPILER_DIR)/compiler.cpp \
-				$(COMPILER_DIR)/frame.cpp \
-				$(COMPILER_DIR)/lexer.cpp \
-				$(COMPILER_DIR)/object.cpp \
-				$(COMPILER_DIR)/parser.cpp \
-				$(COMPILER_DIR)/symbol_table.cpp \
-				$(COMPILER_DIR)/token.cpp \
-				$(COMPILER_DIR)/vm.cpp
+	$(COMPILER_DIR)/ast.cpp \
+	$(COMPILER_DIR)/builtins.cpp \
+	$(COMPILER_DIR)/code.cpp \
+	$(COMPILER_DIR)/compiler.cpp \
+	$(COMPILER_DIR)/frame.cpp \
+	$(COMPILER_DIR)/lexer.cpp \
+	$(COMPILER_DIR)/object.cpp \
+	$(COMPILER_DIR)/parser.cpp \
+	$(COMPILER_DIR)/symbol_table.cpp \
+	$(COMPILER_DIR)/token.cpp \
+	$(COMPILER_DIR)/vm.cpp
 
 INTERPRETER_SRC = \
-				$(INTERPRETER_DIR)/ast.cpp \
-				$(INTERPRETER_DIR)/builtins.cpp \
-				$(INTERPRETER_DIR)/evaluator.cpp \
-				$(INTERPRETER_DIR)/lexer.cpp \
-				$(INTERPRETER_DIR)/object.cpp \
-				$(INTERPRETER_DIR)/parser.cpp \
-				$(INTERPRETER_DIR)/repl.cpp \
-				$(INTERPRETER_DIR)/token.cpp
+	$(INTERPRETER_DIR)/ast.cpp \
+	$(INTERPRETER_DIR)/builtins.cpp \
+	$(INTERPRETER_DIR)/evaluator.cpp \
+	$(INTERPRETER_DIR)/lexer.cpp \
+	$(INTERPRETER_DIR)/object.cpp \
+	$(INTERPRETER_DIR)/parser.cpp \
+	$(INTERPRETER_DIR)/repl.cpp \
+	$(INTERPRETER_DIR)/token.cpp
 
 COMPILER_OBJ = $(COMPILER_SRC:.cpp=.o)
 INTERPRETER_OBJ = $(INTERPRETER_SRC:.cpp=.o)

@@ -1,74 +1,75 @@
-CXXFLAGS =	-O3 --std=c++17 -Wall -Wextra -Werror -pedantic \
-			-Wcast-align -Wcast-qual -Wmissing-declarations \
-			-Wold-style-cast -Woverloaded-virtual -Wsign-promo \
-			-I../include -I../../compiler
+CXXFLAGS = \
+	-O3 --std=c++17 -Wall -Wextra -Werror -pedantic \
+	-Wcast-align -Wcast-qual -Wmissing-declarations \
+	-Wold-style-cast -Woverloaded-virtual -Wsign-promo \
+	-I../include -I../../compiler
 
 COMPILER_DIR = ../../compiler
 
 TEST_EXE = \
-				asttest codetest compilertest lexertest objecttest \
-				parsertest symboltabletest tokentest vmtest
+	asttest codetest compilertest lexertest objecttest \
+	parsertest symboltabletest tokentest vmtest
 
 AST_TEST_SRC = \
-				$(COMPILER_DIR)/ast.cpp \
-				$(COMPILER_DIR)/token.cpp \
-				ast.test.cpp
+	$(COMPILER_DIR)/ast.cpp \
+	$(COMPILER_DIR)/token.cpp \
+	ast.test.cpp
 
 CODE_TEST_SRC = \
-				$(COMPILER_DIR)/code.cpp \
-				code.test.cpp
+	$(COMPILER_DIR)/code.cpp \
+	code.test.cpp
 
 COMPILER_TEST_SRC = \
-				$(COMPILER_DIR)/ast.cpp \
-				$(COMPILER_DIR)/builtins.cpp \
-				$(COMPILER_DIR)/code.cpp \
-				$(COMPILER_DIR)/compiler.cpp \
-				$(COMPILER_DIR)/lexer.cpp \
-				$(COMPILER_DIR)/object.cpp \
-				$(COMPILER_DIR)/parser.cpp \
-				$(COMPILER_DIR)/symbol_table.cpp \
-				$(COMPILER_DIR)/token.cpp \
-				compiler.test.cpp
+	$(COMPILER_DIR)/ast.cpp \
+	$(COMPILER_DIR)/builtins.cpp \
+	$(COMPILER_DIR)/code.cpp \
+	$(COMPILER_DIR)/compiler.cpp \
+	$(COMPILER_DIR)/lexer.cpp \
+	$(COMPILER_DIR)/object.cpp \
+	$(COMPILER_DIR)/parser.cpp \
+	$(COMPILER_DIR)/symbol_table.cpp \
+	$(COMPILER_DIR)/token.cpp \
+	compiler.test.cpp
 
 LEXER_TEST_SRC = \
-				$(COMPILER_DIR)/lexer.cpp \
-				$(COMPILER_DIR)/token.cpp \
-				lexer.test.cpp
+	$(COMPILER_DIR)/lexer.cpp \
+	$(COMPILER_DIR)/token.cpp \
+	lexer.test.cpp
 
 OBJECT_TEST_SRC = \
-				$(COMPILER_DIR)/ast.cpp \
-				$(COMPILER_DIR)/object.cpp \
-				$(COMPILER_DIR)/token.cpp \
-				object.test.cpp
+	$(COMPILER_DIR)/ast.cpp \
+	$(COMPILER_DIR)/object.cpp \
+	$(COMPILER_DIR)/token.cpp \
+	object.test.cpp
 
 PARSER_TEST_SRC = \
-				$(COMPILER_DIR)/ast.cpp \
-				$(COMPILER_DIR)/lexer.cpp \
-				$(COMPILER_DIR)/parser.cpp \
-				$(COMPILER_DIR)/token.cpp \
-				parser.test.cpp
+	$(COMPILER_DIR)/ast.cpp \
+	$(COMPILER_DIR)/lexer.cpp \
+	$(COMPILER_DIR)/parser.cpp \
+	$(COMPILER_DIR)/token.cpp \
+	parser.test.cpp
 
 SYMBOLTABLE_TEST_SRC = \
-				$(COMPILER_DIR)/symbol_table.cpp \
-				symbol_table.test.cpp
+	$(COMPILER_DIR)/symbol_table.cpp \
+	symbol_table.test.cpp
 
 TOKEN_TEST_SRC = \
-				$(COMPILER_DIR)/token.cpp \
-				token.test.cpp
+	$(COMPILER_DIR)/token.cpp \
+	token.test.cpp
 
 VM_TEST_SRC = \
-				$(COMPILER_DIR)/ast.cpp \
-				$(COMPILER_DIR)/builtins.cpp \
-				$(COMPILER_DIR)/code.cpp \
-				$(COMPILER_DIR)/compiler.cpp \
-				$(COMPILER_DIR)/frame.cpp \
-				$(COMPILER_DIR)/lexer.cpp \
-				$(COMPILER_DIR)/object.cpp \
-				$(COMPILER_DIR)/parser.cpp \
-				$(COMPILER_DIR)/symbol_table.cpp \
-				$(COMPILER_DIR)/token.cpp \
-				$(COMPILER_DIR)/vm.cpp \
-				vm.test.cpp
+	$(COMPILER_DIR)/ast.cpp \
+	$(COMPILER_DIR)/builtins.cpp \
+	$(COMPILER_DIR)/code.cpp \
+	$(COMPILER_DIR)/compiler.cpp \
+	$(COMPILER_DIR)/frame.cpp \
+	$(COMPILER_DIR)/lexer.cpp \
+	$(COMPILER_DIR)/object.cpp \
+	$(COMPILER_DIR)/parser.cpp \
+	$(COMPILER_DIR)/symbol_table.cpp \
+	$(COMPILER_DIR)/token.cpp \
+	$(COMPILER_DIR)/vm.cpp \
+	vm.test.cpp
 
 
 AST_TEST_OBJ = $(AST_TEST_SRC:.cpp=.o)
@@ -91,12 +92,12 @@ VM_TEST_OBJ = $(VM_TEST_SRC:.cpp=.o)
 
 
 .PHONY: all clean test-ast test-code test-compiler test-lexer \
-		test-object test-parser test-symboltable test-token test-vm \
-		$(TEST_EXE)
+	test-object test-parser test-symboltable test-token test-vm \
+	$(TEST_EXE)
 
-all: 	test-ast test-code test-compiler test-lexer test-object \
-		test-parser test-symboltable test-token test-vm \
-		$(TEST_EXE)
+all: test-ast test-code test-compiler test-lexer test-object \
+	test-parser test-symboltable test-token test-vm \
+	$(TEST_EXE)
 
 
 asttest : $(AST_TEST_OBJ)
