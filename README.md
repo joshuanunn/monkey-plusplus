@@ -9,7 +9,7 @@ Monkey is a programming language defined in the books above, of which this repos
 Monkey defines types for integers, booleans, strings, arrays, hash maps and supports common arithmetic expressions:
 
 ```javascript
-// Integers & arithemetic expressions
+// Integers & arithmetic expressions
 let version = 1 + (50 / 2) - (8 * 3);
 
 // Strings
@@ -66,7 +66,7 @@ adder(8); // => 11
 
 ## Building
 
-All development was completed within a Linux envionment, so builds should be fairly straightforward on most POSIX systems. Builds on Windows may require a little more work, but the easiest option is to use WSL (Windows Subsystem for Linux). Build tools are required for use of `make` (e.g. `build-essential` under Linux) and a modern C++ compiler supporting the C++17 standard, as the implementations make use of some C++17 features. The GCC compiler suite was used for development and testing, but this should be mostly compatible with other compilers (some of the compiler flags may need to be changed or removed).
+All development was completed within a Linux environment, so builds should be fairly straightforward on most POSIX systems. Builds on Windows may require a little more work, but the easiest option is to use WSL (Windows Subsystem for Linux). Build tools are required for use of `make` (e.g. `build-essential` under Linux) and a modern C++ compiler supporting the C++17 standard, as the implementations make use of some C++17 features. The GCC compiler suite was used for development and testing, but this should be mostly compatible with other compilers (some of the compiler flags may need to be changed or removed).
 
 The [interpreter](./interpreter/) and [compiler](./compiler) implementations are each fully standalone, but share a common core comprising the `ast`, `builtins`, `lexer`, `object`, `parser` and `token` source files (with minor differences between the two implementations). The standard Makefile builds provide a REPL for both the interpreter and compiler to be able to enter and execute Monkey code, which are generated in the repository root as `monkey-interpreter` and `monkey-compiler`.
 
@@ -83,13 +83,9 @@ $ make interpreter
 $ make compiler
 ```
 
-## Under the Hood
-
-TBC
-
 ## Benchmarks
 
-Simple benchmark builds are provided in order to compare the relative performance of the interpreter and compiler implementations. The benchmarks follow those outlined in the books, which are based on the (very inefficient) recursive calculation of the value of the 35th term in the fibonacci sequence (9227465). These work by simply switching out the "front-end" REPL for a hard-coded input string including the definition of a recursive `fibonacci` function followed by a call to `fibonacci(35)`.
+Simple benchmark builds are provided in order to compare the relative performance of the interpreter and compiler implementations. The benchmarks follow those outlined in the books, which are based on the (very inefficient) recursive calculation of the value of the 35th term in the Fibonacci sequence (9227465). These work by simply switching out the "front-end" REPL for a hard-coded input string including the definition of a recursive `fibonacci` function followed by a call to `fibonacci(35)`.
 
 The interpreter and compiler benchmark runs can optionally each be modified by first editing the files [compiler/benchmark.cpp](./compiler/benchmark.cpp) or [interpreter/benchmark.cpp](./interpreter/benchmark.cpp), and then built following the example commands below from in the repository root. The benchmark builds will produce the relevant executables `benchmark-interpreter` and `benchmark-compiler`. Finally, the relevant benchmarks can be run by executing these binary builds.
 
@@ -111,7 +107,7 @@ The C++ implementations of the interpreter are compiler are around 10x and 7x sl
 
 Profiling shows that the poor performance of the C++ Monkey implementations appear to be dominated in the reference benchmarks by memory management. One of the design choices made in these C++ implementations was to make extensive use of C++ smart pointers (mostly `shared_ptr`), which made the management of dynamically allocated memory easier. However, the use of large numbers of smart pointers in this way can add a significant overhead[^1].
 
-[^1]: The reference benchmarks to calculate `fibonacci(35)` really are a worst case here, and `Valgrind` shows a total of 1,191,418,117 heap allocations representing over 61 GB of memory!
+[^1]: The reference benchmarks to calculate `fibonacci(35)` really are a worst case here, and [Valgrind](https://valgrind.org/) shows a total of 1,191,418,117 heap allocations representing over 61 GB of memory!
 
 ## Testing
 
