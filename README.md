@@ -9,29 +9,59 @@ Monkey is a programming language defined in the books above, of which this repos
 Monkey defines types for integers, booleans, strings, arrays, hash maps and supports common arithmetic expressions:
 
 ```javascript
-// Integers & arithemetic expressions...
+// Integers & arithemetic expressions
 let version = 1 + (50 / 2) - (8 * 3);
 
-// ... and strings
+// Strings
 let name = "The Monkey programming language";
 
-// ... booleans
+// Booleans
 let isMonkeyFastNow = true;
 
-// ... arrays & hash maps
+// Arrays & hash maps
 let people = [{"name": "Anna", "age": 24}, {"name": "Bob", "age": 99}];
 ```
 
-It also include first-class support for functions:
+It also includes first-class support for functions:
 
 ```javascript
-// User-defined functions...
+// User-defined functions
 let getName = fn(person) { person["name"]; } ;
 getName(people[0]); // => "Anna"
 getName(people[1]); // => "Bob"
 
-// and built-in functions
+// Built-in functions
 puts(len(people))  // prints: 2
+```
+
+Support for conditionals, implicit and explicit returns and the use of recursive functions allows this:
+
+```javascript
+let fibonacci = fn(x) {
+  if (x == 0) {
+    0
+  } else {
+    if (x == 1) {
+      return 1;
+    } else {
+      fibonacci(x - 1) + fibonacci(x - 2);
+    }
+  }
+};
+```
+
+Monkey even supports closures:
+
+```javascript
+// Return a closure with free variables a and b
+let newAdder = fn(a, b) {
+  fn(c) { a + b + c };
+};
+
+// Construct a new 'adder' function
+let adder = newAdder(1, 2);
+
+adder(8); // => 11
 ```
 
 ## Building
