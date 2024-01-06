@@ -1,3 +1,5 @@
+.SILENT:
+
 CXXFLAGS = \
 	-O3 --std=c++17 -Wall -Wextra -Werror -pedantic \
 	-Wcast-align -Wcast-qual -Wmissing-declarations \
