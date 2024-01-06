@@ -89,7 +89,23 @@ TBC
 
 ## Benchmarks
 
-TBC
+Simple benchmark builds are provided in order to compare the relative performance of the interpreter and compiler implementations. The benchmarks follow those outlined in the books, which are based on the (very inefficient) recursive calculation of the value of the 35th term in the fibonacci sequence (9227465). These work by simply switching out the "front-end" REPL for a hard-coded input string including the definition of a recursive `fibonacci` function followed by a call to `fibonacci(35)`.
+
+The interpreter and compiler benchmark runs can optionally each be modified by first editing the files [compiler/benchmark.cpp](./compiler/benchmark.cpp) or [interpreter/benchmark.cpp](./interpreter/benchmark.cpp), and then built following the example commands below from in the repository root. The benchmark builds will produce the relevant executables `benchmark-interpreter` and `benchmark-compiler`. Finally, the relevant benchmarks can be run by executing these binary builds.
+
+```sh
+$ make interpreter-benchmark
+$ ./benchmark-interpreter
+$ make compiler-benchmark
+$ ./benchmark-compiler
+```
+
+Reference timing information from benchmark runs on a 13th Gen Intel i5-13500H @ 2.06 GHz is provided below for these C++ implementations of the interpreter and compiler, and also equivalent runs from the final Go implementations on the same machine.
+
+| Implementation | Interpreter time (s) | Compiler time (s) |
+| :---: | :---: | :---: |
+| Go (book) | 12.8 | 2.9 |
+| C++ (this repo) | 131.4 | 20.2 |
 
 ## Testing
 
@@ -117,4 +133,4 @@ To run only a specific test set (e.g. only the lexer within the compiler), then 
 
 This software is released under the MIT license [MIT](LICENSE).
 
-It is based on the design of the Go implementations in the books [Writing An Interpreter In Go](https://interpreterbook.com/) and [Writing A Compiler In Go](https://compilerbook.com/), written by Thorsten Ball.
+It is based on the design of the Go implementations (also released under an MIT license) in the books [Writing An Interpreter In Go](https://interpreterbook.com/) and [Writing A Compiler In Go](https://compilerbook.com/), written by Thorsten Ball.
