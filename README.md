@@ -1,12 +1,38 @@
-# monkey-plusplus
+# Monkey++
 
-A cheeky simian-inspired interpreter and compiler for the [Monkey](https://monkeylang.org/) programming language, written in `C++`.
-
-These are based on the books [Writing An Interpreter In Go](https://interpreterbook.com/) and [Writing A Compiler In Go](https://compilerbook.com/), written by Thorsten Ball.
+A cheeky simian-inspired interpreter and compiler for the [Monkey](https://monkeylang.org/) programming language, written in `C++`. These are based on the books [Writing An Interpreter In Go](https://interpreterbook.com/) and [Writing A Compiler In Go](https://compilerbook.com/), written by Thorsten Ball.
 
 ## Monkey Language
 
-TBC
+Monkey is a programming language defined in the books above, of which this repository includes two implementations: a tree-walking interpreter and a bytecode compiler and virtual machine. More information can be found at [https://monkeylang.org](https://monkeylang.org/).
+
+Monkey defines types for integers, booleans, strings, arrays, hash maps and supports common arithmetic expressions:
+
+```javascript
+// Integers & arithemetic expressions...
+let version = 1 + (50 / 2) - (8 * 3);
+
+// ... and strings
+let name = "The Monkey programming language";
+
+// ... booleans
+let isMonkeyFastNow = true;
+
+// ... arrays & hash maps
+let people = [{"name": "Anna", "age": 24}, {"name": "Bob", "age": 99}];
+```
+
+It also include first-class support for functions:
+
+```javascript
+// User-defined functions...
+let getName = fn(person) { person["name"]; } ;
+getName(people[0]); // => "Anna"
+getName(people[1]); // => "Bob"
+
+// and built-in functions
+puts(len(people))  // prints: 2
+```
 
 ## Building
 
@@ -39,21 +65,23 @@ TBC
 
 A test suite is included for each of the interpreter and compiler within the [test/interpreter/](./test/interpreter) and [test/compiler/](./test/compiler) directories, which are based on those provided in the original Go implementations in the books. The [Catch2](https://github.com/catchorg/Catch2) unit testing framework is used to orchestrate tests and the required header-only implementation is included in `test/include`.
 
-To run all interpreter tests:
+To run all interpreter tests (and clean up artifacts):
 
 ```sh
 $ cd test/interpreter
 $ make
+$ make clean
 ```
 
-To run all compiler tests:
+To run all compiler tests (and clean up test artifacts):
 
 ```sh
 $ cd test/compiler
 $ make
+$ make clean
 ```
 
-To run only a specific set of test (e.g. only the lexer within the compiler), then these can be run as `make test-lexer` from within the `test/compiler` directory.
+To run only a specific test set (e.g. only the lexer within the compiler), then these can be run as for example `make test-lexer` from within the `test/compiler` directory.
 
 ## License
 
