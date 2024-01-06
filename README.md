@@ -128,17 +128,37 @@ A test suite is included for each of the interpreter and compiler within the [te
 
 To run all interpreter tests (and clean up artifacts):
 
-```sh
+```
 $ cd test/interpreter
 $ make
+===============================================================================
+All tests passed (1 assertion in 1 test case)
+
+===============================================================================
+All tests passed (172 assertions in 26 test cases)
+
+===============================================================================
+All tests passed (87 assertions in 1 test case)
+...
+...
 $ make clean
 ```
 
 To run all compiler tests (and clean up test artifacts):
 
-```sh
+```
 $ cd test/compiler
 $ make
+===============================================================================
+All tests passed (1 assertion in 1 test case)
+
+===============================================================================
+All tests passed (25 assertions in 7 test cases)
+
+===============================================================================
+All tests passed (174 assertions in 27 test cases)
+...
+...
 $ make clean
 ```
 
